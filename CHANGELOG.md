@@ -10,6 +10,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - Charging insights at `/cars/{carId}/charging/insights`: sessions, energy, cost per kWh, and cost per 100 km for a period, AC and DC compared, the curves of the last six DC sessions, a heatmap of charge starts, and the top charging places.
 - Stats: consumption by speed band, with the share of driving time in each band, in km/h or mph.
 - Slow-leak warning: when one tire loses at least 0.1 bar against the median of the other three over the last 14 days, the Overview tire card and the Stats tire panel show a warning.
+- Car summary: `GET /api/cars/{carId}/summary.json` gives the Overview values and the live MQTT values as JSON, in metric units. The position and the navigation come only with `?location=1`. [API](docs/api.md) explains how a script calls it with a Cloudflare Access service token.
 
 ### Changed
 

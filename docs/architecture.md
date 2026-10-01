@@ -41,6 +41,7 @@ A Next.js App Router app that reads the TeslaMate PostgreSQL database on the ser
 | `src/lib/trip.ts` | Pure logic for the trip view: the date range with its default and its 366-day limit, the presets, the totals, and the merged list. Full test cover. |
 | `src/lib/drive-series.ts`, `gpx.ts`, `csv.ts`, `trip-log.ts` | Pure logic for the drive charts (sampling, energy used and recovered), the GPX track, the CSV writer with its formula guard, and the export rows in the user's units and time zone. Full test cover. |
 | `src/app/api/cars/[carId]/drives/[file]/route.ts`, `src/app/api/cars/[carId]/[file]/route.ts` | `GET` exports: one drive as GPX, and all drives or charges as CSV, with an optional date range. Behind the same login as the pages. |
+| `src/lib/summary.ts`, `src/app/api/cars/[carId]/summary.json/route.ts` | The car summary for scripts: the snapshot and the live values in metric units, with the location only on request. The pure part has tests. Read [API](api.md). |
 | `src/lib/sql-template.ts` | The postgres.js tag interface on top of PGlite: parameters, nested fragments, and identifiers. Pure, with tests. |
 | `src/components/landing/`, `src/lib/github.ts`, `src/lib/project.ts` | The landing page of the demo site, the cached GitHub star count, and the project links. |
 | `tools/demo/` | The seed tool for the PostgreSQL demo database. Read [decision 0003](decisions/0003-demo-database.md). |

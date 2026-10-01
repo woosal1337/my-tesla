@@ -27,12 +27,12 @@ A self-hosted, read-only web dashboard for the car data that [TeslaMate](https:/
 
 | Page | Content |
 |---|---|
-| Overview | Battery and range, odometer, temperatures, software version, tire pressure, last position on a map, today's activity strip, last drive and charge. With the optional MQTT feed: a Live card with locks, Sentry Mode, open doors and windows, charging, climate, software updates, driving, and navigation. |
+| Overview | Battery and range, odometer, temperatures, software version, tire pressure with a slow-leak warning, last position on a map, today's activity strip, last drive and charge. With the optional MQTT feed: a Live card with locks, Sentry Mode, open doors and windows, charging, climate, software updates, driving, and navigation. |
 | Drives | All drives by day, with distance, duration, and efficiency. Each drive has a route map, speed, power, elevation, and battery charts, the energy recovered, the climb, and a GPX export. All drives export as CSV. A trip view sums any date range on one map. |
 | Charging | All charging sessions, with energy, levels, power, and cost. Each session has power, voltage, and current charts. All sessions export as CSV. An insights page shows the cost per kWh for AC and DC, the cost per 100 km, the DC curves, when the car charges, and the top places. |
 | Timeline | One day at a time: driving, charging, parked, asleep, and offline time on a 24-hour strip |
 | Battery | Estimated health, capacity, range at 100 %, charge cycles, AC and DC energy, time at each level, idle drain |
-| Stats | Distance, energy, cost, efficiency against temperature and speed, drive times, longest drives, tire pressure trend, software updates |
+| Stats | Distance, energy, cost, efficiency against temperature and speed, drive times, longest drives, tire pressure trend with a slow-leak warning, software updates |
 | Places | A map of visited and charging places, the most visited places, charging cost by place, geofences |
 | Settings | Units, date and time formats, number style, currency, place names, maps, theme, tabs, and Overview cards. Saved on the server for each user. |
 
@@ -125,6 +125,7 @@ The full guide is [Installation](docs/installation.md).
 | Put a login in front of the app | [Protect the dashboard](docs/authentication.md) |
 | Environment variables and user settings | [Configuration](docs/configuration.md) |
 | Show live locks, charging, and navigation from MQTT | [Live status](docs/live-status.md) |
+| Get the car status as JSON, and the CSV and GPX exports | [API](docs/api.md) |
 | Which outside services the browser contacts | [Privacy](docs/privacy.md) |
 | Run or deploy the public demo | [Demo site](docs/demo-site.md) |
 | Update the app and TeslaMate | [Upgrading](docs/upgrading.md) |

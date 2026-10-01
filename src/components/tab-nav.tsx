@@ -26,7 +26,7 @@ const icons: Record<TabId, typeof Gauge> = {
   settings: Settings,
 };
 
-const spring = {
+export const tabSpring = {
   type: "spring",
   stiffness: 520,
   damping: 42,
@@ -72,7 +72,7 @@ export function TabNav({ carId, visible }: TabsProps) {
           {tab.active && (
             <motion.span
               layoutId="tab-highlight"
-              transition={spring}
+              transition={tabSpring}
               className="absolute inset-0 rounded bg-accent"
             />
           )}
@@ -114,7 +114,7 @@ export function TabBar({ carId, visible }: TabsProps) {
               {tab.active && (
                 <motion.span
                   layoutId="tab-bar-highlight"
-                  transition={spring}
+                  transition={tabSpring}
                   className="absolute -top-2 h-0.5 w-6 rounded-full bg-foreground"
                 />
               )}

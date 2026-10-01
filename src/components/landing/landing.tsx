@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { LandingNav } from "@/components/landing/landing-nav";
 import { LogoTile } from "@/components/tesla-mark";
 import { project } from "@/lib/project";
 import { cn } from "@/lib/utils";
@@ -208,38 +209,19 @@ function Screenshot({
 export function Landing({ stars }: { stars: number | null }) {
   return (
     <div className="min-h-dvh">
-      <header className="sticky top-0 z-50 bg-background/75 backdrop-blur-xl">
+      <header
+        style={{ viewTransitionName: "site-header" }}
+        className="sticky top-0 z-50 bg-background/75 backdrop-blur-xl"
+      >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-5">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link
+            href="/"
+            className="-ml-1.5 flex items-center gap-2.5 rounded p-1.5 pr-3 transition-tesla hover:bg-accent"
+          >
             <LogoTile className="size-8" />
             <span className="font-medium">{project.name}</span>
           </Link>
-          <nav
-            aria-label="Page"
-            className="hidden items-center gap-1 text-sm md:flex"
-          >
-            {[
-              ["#features", "Features"],
-              ["#self-host", "Self-host"],
-              ["#privacy", "Privacy"],
-            ].map(([href, label]) => (
-              <a
-                key={href}
-                href={href}
-                className="rounded px-3 py-1.5 text-muted-foreground transition-tesla hover:text-foreground"
-              >
-                {label}
-              </a>
-            ))}
-            <a
-              href={project.docsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded px-3 py-1.5 text-muted-foreground transition-tesla hover:text-foreground"
-            >
-              Docs
-            </a>
-          </nav>
+          <LandingNav docsUrl={project.docsUrl} />
           <div className="flex items-center gap-2">
             <GitHubButton stars={stars} />
             <DemoButton />

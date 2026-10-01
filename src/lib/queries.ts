@@ -4,6 +4,12 @@ import { cache } from "react";
 import { database } from "./database";
 import { rangeColumn } from "./range-columns";
 import { sampleRoute, type LngLat } from "./route";
+import {
+  driveEnergy,
+  sampleDrive,
+  type DriveEnergy,
+  type DrivePoint,
+} from "./drive-series";
 import { driveEfficiency, placeLabel, type RecordedState } from "./vehicle";
 import { getPlaceStyle, getRangeKind } from "./viewer";
 
@@ -54,6 +60,9 @@ export type Drive = {
   efficiencyWhPerKm: number | null;
   speedMaxKmh: number | null;
   powerMaxKw: number | null;
+  powerMinKw: number | null;
+  ascentM: number | null;
+  descentM: number | null;
   outsideTempAvg: number | null;
   startLevel: number | null;
   endLevel: number | null;
@@ -215,6 +224,9 @@ type DriveRow = {
   endRangeKm: number | null;
   speedMaxKmh: number | null;
   powerMaxKw: number | null;
+  powerMinKw: number | null;
+  ascentM: number | null;
+  descentM: number | null;
   outsideTempAvg: number | null;
   startLevel: number | null;
   endLevel: number | null;
@@ -242,6 +254,9 @@ async function queryDrives(
       ${rangeColumn(kind, "d", "end")}::float8 as "endRangeKm",
       d.speed_max::int as "speedMaxKmh",
       d.power_max::int as "powerMaxKw",
+      d.power_min::int as "powerMinKw",
+      d.ascent::int as "ascentM",
+      d.descent::int as "descentM",
       d.outside_temp_avg::float8 as "outsideTempAvg",
       sp.battery_level::int as "startLevel",
       ep.battery_level::int as "endLevel",
@@ -274,6 +289,9 @@ async function queryDrives(
     durationMin: row.durationMin,
     speedMaxKmh: row.speedMaxKmh,
     powerMaxKw: row.powerMaxKw,
+    powerMinKw: row.powerMinKw,
+    ascentM: row.ascentM,
+    descentM: row.descentM,
     outsideTempAvg: row.outsideTempAvg,
     startLevel: row.startLevel,
     endLevel: row.endLevel,
@@ -290,21 +308,46 @@ export function recentDrives(car: Car, limit = 50): Promise<Drive[]> {
   return queryDrives(car, { limit });
 }
 
+type DrivePointRow = DrivePoint & { lng: number; lat: number };
+
 export async function findDrive(
   car: Car,
   driveId: number,
-): Promise<{ drive: Drive; route: LngLat[] } | null> {
+): Promise<{
+  drive: Drive;
+  route: LngLat[];
+  series: DrivePoint[];
+  energy: DriveEnergy;
+} | null> {
   const [drive] = await queryDrives(car, { limit: 1, driveId });
   if (!drive) return null;
-  const points = await database()<{ lng: number; lat: number }[]>`
-    select longitude::float8 as lng, latitude::float8 as lat
+  const points = await database()<DrivePointRow[]>`
+    select
+      longitude::float8 as lng,
+      latitude::float8 as lat,
+      (extract(epoch from date) * 1000)::float8 as at,
+      speed::float8 as "speedKmh",
+      power::float8 as "powerKw",
+      elevation::float8 as "elevationM",
+      battery_level::int as battery
     from positions
     where car_id = ${car.id} and drive_id = ${driveId}
     order by date
   `;
+  const series = points.map(
+    ({ at, speedKmh, powerKw, elevationM, battery }) => ({
+      at,
+      speedKmh,
+      powerKw,
+      elevationM,
+      battery,
+    }),
+  );
   return {
     drive,
     route: sampleRoute(points.map(({ lng, lat }) => [lng, lat])),
+    series: sampleDrive(series),
+    energy: driveEnergy(series),
   };
 }
 

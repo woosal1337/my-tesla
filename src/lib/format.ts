@@ -132,6 +132,9 @@ export function createFormatter(settings: FormatSettings, timeZone: string) {
         ? withUnit(toSpeed(kmh, settings), 0, units.speed)
         : missing;
     },
+    elevationValue(meters: number | null | undefined): number | null {
+      return isNumber(meters) ? toElevation(meters, settings) : null;
+    },
     elevation(meters: number | null | undefined): string {
       return isNumber(meters)
         ? withUnit(toElevation(meters, settings), 0, units.elevation)

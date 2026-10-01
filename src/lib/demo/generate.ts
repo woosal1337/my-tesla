@@ -197,9 +197,9 @@ function outsideTemp(at: number, start: number, days: number, random: Random) {
 
 function elevationAt(point: Point) {
   return Math.round(
-    60 +
-      50 * Math.sin(point.latitude * 40) +
-      45 * Math.cos(point.longitude * 35),
+    Math.max(300, 340 + (point.latitude - 33.45) * 1000) +
+      25 * Math.sin(point.latitude * 40) +
+      20 * Math.cos(point.longitude * 35),
   );
 }
 

@@ -2,9 +2,11 @@ import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SeriesChart } from "@/components/charts/series-chart";
 import { MapsOff, RouteMap } from "@/components/maps";
 import { Stat } from "@/components/overview/stat";
 import { PageTransition } from "@/components/page-transition";
+import { Panel } from "@/components/panel";
 import { requireCar } from "@/lib/car-route";
 import { mapThemeOf } from "@/lib/preferences";
 import { findDrive } from "@/lib/queries";
@@ -13,6 +15,13 @@ import { getFormatter, getPreferences } from "@/lib/viewer";
 export const instant = false;
 
 export const metadata: Metadata = { title: "Drive" };
+
+const colors = {
+  speed: "var(--chart-1)",
+  power: "var(--chart-4)",
+  elevation: "var(--chart-3)",
+  battery: "var(--chart-2)",
+};
 
 function parseDriveId(value: string): number | null {
   return /^\d{1,9}$/.test(value) ? Number(value) : null;
@@ -30,8 +39,16 @@ export default async function DrivePage({
   const id = parseDriveId(driveId);
   const found = id === null ? null : await findDrive(car, id);
   if (!found) notFound();
-  const { drive, route } = found;
+  const { drive, route, series, energy } = found;
   const now = new Date();
+  const rows = series.map((point) => ({
+    at: point.at,
+    speed: f.speedValue(point.speedKmh),
+    power: point.powerKw,
+    elevation: f.elevationValue(point.elevationM),
+    battery: point.battery,
+  }));
+  const hasSeries = rows.length > 1;
 
   return (
     <PageTransition>
@@ -50,6 +67,8 @@ export default async function DrivePage({
         <p className="mt-2 text-sm text-muted-foreground tabular">
           from {drive.from} · {f.day(drive.startAt, now)}{" "}
           {f.clock(drive.startAt)} to {f.clock(drive.endAt)}
+          {drive.outsideTempAvg !== null &&
+            ` · ${f.temperature(drive.outsideTempAvg)} outside`}
         </p>
       </div>
 
@@ -76,11 +95,102 @@ export default async function DrivePage({
           {drive.startLevel ?? "—"}% → {drive.endLevel ?? "—"}%
         </Stat>
         <Stat label="Top speed">{f.speed(drive.speedMaxKmh)}</Stat>
-        <Stat label="Peak power">
+        <Stat
+          label="Peak power"
+          detail={
+            drive.powerMinKw !== null && drive.powerMinKw < 0
+              ? `Regen up to ${-drive.powerMinKw} kW`
+              : undefined
+          }
+        >
           {drive.powerMaxKw === null ? "—" : `${drive.powerMaxKw} kW`}
         </Stat>
-        <Stat label="Outside">{f.temperature(drive.outsideTempAvg)}</Stat>
+        <Stat
+          label="Energy recovered"
+          detail={hasSeries ? `${f.energy(energy.usedKwh)} used` : undefined}
+        >
+          {hasSeries ? f.energy(energy.recoveredKwh) : "—"}
+        </Stat>
+        <Stat
+          label="Climb"
+          detail={
+            drive.descentM !== null
+              ? `${f.elevation(drive.descentM)} descent`
+              : undefined
+          }
+        >
+          {f.elevation(drive.ascentM)}
+        </Stat>
       </dl>
+
+      {hasSeries && (
+        <div className="mt-12 grid grid-cols-1 gap-4">
+          <Panel title="Speed and power">
+            <SeriesChart
+              data={rows}
+              xKey="at"
+              xFormat="clock"
+              chartStyle={f.chartStyle}
+              series={[
+                {
+                  key: "speed",
+                  label: "Speed",
+                  color: colors.speed,
+                  unit: f.units.speed,
+                  kind: "area",
+                },
+                {
+                  key: "power",
+                  label: "Power",
+                  color: colors.power,
+                  unit: "kW",
+                  axis: "right",
+                },
+              ]}
+              yDomain={[0, "auto"]}
+              rightDomain={["auto", "auto"]}
+            />
+          </Panel>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Panel title={`Elevation (${f.units.elevation})`}>
+              <SeriesChart
+                data={rows}
+                xKey="at"
+                xFormat="clock"
+                chartStyle={f.chartStyle}
+                series={[
+                  {
+                    key: "elevation",
+                    label: "Elevation",
+                    color: colors.elevation,
+                    unit: f.units.elevation,
+                    kind: "area",
+                  },
+                ]}
+                yDomain={["auto", "auto"]}
+              />
+            </Panel>
+            <Panel title="Battery (%)">
+              <SeriesChart
+                data={rows}
+                xKey="at"
+                xFormat="clock"
+                chartStyle={f.chartStyle}
+                series={[
+                  {
+                    key: "battery",
+                    label: "Battery",
+                    color: colors.battery,
+                    unit: "%",
+                  },
+                ]}
+                yDomain={["auto", "auto"]}
+                yFormat="percent"
+              />
+            </Panel>
+          </div>
+        </div>
+      )}
     </PageTransition>
   );
 }

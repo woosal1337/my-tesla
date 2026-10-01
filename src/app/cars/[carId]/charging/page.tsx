@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChartColumn } from "lucide-react";
 import { DownloadLink } from "@/components/download-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageTransition } from "@/components/page-transition";
@@ -58,10 +59,20 @@ export default async function ChargingPage({
         }
         action={
           charges.length > 0 && (
-            <DownloadLink
-              href={`/api/cars/${car.id}/charges.csv`}
-              label="CSV"
-            />
+            <div className="flex gap-2">
+              <Link
+                href={`/cars/${car.id}/charging/insights`}
+                transitionTypes={["tab-forward"]}
+                className="inline-flex h-9 items-center gap-2 rounded bg-card px-3 text-sm font-medium transition-tesla hover:bg-accent"
+              >
+                <ChartColumn aria-hidden className="size-4" />
+                Insights
+              </Link>
+              <DownloadLink
+                href={`/api/cars/${car.id}/charges.csv`}
+                label="CSV"
+              />
+            </div>
           )
         }
       />

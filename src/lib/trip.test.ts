@@ -1,12 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Charge, Drive } from "./queries";
-import {
-  shiftDay,
-  tripItems,
-  tripPresets,
-  tripRange,
-  tripTotals,
-} from "./trip";
+import { tripItems, tripPresets, tripRange, tripTotals } from "./trip";
 
 const zone = "America/Phoenix";
 const now = new Date(Date.UTC(2026, 9, 2, 3, 0));
@@ -54,13 +48,6 @@ function charge(id: number, hour: number, cost: number | null): Charge {
     longitude: null,
   };
 }
-
-describe("shiftDay", () => {
-  test("moves across months and years", () => {
-    expect(shiftDay("2026-10-01", -1)).toBe("2026-09-30");
-    expect(shiftDay("2026-12-31", 1)).toBe("2027-01-01");
-  });
-});
 
 describe("tripRange", () => {
   test("defaults to the last seven local days", () => {

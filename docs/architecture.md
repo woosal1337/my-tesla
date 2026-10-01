@@ -36,6 +36,7 @@ A Next.js App Router app that reads the TeslaMate PostgreSQL database on the ser
 | `src/proxy.ts`, `src/lib/access.ts` | With `CF_ACCESS_TEAM_DOMAIN` and `CF_ACCESS_AUD`, checks the Cloudflare Access token before every route, and sets the email header from it. Read [decision 0010](decisions/0010-verify-access-token.md). |
 | `src/lib/analytics.ts` | The Open Analytics settings for demo mode, the event names, `eventProps()` for click attributes, and `trackEvent()`. Pure, with tests. Read [decision 0009](decisions/0009-demo-analytics.md). |
 | `tools/brand/render.ts` | Builds the preview images and icons from the T mark with headless Chrome and `sips`. |
+| `src/lib/charge-insights-data.ts`, `charge-insights.ts` | The charging insights: charge starts by weekday and hour, the AC and DC totals, and the DC curves (server), plus the curve rows and the cost ratios (pure, with tests). |
 | `src/lib/trip.ts` | Pure logic for the trip view: the date range with its default and its 366-day limit, the presets, the totals, and the merged list. Full test cover. |
 | `src/lib/drive-series.ts`, `gpx.ts`, `csv.ts`, `trip-log.ts` | Pure logic for the drive charts (sampling, energy used and recovered), the GPX track, the CSV writer with its formula guard, and the export rows in the user's units and time zone. Full test cover. |
 | `src/app/api/cars/[carId]/drives/[file]/route.ts`, `src/app/api/cars/[carId]/[file]/route.ts` | `GET` exports: one drive as GPX, and all drives or charges as CSV, with an optional date range. Behind the same login as the pages. |

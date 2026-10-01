@@ -1,4 +1,4 @@
-import { dayWindow, localDayKey } from "./insights";
+import { dayWindow, localDayKey, shiftDayKey } from "./insights";
 import type { Charge, Drive } from "./queries";
 
 export type TripRange = { from: string; to: string; start: Date; end: Date };
@@ -23,21 +23,6 @@ export type TripItem =
 
 const dayPattern = /^\d{4}-\d{2}-\d{2}$/;
 const longestTripDays = 366;
-const dayMs = 86_400_000;
-
-function dayNumber(key: string): number {
-  const [year, month, day] = key.split("-").map(Number);
-  return Date.UTC(year, month - 1, day) / dayMs;
-}
-
-function keyOf(day: number): string {
-  return new Date(day * dayMs).toISOString().slice(0, 10);
-}
-
-export function shiftDay(key: string, days: number): string {
-  return keyOf(dayNumber(key) + days);
-}
-
 export function tripRange(
   from: string | null,
   to: string | null,
@@ -45,9 +30,11 @@ export function tripRange(
   now: Date,
 ): TripRange | "invalid" {
   const end = to || localDayKey(now, timeZone);
-  const start = from || shiftDay(end, -6);
+  const start = from || shiftDayKey(end, -6);
   if (!dayPattern.test(start) || !dayPattern.test(end)) return "invalid";
-  const span = dayNumber(end) - dayNumber(start);
+  const span =
+    (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) /
+    86_400_000;
   if (Number.isNaN(span) || span < 0 || span >= longestTripDays) {
     return "invalid";
   }
@@ -62,8 +49,8 @@ export function tripRange(
 export function tripPresets(now: Date, timeZone: string): TripPreset[] {
   const today = localDayKey(now, timeZone);
   return [
-    { label: "Last 7 days", from: shiftDay(today, -6), to: today },
-    { label: "Last 30 days", from: shiftDay(today, -29), to: today },
+    { label: "Last 7 days", from: shiftDayKey(today, -6), to: today },
+    { label: "Last 30 days", from: shiftDayKey(today, -29), to: today },
     { label: "This month", from: `${today.slice(0, 8)}01`, to: today },
     { label: "This year", from: `${today.slice(0, 5)}01-01`, to: today },
   ];

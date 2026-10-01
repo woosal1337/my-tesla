@@ -29,7 +29,7 @@ A self-hosted, read-only web dashboard for the car data that [TeslaMate](https:/
 |---|---|
 | Overview | Battery and range, odometer, temperatures, software version, tire pressure, last position on a map, today's activity strip, last drive and charge. With the optional MQTT feed: a Live card with locks, Sentry Mode, open doors and windows, charging, climate, software updates, driving, and navigation. |
 | Drives | All drives by day, with distance, duration, and efficiency. Each drive has a route map, speed, power, elevation, and battery charts, the energy recovered, the climb, and a GPX export. All drives export as CSV. A trip view sums any date range on one map. |
-| Charging | All charging sessions, with energy, levels, power, and cost. Each session has power, voltage, and current charts. All sessions export as CSV. |
+| Charging | All charging sessions, with energy, levels, power, and cost. Each session has power, voltage, and current charts. All sessions export as CSV. An insights page shows the cost per kWh for AC and DC, the cost per 100 km, the DC curves, when the car charges, and the top places. |
 | Timeline | One day at a time: driving, charging, parked, asleep, and offline time on a 24-hour strip |
 | Battery | Estimated health, capacity, range at 100 %, charge cycles, AC and DC energy, time at each level, idle drain |
 | Stats | Distance, energy, cost, efficiency against temperature, drive times, longest drives, tire pressure trend, software updates |

@@ -12,7 +12,7 @@ import {
   userPreferencesTag,
   writeUserPreferences,
 } from "@/lib/preferences-store";
-import { baseline, currentViewer } from "@/lib/viewer";
+import { baseline, currentViewer, getPreferences } from "@/lib/viewer";
 
 export type SaveResult = { ok: true } | { ok: false; message: string };
 
@@ -44,6 +44,13 @@ export async function savePreferences(input: unknown): Promise<SaveResult> {
   } catch {
     return { ok: false, message: "The server did not save the settings." };
   }
+}
+
+export async function saveTheme(theme: unknown): Promise<SaveResult> {
+  if (theme !== "light" && theme !== "dark") {
+    return { ok: false, message: "Choose the light or the dark theme." };
+  }
+  return savePreferences({ ...(await getPreferences()), theme });
 }
 
 export async function resetPreferences(): Promise<SaveResult> {

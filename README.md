@@ -8,6 +8,15 @@
 
 <p align="center"><a href="https://mytesla.chele.bi">Live demo</a> · <a href="docs/installation.md">Install</a> · <a href="#documentation">Docs</a></p>
 
+<p align="center">
+  <a href="https://mytesla.chele.bi">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/images/screenshots/overview-dark.png">
+      <img src="docs/images/screenshots/overview-light.png" alt="The My Tesla Overview page with a Model Y, its battery level, and its range" width="900">
+    </picture>
+  </a>
+</p>
+
 A self-hosted, read-only web dashboard for the car data that [TeslaMate](https://github.com/teslamate-org/teslamate) records. It runs next to your TeslaMate stack, reads its PostgreSQL database with a read-only role, and shows the data in a clean, fast interface that follows the Tesla visual style.
 
 > This project is an unofficial community tool and is not affiliated with, endorsed by, or supported by the official TeslaMate project.
@@ -33,6 +42,51 @@ Other properties:
 - **Server-rendered.** Every value is read and formatted on the server. No database value reaches the browser without a server module.
 - **Light and dark.** The theme follows the system, or you choose one in Settings.
 - **Phone ready.** Every page works at 390 px wide, with a bottom tab bar.
+
+## Screenshots
+
+All screenshots show the synthetic data of the [live demo](https://mytesla.chele.bi).
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/drive-dark.png" alt="A drive with its route on the map, distance, duration, consumption, and battery use"></td>
+    <td width="50%"><img src="docs/images/screenshots/charge-dark.png" alt="A Supercharger session with energy added, peak power, efficiency, cost, and the power curve"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Drive</b>: the route map and the drive totals</td>
+    <td align="center"><b>Charge</b>: energy, power curve, cost, and efficiency</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshots/battery-dark.png" alt="Battery health, capacity, range at 100 percent, and charge cycles"></td>
+    <td><img src="docs/images/screenshots/stats-dark.png" alt="Distance, energy, and temperature charts for each week"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Battery</b>: health, capacity, and idle drain</td>
+    <td align="center"><b>Stats</b>: distance, energy, efficiency, and tire pressure</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshots/places-dark.png" alt="A map of visited places and charging places"></td>
+    <td><img src="docs/images/screenshots/timeline-dark.png" alt="One day as a 24-hour strip of driving, charging, and parked time"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Places</b>: where the car goes and charges</td>
+    <td align="center"><b>Timeline</b>: one day, hour by hour</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshots/live-dark.png" alt="The Live card with the lock, the openings, charging, climate, and a software update"></td>
+    <td><img src="docs/images/screenshots/settings-dark.png" alt="The Settings page with units, date and time, and display options"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Live status</b>: locks, charging, and updates over MQTT</td>
+    <td align="center"><b>Settings</b>: units, formats, theme, and tabs</td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/screenshots/phone-overview.png" alt="The Overview page on a phone" width="260">
+  &nbsp;&nbsp;
+  <img src="docs/images/screenshots/phone-charging.png" alt="The Charging page on a phone" width="260">
+</p>
 
 ## Quick start
 
@@ -89,7 +143,7 @@ The full guide is [Installation](docs/installation.md).
 
 ## Status
 
-The project is at version 0.1.0. The pages work against TeslaMate 4.3.0 and against the [demo data](docs/demo-data.md). The [changelog](CHANGELOG.md) lists each release.
+The project is at version 1.0.0. The pages work against TeslaMate 4.3.0 and against the [demo data](docs/demo-data.md). The [changelog](CHANGELOG.md) lists each release.
 
 ## License
 

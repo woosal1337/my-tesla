@@ -11,6 +11,7 @@ The public site at https://mytesla.chele.bi runs the app with `DEMO_MODE=1`. It 
 | Settings | Saved in `PREFERENCES_FILE` for each user | Saved in a cookie for each visitor |
 | Dashboard | No banner | A banner that says the data is synthetic |
 | Live card | From the MQTT feed, if `MQTT_URL` is set | Fixed demo values, with no live stream |
+| Theme | The TeslaMate default, often System | Dark, with a light and dark switch in the landing page header |
 
 The demo data ends when the server process starts. A process builds new data after 6 hours.
 
@@ -83,6 +84,7 @@ The tracker counts each page view, also the tab changes in the dashboard. `src/l
 | `landing_open` | A visitor goes from the demo back to the landing page | |
 | `outbound_click` | A visitor opens the license or TeslaMate | `host` |
 | `settings_change` | A visitor changes a setting in the demo | `setting` |
+| `theme_change` | A visitor presses the light and dark switch on the landing page | `theme` |
 
 A click sends an event through the `data-oa-event` attribute, with no extra code. Settings calls `trackEvent()`, because a change is not a click on a link. Without the tracker, `trackEvent()` does nothing.
 

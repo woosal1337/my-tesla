@@ -14,7 +14,7 @@
 
 The saved Settings stay in the `/data` volume. A new version reads the old file. An unknown or removed setting falls back to its default.
 
-To pin one version, use a tag such as `ghcr.io/woosal1337/my-tesla:0.1.0` instead of `latest`.
+To pin one version, use a tag such as `ghcr.io/woosal1337/my-tesla:1.0.0` instead of `latest`.
 
 ## Upgrade TeslaMate
 
@@ -31,4 +31,4 @@ The read-only role keeps its access to new tables, because of the `ALTER DEFAULT
 
 | Dashboard | TeslaMate |
 |---|---|
-| 0.1.0 | 4.3.0 |
+| 1.0.0 | 4.3.0 |

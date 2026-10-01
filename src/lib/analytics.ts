@@ -7,6 +7,7 @@ export const analyticsEvents = {
   landingOpen: "landing_open",
   outboundClick: "outbound_click",
   settingsChange: "settings_change",
+  themeChange: "theme_change",
 } as const;
 
 type AnalyticsEvent = (typeof analyticsEvents)[keyof typeof analyticsEvents];

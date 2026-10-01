@@ -4,9 +4,11 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-01
+
 ### Added
 
-- First public version of the dashboard, tested with TeslaMate 4.3.0.
+- First public release of the dashboard, tested with TeslaMate 4.3.0.
 - Pages: Overview, Drives with route maps, Charging with power curves, Timeline, Battery, Stats, Places, and Settings.
 - Settings for units, date and time formats, number style, currency, place names, maps, theme, motion, tabs, and Overview cards, saved on the server for each user.
 - A container image with a Next.js standalone server, a health check, and a settings volume.
@@ -16,4 +18,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - Live status from the optional TeslaMate MQTT feed: a Live card on the Overview with locks, Sentry Mode, openings, charging, climate, software updates, driving, and navigation, updated through server-sent events.
 - Link previews and icons: a 1200 × 630 preview image, Open Graph and X card tags, a canonical link, JSON-LD, an iPhone icon, a favicon, a web app manifest, `robots.txt`, a sitemap, and `SITE_URL`.
 - Demo analytics: with `OPEN_ANALYTICS_URL` and `OPEN_ANALYTICS_KEY`, demo mode loads Open Analytics and sends named events for the demo, install, repository, docs, navbar, and Settings actions. A normal install never loads it.
+- A light and dark switch on the landing page. The demo starts in dark mode.
+- Security headers on every response: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, and `Cross-Origin-Opener-Policy`. The `X-Powered-By` header is off.
+- README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
+
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/woosal1337/my-tesla/releases/tag/v1.0.0

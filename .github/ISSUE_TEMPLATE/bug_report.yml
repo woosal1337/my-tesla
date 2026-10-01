@@ -10,7 +10,7 @@ body:
     id: dashboard-version
     attributes:
       label: Dashboard version
-      placeholder: 0.1.0 or the image tag
+      placeholder: 1.0.0 or the image tag
     validations:
       required: true
   - type: input

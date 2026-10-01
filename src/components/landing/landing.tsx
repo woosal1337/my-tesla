@@ -20,6 +20,7 @@ import type { ReactNode } from "react";
 import { LandingNav } from "@/components/landing/landing-nav";
 import { analyticsEvents, eventProps, outboundProps } from "@/lib/analytics";
 import { LogoTile } from "@/components/tesla-mark";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { project } from "@/lib/project";
 import { cn } from "@/lib/utils";
 
@@ -238,6 +239,7 @@ export function Landing({
           </Link>
           <LandingNav docsUrl={project.docsUrl} />
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <GitHubButton stars={stars} />
             <DemoButton place="header" />
           </div>

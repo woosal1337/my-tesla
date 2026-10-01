@@ -15,8 +15,8 @@ The image is `ghcr.io/woosal1337/my-tesla`. The [image workflow](../.github/work
 | Tag | Meaning |
 |---|---|
 | `latest` | The newest release |
-| `0.1.0` | One exact release |
-| `0.1` | The newest patch of a minor release |
+| `1.0.0` | One exact release |
+| `1.0` | The newest patch of a minor release |
 | `sha-<commit>` | One commit |
 
 Until the first release exists, build the image yourself:

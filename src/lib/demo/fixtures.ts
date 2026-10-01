@@ -2,7 +2,9 @@ import { demoCarId } from "./generate";
 
 export function demoFixtures(now: Date) {
   return {
-    settings: [{ id: 1, inserted_at: now, updated_at: now }],
+    settings: [
+      { id: 1, inserted_at: now, updated_at: now, theme_mode: "dark" },
+    ],
     carSettings: [{ id: 1 }, { id: 2 }],
     cars: [
       {

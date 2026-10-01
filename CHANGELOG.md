@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-02
+
 ### Added
 
 - Trip view at `/cars/{carId}/drives/trip`: a date range with presets, the totals for distance, driving and charging time, energy, and cost, every route on one map with the charge stops, and a list of drives and charges. CSV buttons for the range.
@@ -53,7 +55,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/woosal1337/my-tesla/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/woosal1337/my-tesla/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/woosal1337/my-tesla/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/woosal1337/my-tesla/releases/tag/v1.0.0

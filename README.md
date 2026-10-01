@@ -144,7 +144,7 @@ The full guide is [Installation](docs/installation.md).
 
 ## Status
 
-The project is at version 1.0.0. The pages work against TeslaMate 4.3.0 and against the [demo data](docs/demo-data.md). The [changelog](CHANGELOG.md) lists each release.
+The pages work against TeslaMate 4.3.0 and against the [demo data](docs/demo-data.md). The [changelog](CHANGELOG.md) lists each release.
 
 ## License
 

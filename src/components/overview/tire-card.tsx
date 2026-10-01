@@ -1,3 +1,4 @@
+import { CircleAlert } from "lucide-react";
 import type { CarSnapshot } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
@@ -51,9 +52,11 @@ function CarOutline() {
 export function TireCard({
   tires,
   format,
+  warnings = [],
 }: {
   tires: CarSnapshot["tires"];
   format: (bar: number) => string;
+  warnings?: string[];
 }) {
   return (
     <section className="flex flex-col rounded-xl bg-card p-5">
@@ -89,6 +92,15 @@ export function TireCard({
           The car sends tire pressure after it drives.
         </p>
       )}
+      {warnings.map((warning) => (
+        <p key={warning} className="mt-3 flex items-start gap-2 text-sm">
+          <CircleAlert
+            aria-hidden
+            className="mt-0.5 size-4 shrink-0 text-warning"
+          />
+          {warning}
+        </p>
+      ))}
     </section>
   );
 }

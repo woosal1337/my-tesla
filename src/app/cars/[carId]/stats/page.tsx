@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { CircleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { niceDomain } from "@/components/charts/nice-domain";
@@ -28,9 +29,11 @@ import {
   softwareUpdates,
   statsBuckets,
   speedBandRows,
+  recentTireLeaks,
 } from "@/lib/stats-data";
 import { efficiencyDigits } from "@/lib/units";
 import { speedBands, speedEdges } from "@/lib/speed-bands";
+import { leakWarning } from "@/lib/tire-leak";
 import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
@@ -82,6 +85,7 @@ export default async function StatsPage({
     updates,
     longest,
     speedRows,
+    leaks,
   ] = await Promise.all([
     statsBuckets(car.id, from, unit, timeZone, sundayFirst),
     driveTotals(car.id, from),
@@ -92,6 +96,7 @@ export default async function StatsPage({
     softwareUpdates(car.id),
     longestDrives(car.id, from),
     speedBandRows(car.id, from, edges.kmh),
+    recentTireLeaks(car.id, timeZone),
   ]);
 
   const whPerKm = drives.distanceKm
@@ -536,6 +541,18 @@ export default async function StatsPage({
             ) : (
               <PanelNote>No record yet.</PanelNote>
             )}
+            {leaks.map((leak) => (
+              <p
+                key={leak.tire}
+                className="mt-4 flex items-start gap-2 text-sm"
+              >
+                <CircleAlert
+                  aria-hidden
+                  className="mt-0.5 size-4 shrink-0 text-warning"
+                />
+                {leakWarning(leak, (bar) => f.pressure(bar))}
+              </p>
+            ))}
           </Panel>
           <Panel title="Software">
             {updates.length ? (

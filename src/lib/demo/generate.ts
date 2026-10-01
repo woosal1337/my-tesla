@@ -353,7 +353,8 @@ export function generateDemo(options: {
   const tires = (at: number, temperature: number) => {
     const dayIndex = Math.floor((at - start) / day);
     const base = 2.86 + (temperature - 20) * 0.008;
-    const leak = dayIndex < 41 ? dayIndex * 0.0055 : (dayIndex - 41) * 0.001;
+    const leak =
+      dayIndex < 41 ? dayIndex * 0.0055 : Math.max(0, dayIndex - 46) * 0.012;
     return {
       tpms_pressure_fl: round(base + random.between(-0.01, 0.01), 2),
       tpms_pressure_fr: round(base + random.between(-0.01, 0.01), 2),

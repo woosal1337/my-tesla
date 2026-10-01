@@ -18,7 +18,9 @@ import { buildTimeline, dayWindow, localDayKey } from "@/lib/insights";
 import { getLive } from "@/lib/live/live";
 import { mapThemeOf } from "@/lib/preferences";
 import { carSnapshot, recentCharges, recentDrives } from "@/lib/queries";
+import { recentTireLeaks } from "@/lib/stats-data";
 import { dayRecords } from "@/lib/timeline-data";
+import { leakWarning } from "@/lib/tire-leak";
 import { cn } from "@/lib/utils";
 import {
   activityLabel,
@@ -56,13 +58,16 @@ export default async function OverviewPage({
   ]);
   const now = new Date();
   const today = dayWindow(localDayKey(now, f.timeZone), f.timeZone);
-  const [snapshot, [lastDrive], [lastCharge], todayRecords, live] =
+  const [snapshot, [lastDrive], [lastCharge], todayRecords, live, leaks] =
     await Promise.all([
       carSnapshot(car.id),
       recentDrives(car, 1),
       recentCharges(car.id, 1),
       dayRecords(car.id, today.start, today.end),
       getLive(car.id),
+      preferences.overview.tires
+        ? recentTireLeaks(car.id, f.timeZone)
+        : Promise.resolve([]),
     ]);
   const show = preferences.overview;
   const liveNow = live?.connected ? live.view : null;
@@ -222,6 +227,9 @@ export default async function OverviewPage({
                 <TireCard
                   tires={liveNow?.tires ?? snapshot.tires}
                   format={(bar) => f.pressure(bar)}
+                  warnings={leaks.map((leak) =>
+                    leakWarning(leak, (bar) => f.pressure(bar)),
+                  )}
                 />
               )}
               {show.location && (

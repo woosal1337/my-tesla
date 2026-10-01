@@ -4,12 +4,12 @@ import { demoCarId } from "./generate";
 import { demoLiveValues } from "./live";
 
 describe("demoLiveValues", () => {
-  test("gives the demo car a parked state with an update ready", () => {
+  test("gives the demo car a parked state with an update ready and no tire values", () => {
     const view = liveView(demoLiveValues(demoCarId));
     expect(view.locked).toBe(true);
     expect(view.openParts).toEqual([]);
     expect(view.software.updateVersion).toBe("2026.32.6");
-    expect(view.tires).not.toBeNull();
+    expect(view.tires).toBeNull();
   });
 
   test("gives no values for an unknown car", () => {

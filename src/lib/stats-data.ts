@@ -4,6 +4,7 @@ import { cache } from "react";
 import { database } from "./database";
 import { rangeColumn, type RangeKind } from "./range-columns";
 import type { SpeedBandRow } from "./speed-bands";
+import { slowLeaks, type SlowLeak } from "./tire-leak";
 import { placeLabel } from "./vehicle";
 import { getPlaceStyle, getRangeKind } from "./viewer";
 
@@ -371,5 +372,14 @@ export const speedBandRows = cache(
       group by 1
       order by 1
     `;
+  },
+);
+
+const leakWindowMs = 14 * 86_400_000;
+
+export const recentTireLeaks = cache(
+  async (carId: number, timeZone: string): Promise<SlowLeak[]> => {
+    const from = new Date(Date.now() - leakWindowMs);
+    return slowLeaks(await pressureTrend(carId, from, "day", timeZone));
   },
 );

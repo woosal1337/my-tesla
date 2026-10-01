@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-02
+
 ### Added
 
 - Drive page: speed and power, elevation, and battery charts along the drive, the energy recovered, the energy used, the regen peak, the climb, and the descent.
@@ -39,6 +41,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/woosal1337/my-tesla/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/woosal1337/my-tesla/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/woosal1337/my-tesla/releases/tag/v1.0.0

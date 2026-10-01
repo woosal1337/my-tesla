@@ -26,6 +26,7 @@ import {
   batteryTone,
   carActivity,
   liveActivity,
+  ongoingText,
   variantLine,
 } from "@/lib/vehicle";
 import { getFormatter, getPreferences } from "@/lib/viewer";
@@ -310,10 +311,10 @@ export default async function OverviewPage({
                       {lastCharge.place}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground tabular">
-                      +{f.energy(lastCharge.energyAddedKwh)} ·{" "}
-                      {lastCharge.startLevel ?? "—"}% →{" "}
-                      {lastCharge.endLevel ?? "—"}% ·{" "}
-                      {f.day(lastCharge.startAt, now)}
+                      {lastCharge.endAt
+                        ? `+${f.energy(lastCharge.energyAddedKwh)} · ${lastCharge.startLevel ?? "—"}% → ${lastCharge.endLevel ?? "—"}%`
+                        : `${ongoingText} since ${f.clock(lastCharge.startAt)}`}{" "}
+                      · {f.day(lastCharge.startAt, now)}
                     </p>
                   </>
                 ) : (

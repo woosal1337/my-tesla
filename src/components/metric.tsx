@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { ongoingText } from "@/lib/vehicle";
 
 export function Metric({
   label,
@@ -14,6 +15,7 @@ export function Metric({
   detail?: ReactNode;
   size?: "md" | "lg";
 }) {
+  const pending = value === "—" || value === ongoingText;
   return (
     <div className="min-w-0">
       <dt className="text-sm text-muted-foreground">{label}</dt>
@@ -25,8 +27,15 @@ export function Metric({
             : "text-2xl",
         )}
       >
-        <span className="whitespace-nowrap">{value}</span>
-        {unit && value !== "—" && (
+        <span
+          className={cn(
+            "whitespace-nowrap",
+            value === ongoingText && "text-[0.75em] text-muted-foreground",
+          )}
+        >
+          {value}
+        </span>
+        {unit && !pending && (
           <span
             className={cn(
               "font-normal text-muted-foreground",

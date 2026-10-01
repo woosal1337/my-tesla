@@ -25,6 +25,7 @@ import {
 } from "@/lib/insights";
 import { dayRecords } from "@/lib/timeline-data";
 import { cn } from "@/lib/utils";
+import { ongoingText } from "@/lib/vehicle";
 import { getFormatter } from "@/lib/viewer";
 
 export const instant = false;
@@ -43,7 +44,8 @@ function ItemRow({
   f: Formatter;
 }) {
   const durationOf = (ms: number) => f.duration(ms / minuteMs);
-  const time = `${f.clock(item.start)} – ${f.clock(item.end)}`;
+  const open = item.kind === "charge" && item.charge.end === null;
+  const time = `${f.clock(item.start)} – ${open ? "Now" : f.clock(item.end)}`;
   const length = item.end.getTime() - item.start.getTime();
   let icon: ReactNode;
   let title: string;
@@ -58,8 +60,8 @@ function ItemRow({
     dot = "bg-primary text-primary-foreground";
   } else if (item.kind === "charge") {
     icon = <BatteryCharging className="size-4" />;
-    title = `Charged at ${item.charge.place}`;
-    detail = `+${f.energy(item.charge.energyAddedKwh)} · ${durationOf(length)} · ${item.charge.fast ? "DC" : "AC"}`;
+    title = `${open ? "Charging" : "Charged"} at ${item.charge.place}`;
+    detail = `${open ? ongoingText : `+${f.energy(item.charge.energyAddedKwh)}`} · ${durationOf(length)} · ${item.charge.fast ? "DC" : "AC"}`;
     href = `/cars/${carId}/charging/${item.charge.id}`;
     dot = "bg-charge text-primary-foreground";
   } else {

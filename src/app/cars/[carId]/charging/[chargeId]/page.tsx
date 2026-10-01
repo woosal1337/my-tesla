@@ -13,6 +13,7 @@ import { requireCar } from "@/lib/car-route";
 import { chargeCurve, findChargeSession } from "@/lib/charge-data";
 import { mapThemeOf } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
+import { ongoingText } from "@/lib/vehicle";
 import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
@@ -130,6 +131,8 @@ export default async function ChargePage({
     .map((point) => point.voltage)
     .filter((value): value is number => value !== null);
   const voltageDomain = niceDomain(voltages);
+  const ongoing = session.endAt === null;
+  const missing = ongoing ? ongoingText : "—";
   const added = session.energyAddedKwh;
   const averagePower =
     added !== null && session.durationMin
@@ -191,14 +194,16 @@ export default async function ChargePage({
         <Metric
           size="lg"
           label="Energy added"
-          value={added === null ? "—" : `+${f.number(added, 1)}`}
+          value={added === null ? missing : `+${f.number(added, 1)}`}
           unit="kWh"
         />
         <Metric
           size="lg"
           label="Range added"
           value={
-            rangeAdded === null ? "—" : `+${f.number(Math.round(rangeAdded))}`
+            rangeAdded === null
+              ? missing
+              : `+${f.number(Math.round(rangeAdded))}`
           }
           unit={f.units.distance}
         />
@@ -213,7 +218,11 @@ export default async function ChargePage({
         <Metric
           size="lg"
           label="Duration"
-          value={f.duration(session.durationMin)}
+          value={
+            session.durationMin === null
+              ? missing
+              : f.duration(session.durationMin)
+          }
         />
       </dl>
 
@@ -226,12 +235,12 @@ export default async function ChargePage({
       <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
         <Metric
           label="Average power"
-          value={averagePower === null ? "—" : f.number(averagePower, 1)}
+          value={averagePower === null ? missing : f.number(averagePower, 1)}
           unit="kW"
         />
         <Metric
           label="Charging efficiency"
-          value={efficiency === null ? "—" : Math.round(efficiency)}
+          value={efficiency === null ? missing : Math.round(efficiency)}
           unit="%"
           detail={
             session.energyUsedKwh
@@ -241,7 +250,7 @@ export default async function ChargePage({
         />
         <Metric
           label="Cost"
-          value={f.cost(session.cost)}
+          value={session.cost === null ? missing : f.cost(session.cost)}
           detail={
             session.cost !== null && added
               ? `${f.cost(session.cost / added)} per kWh added`

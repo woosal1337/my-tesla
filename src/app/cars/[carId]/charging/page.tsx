@@ -6,6 +6,7 @@ import { SectionHeader } from "@/components/section-header";
 import { requireCar } from "@/lib/car-route";
 import { recentCharges } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import { ongoingText } from "@/lib/vehicle";
 import { getFormatter } from "@/lib/viewer";
 
 export const instant = false;
@@ -99,11 +100,19 @@ export default async function ChargingPage({
                             </span>
                           </p>
                           <p className="text-sm text-muted-foreground tabular">
-                            {charge.startLevel ?? "—"}% →{" "}
-                            {charge.endLevel ?? "—"}%
-                            {charge.maxPowerKw
-                              ? ` · up to ${Math.round(charge.maxPowerKw)} kW`
-                              : ""}
+                            {[
+                              charge.startLevel !== null &&
+                              charge.endLevel !== null
+                                ? `${charge.startLevel}% → ${charge.endLevel}%`
+                                : charge.endAt
+                                  ? "—"
+                                  : null,
+                              charge.maxPowerKw
+                                ? `up to ${Math.round(charge.maxPowerKw)} kW`
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
                           </p>
                           <LevelBar
                             start={charge.startLevel}
@@ -111,9 +120,16 @@ export default async function ChargingPage({
                           />
                         </div>
                         <div className="text-right tabular">
-                          <p className="font-medium">
-                            +{f.energy(charge.energyAddedKwh)}
-                          </p>
+                          {charge.energyAddedKwh === null && !charge.endAt ? (
+                            <p className="flex items-center justify-end gap-1.5 font-medium text-charge">
+                              <span className="size-1.5 animate-pulse rounded-full bg-charge" />
+                              {ongoingText}
+                            </p>
+                          ) : (
+                            <p className="font-medium">
+                              +{f.energy(charge.energyAddedKwh)}
+                            </p>
+                          )}
                           <p className="text-xs text-subtle">
                             {charge.cost === null ? "" : f.cost(charge.cost)}
                           </p>

@@ -5,6 +5,8 @@ export type CarActivity =
 
 export type Tone = "active" | "charge" | "quiet";
 
+export const ongoingText = "Ongoing…";
+
 export const tabs = [
   { id: "overview", label: "Overview", segment: "" },
   { id: "drives", label: "Drives", segment: "/drives" },

@@ -1,0 +1,460 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(
+      :root:not([data-theme="light"]),
+      :root:not([data-theme="light"]) *
+    ) {
+      @slot;
+    }
+  }
+}
+
+@theme inline {
+  --font-sans:
+    var(--font-inter), -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-subtle: var(--subtle);
+  --color-charge: var(--charge);
+  --color-warning: var(--warning);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 1rem;
+  --radius-4xl: 1.25rem;
+  --ease-tesla: cubic-bezier(0.5, 0, 0, 0.75);
+  --animate-shimmer: shimmer 1.6s var(--ease-tesla) infinite;
+}
+
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#ffffff, #111215);
+  --foreground: light-dark(#171a20, #f4f4f4);
+  --card: light-dark(#f4f4f4, #1b1d22);
+  --card-foreground: light-dark(#171a20, #f4f4f4);
+  --popover: light-dark(#ffffff, #1b1d22);
+  --popover-foreground: light-dark(#171a20, #f4f4f4);
+  --primary: #3e6ae1;
+  --primary-foreground: #ffffff;
+  --secondary: light-dark(#f4f4f4, #22252b);
+  --secondary-foreground: light-dark(#393c41, #d0d1d2);
+  --muted: light-dark(#eeeeee, #22252b);
+  --muted-foreground: light-dark(#5c5e62, #a2a3a5);
+  --subtle: light-dark(#8e8e8e, #6f7176);
+  --accent: light-dark(#eeeeee, #262930);
+  --accent-foreground: light-dark(#171a20, #f4f4f4);
+  --destructive: light-dark(#d93c3c, #ef5a5a);
+  --warning: light-dark(#e8a33d, #f0b453);
+  --charge: light-dark(#1fae5b, #2fd073);
+  --border: light-dark(#eeeeee, #262930);
+  --input: light-dark(#d0d1d2, #393c41);
+  --ring: light-dark(#3e6ae1, #5b82ee);
+  --chart-1: light-dark(#3e6ae1, #5b82ee);
+  --chart-2: light-dark(#1fae5b, #2fd073);
+  --chart-3: light-dark(#8e8e8e, #a2a3a5);
+  --chart-4: light-dark(#e8a33d, #f0b453);
+  --chart-5: light-dark(#393c41, #d0d1d2);
+  --radius: 0.25rem;
+  --duration: 0.33s;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      "cv11" 1,
+      "ss01" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+
+  :is(
+    button,
+    select,
+    summary,
+    [role="button"],
+    [role="switch"],
+    [role="radio"],
+    [role="menuitem"],
+    [role="option"]
+  ):not(:disabled, [aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
+  .maplibregl-ctrl-attrib {
+    @apply bg-background! text-muted-foreground! border-border! rounded-md! border! shadow-sm!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply text-muted-foreground!;
+  }
+  .maplibregl-ctrl-attrib a:hover {
+    @apply text-foreground!;
+  }
+  .maplibregl-ctrl-attrib-button {
+    @apply bg-transparent! dark:invert;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility transition-tesla {
+  transition-duration: var(--duration);
+  transition-timing-function: var(--ease-tesla);
+  transition-property:
+    color, background-color, border-color, opacity, box-shadow;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes mark-draw {
+  0% {
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+  }
+  60% {
+    stroke-dashoffset: 0;
+    fill-opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+  }
+}
+
+@keyframes mark-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    var(--accent) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+.mark-draw path {
+  stroke-dasharray: 1;
+  animation: mark-draw 1.1s var(--ease-tesla) both;
+}
+
+.mark-breathe {
+  animation: mark-breathe 1.4s var(--ease-tesla) infinite;
+}
+
+.splash {
+  animation: splash-out var(--duration) var(--ease-tesla) 3s forwards;
+}
+
+.splash[data-state="done"] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration) var(--ease-tesla),
+    visibility 0s linear var(--duration);
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="reduced"]) .overview-hero {
+      --hero-top: 2rem;
+      --hero-text: 6.5rem;
+      --car-gap: -0.5rem;
+      --car-width: min(100%, 48rem);
+      --dock-width: 8.75rem;
+      --collapse: calc(min(100cqw, 48rem) * 7 / 16 + var(--car-gap));
+      container-type: inline-size;
+
+      @media (width >= 40rem) {
+        --dock-width: 12.5rem;
+      }
+
+      @media (width >= 48rem) {
+        --hero-top: 3.5rem;
+        --car-gap: -1.5rem;
+        --dock-width: 18rem;
+      }
+
+      .hero-head {
+        position: sticky;
+        top: 3.5rem;
+        z-index: 10;
+      }
+
+      .hero-text {
+        max-width: calc(100% - var(--dock-width) - 1rem);
+      }
+
+      .hero-car {
+        position: absolute;
+        top: calc(100% + var(--car-gap));
+        left: calc(50% - var(--car-width) / 2);
+        width: var(--car-width);
+        max-width: none;
+        margin: 0;
+        pointer-events: none;
+        animation: hero-dock linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0px var(--collapse);
+      }
+
+      .hero-spacer {
+        display: block;
+        width: min(100%, 48rem);
+        aspect-ratio: 16 / 7;
+        margin-top: var(--car-gap);
+      }
+
+      &:has(.hero-car:empty) .hero-spacer {
+        display: none;
+      }
+    }
+  }
+}
+
+@keyframes hero-dock {
+  to {
+    top: calc(
+      var(--hero-top) + var(--hero-text) / 2 - var(--dock-width) * 7 / 32
+    );
+    left: calc(100% - var(--dock-width));
+    width: var(--dock-width);
+  }
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(site-header),
+::view-transition-group(tab-bar) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-group(splash) {
+  animation: none;
+  z-index: 200;
+}
+
+::view-transition-old(splash) {
+  display: none;
+}
+
+::view-transition-new(splash) {
+  animation: none;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(tab-bar) {
+  display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(tab-bar) {
+  animation: none;
+}
+
+::view-transition-old(.slide-down) {
+  animation: 150ms ease-out both fade reverse;
+}
+
+::view-transition-new(.slide-up) {
+  animation:
+    210ms ease-in 150ms both fade,
+    400ms var(--ease-tesla) both slide-y;
+}
+
+::view-transition-old(.tab-forward) {
+  --slide-offset: -32px;
+  animation:
+    150ms ease-in both fade reverse,
+    330ms var(--ease-tesla) both slide-x reverse;
+}
+
+::view-transition-new(.tab-forward) {
+  --slide-offset: 32px;
+  animation:
+    210ms ease-out 120ms both fade,
+    330ms var(--ease-tesla) both slide-x;
+}
+
+::view-transition-old(.tab-back) {
+  --slide-offset: 32px;
+  animation:
+    150ms ease-in both fade reverse,
+    330ms var(--ease-tesla) both slide-x reverse;
+}
+
+::view-transition-new(.tab-back) {
+  --slide-offset: -32px;
+  animation:
+    210ms ease-out 120ms both fade,
+    330ms var(--ease-tesla) both slide-x;
+}
+
+::view-transition-old(.car-swap) {
+  animation: 180ms ease-in both fade reverse;
+}
+
+::view-transition-new(.car-swap) {
+  animation:
+    260ms ease-out 120ms both fade,
+    400ms var(--ease-tesla) both slide-y;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes slide-y {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-x {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+
+  .skeleton,
+  .mark-breathe,
+  .mark-draw path {
+    animation: none;
+  }
+
+  .mark-draw path {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+  }
+}
+
+:root[data-motion="reduced"]::view-transition-old(*),
+:root[data-motion="reduced"]::view-transition-new(*),
+:root[data-motion="reduced"]::view-transition-group(*) {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+:root[data-motion="reduced"] {
+  .skeleton,
+  .mark-breathe,
+  .mark-draw path {
+    animation: none;
+  }
+
+  .mark-draw path {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+  }
+}

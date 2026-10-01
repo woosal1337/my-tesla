@@ -1,0 +1,101 @@
+{
+  "name": "my-tesla",
+  "board": {
+    "key": "TSLA",
+    "org": "Personal",
+    "org_id": "019fde50-6654-7c03-81a5-2b4aa937b624",
+    "project": "TeslaMate",
+    "project_id": "01a0f415-7d17-72f0-bd9b-251690511fb7",
+    "tool": "elliptic"
+  },
+  "remote": "git@github.com:woosal1337/my-tesla.git",
+  "machines": {
+    "workstation": {
+      "repo": "~/Documents/GitHub/my-tesla",
+      "work": "~/work/my-tesla"
+    },
+    "server": {
+      "repo": "~/repos/my-tesla",
+      "work": "~/work/my-tesla"
+    }
+  },
+  "github": {
+    "owner": "woosal1337",
+    "url": "https://github.com/woosal1337/my-tesla",
+    "description": "Self-hosted, read-only web dashboard for TeslaMate data. Next.js, TypeScript, and Bun.",
+    "homepage": "",
+    "topics": [
+      "teslamate",
+      "tesla",
+      "dashboard",
+      "nextjs",
+      "typescript",
+      "bun",
+      "tailwindcss",
+      "postgresql"
+    ],
+    "visibility": "private",
+    "default_branch": "main"
+  },
+  "stack": {
+    "runtime": {
+      "name": "Node.js",
+      "version": "24 LTS"
+    },
+    "framework": {
+      "name": "Next.js",
+      "version": "16.3.8"
+    },
+    "package_manager": {
+      "name": "Bun",
+      "version": "1.3.14"
+    },
+    "lockfile": "bun.lock"
+  },
+  "commands": {
+    "test": ["bun", "test"],
+    "dev": ["bun", "run", "dev"],
+    "build": ["bun", "run", "build"],
+    "start": ["bun", "run", "start"]
+  },
+  "quality": {
+    "pre_commit_version": "4.6.2",
+    "required": ["typecheck", "unused"],
+    "checks": [
+      {
+        "id": "format",
+        "argv": ["bun", "run", "format:check"]
+      },
+      {
+        "id": "source-comments",
+        "argv": ["bun", "run", "check:source"]
+      },
+      {
+        "id": "lint",
+        "argv": ["bun", "run", "lint"]
+      },
+      {
+        "id": "typecheck",
+        "argv": ["bun", "run", "typecheck"]
+      },
+      {
+        "id": "unused",
+        "argv": ["bun", "run", "check:unused"]
+      },
+      {
+        "id": "test",
+        "argv": ["bun", "test"]
+      }
+    ]
+  },
+  "knowledge": {
+    "vault": "base",
+    "note": "projects/teslamate/README.md"
+  },
+  "foundation": {
+    "template": "ege-repository-foundation",
+    "version": 1,
+    "workflow_id": "create-repository",
+    "workflow_version": 2
+  }
+}

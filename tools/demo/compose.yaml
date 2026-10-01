@@ -1,0 +1,34 @@
+name: my-tesla-demo
+services:
+  database:
+    image: postgres:18-trixie
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: demo_owner
+      POSTGRES_PASSWORD: ${DEMO_OWNER_PASSWORD:?Set DEMO_OWNER_PASSWORD}
+      POSTGRES_DB: teslamate_demo
+    ports:
+      - "127.0.0.1:5439:5432"
+    volumes:
+      - demo-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo_owner -d teslamate_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  schema:
+    image: teslamate/teslamate:4.3.0
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: database
+      DATABASE_USER: demo_owner
+      DATABASE_PASS: ${DEMO_OWNER_PASSWORD:?Set DEMO_OWNER_PASSWORD}
+      DATABASE_NAME: teslamate_demo
+      ENCRYPTION_KEY: demo-only-key-without-tesla-tokens
+      DISABLE_MQTT: "true"
+    command: ["true"]
+    restart: "no"
+volumes:
+  demo-db:

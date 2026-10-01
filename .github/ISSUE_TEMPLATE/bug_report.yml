@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a problem with the dashboard.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Remove locations, addresses, VINs, and email addresses from logs and screenshots. Report a security problem privately. Read SECURITY.md.
+  - type: input
+    id: dashboard-version
+    attributes:
+      label: Dashboard version
+      placeholder: 0.1.0 or the image tag
+    validations:
+      required: true
+  - type: input
+    id: teslamate-version
+    attributes:
+      label: TeslaMate version
+      placeholder: 4.3.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: Installation method
+      options:
+        - Docker Compose with TeslaMate
+        - Separate Docker Compose project
+        - Coolify
+        - From source
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see the problem
+      placeholder: |
+        1. Open the Stats tab.
+        2. Choose 1 year.
+        3. See the error.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server log
+      description: The output of `docker compose logs --tail 100 dashboard`.
+      render: text

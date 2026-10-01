@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a new page, chart, or setting.
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What do you want to see or do that the dashboard does not support?
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: The change
+      description: Describe the page, chart, or setting that solves the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: TeslaMate data
+      description: The TeslaMate tables and columns that hold the data, if you know them.

@@ -1,0 +1,17 @@
+.git
+.github
+.next
+.next-build
+.next-demo
+.data
+.cache
+.env
+.env.*
+!.env.example
+node_modules
+docs
+research
+tools/demo
+*.md
+Dockerfile
+.dockerignore

@@ -28,7 +28,20 @@ Without a valid email in the header, all users share one set of settings, saved 
 3. Add a policy that allows only your email address.
 4. Open the host name. Cloudflare asks for the login first, then sends the request with the email header.
 
-The app needs no setting for this proxy.
+The app needs no setting for this proxy. To close every other path to the app, also set the token check below.
+
+### Verify the Cloudflare Access token
+
+A second path to the app can skip Cloudflare. For example, the reverse proxy on your server can also answer on your LAN or your tailnet. A request on that path reaches the app without a login, and it can set any email header.
+
+Set two variables, and the app checks the signed token that Cloudflare Access adds to each request:
+
+| Name | Value |
+|---|---|
+| `CF_ACCESS_TEAM_DOMAIN` | Your team domain, such as `myteam.cloudflareaccess.com` |
+| `CF_ACCESS_AUD` | The Application Audience (AUD) tag of the Access application. Find it in Zero Trust, Access, Applications, the application, Overview. |
+
+The app then answers 403 to a request without a valid token, and it takes the email from the token, not from the header. `/api/health` stays open for the container health check, and it shows no car data. [Decision 0010](decisions/0010-verify-access-token.md) explains the check.
 
 ## Tailscale
 

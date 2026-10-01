@@ -11,6 +11,8 @@ The server reads environment variables at the first request. The browser never s
 | `DATABASE_POOL_MAX` | No | `5` | The most database connections at the same time. A positive whole number. |
 | `DISPLAY_TIME_ZONE` | No | `UTC` | An IANA time zone, such as `Europe/Berlin`. Settings shows it as "Automatic". |
 | `PREFERENCES_FILE` | No | `.data/preferences.json` in the working folder. The container image sets `/data/preferences.json`. | The JSON file that holds the saved Settings. Keep it on a persistent volume. |
+| `CF_ACCESS_TEAM_DOMAIN` | No | Empty | With `CF_ACCESS_AUD`, the app accepts only requests with a valid Cloudflare Access token. Read [Verify the Cloudflare Access token](authentication.md#verify-the-cloudflare-access-token). |
+| `CF_ACCESS_AUD` | No | Empty | The Application Audience tag of the Cloudflare Access application |
 | `IDENTITY_HEADER` | No | `cf-access-authenticated-user-email` | The request header that holds the user's email. Read [Protect the dashboard](authentication.md). |
 | `SITE_URL` | No | `VERCEL_PROJECT_PRODUCTION_URL` on Vercel, else empty | The public address, such as `https://tesla.example.com`. Link previews, the canonical link, `robots.txt`, and the sitemap use it. Read [Link previews and icons](demo-site.md#link-previews-and-icons). |
 | `OPEN_ANALYTICS_URL` | No | Empty | Demo mode only. The Open Analytics collector, such as `https://oa-c.example.com`. Read [Analytics on the demo site](demo-site.md#analytics-on-the-demo-site). |

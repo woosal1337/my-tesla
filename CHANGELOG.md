@@ -4,6 +4,12 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-01
+
+### Added
+
+- Cloudflare Access token check: with `CF_ACCESS_TEAM_DOMAIN` and `CF_ACCESS_AUD`, the app verifies the signed Access token on every request. A path that skips Cloudflare gets 403, and the email comes from the token.
+
 ## [1.0.0] - 2026-10-01
 
 ### Added
@@ -23,5 +29,6 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/woosal1337/my-tesla/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/woosal1337/my-tesla/releases/tag/v1.0.0

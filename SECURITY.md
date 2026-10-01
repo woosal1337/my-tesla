@@ -18,6 +18,7 @@ Only the latest release gets security fixes.
 
 - The app has no login. It must run behind an authenticating proxy. Read [Protect the dashboard](docs/authentication.md).
 - The app trusts the identity header that the proxy sets. The proxy must remove that header from client requests.
+- Behind Cloudflare Access, set `CF_ACCESS_TEAM_DOMAIN` and `CF_ACCESS_AUD`. The app then checks the signed Access token on each request, and a path that skips Cloudflare gets 403.
 - The app connects to the database with a read-only role. It refuses the TeslaMate superuser. Every session is read-only and has a statement timeout.
 - The app never sends database values to the browser outside the rendered pages.
 - The container runs as an unprivileged user.

@@ -32,6 +32,7 @@ You need no database. Open http://localhost:3000.
    | `DEMO_MODE` | `1` |
    | `DISPLAY_TIME_ZONE` | `America/Phoenix` |
    | `SITE_URL` | Your domain, such as `https://mytesla.chele.bi` |
+   | `OPEN_ANALYTICS_URL`, `OPEN_ANALYTICS_KEY` | Optional, for Production only. Read [Analytics on the demo site](#analytics-on-the-demo-site). |
 
 3. Deploy. Each push to `main` deploys to production. Each push to another branch gets a preview URL.
 4. Add your domain in the project settings, and point a `CNAME` record at `cname.vercel-dns.com`.
@@ -61,4 +62,27 @@ A shared link shows a 1200 × 630 preview image, the title, and the description.
 The script also writes `docs/images/social-preview.png` at 1280 × 640. GitHub has no API for the repository social preview. Upload the file by hand: open the repository settings, then Social preview, then Edit.
 
 Messaging apps keep a preview for days. After an image change, refresh the preview in the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/). WhatsApp uses the same data.
+
+## Analytics on the demo site
+
+The public demo counts visits with [Open Analytics](https://github.com/openlabs-so/openanalytics), on a self-hosted server. [Decision 0009](decisions/0009-demo-analytics.md) explains the limits.
+
+1. Make a site in Open Analytics, and allow only your demo domain.
+2. Set `OPEN_ANALYTICS_URL` to the collector and `OPEN_ANALYTICS_KEY` to the public tracking key, for Production only.
+3. Deploy. The root layout then loads `oa.js` from the collector, with Do Not Track and Global Privacy Control respected. The landing page footer says that the site counts visits.
+
+The tracker counts each page view, also the tab changes in the dashboard. `src/lib/analytics.ts` holds the event names, because the reports and the funnels match on these strings:
+
+| Event | Sent when | Property |
+|---|---|---|
+| `demo_open` | A visitor presses "Try the demo" | `place`: `header`, `hero`, or `cta` |
+| `install_open` | A visitor opens the install guide | `place`: `hero`, `self_host`, or `banner` |
+| `github_open` | A visitor opens the repository | `place`: `header` or `footer` |
+| `docs_open` | A visitor opens the docs | `place`: `nav` or `footer` |
+| `section_jump` | A visitor presses a section in the landing page navbar | `section` |
+| `landing_open` | A visitor goes from the demo back to the landing page | |
+| `outbound_click` | A visitor opens the license or TeslaMate | `host` |
+| `settings_change` | A visitor changes a setting in the demo | `setting` |
+
+A click sends an event through the `data-oa-event` attribute, with no extra code. Settings calls `trackEvent()`, because a change is not a click on a link. Without the tracker, `trackEvent()` does nothing.
 

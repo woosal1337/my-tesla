@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/empty-state";
+import { readAnalyticsConfig } from "@/lib/analytics";
 import { Landing } from "@/components/landing/landing";
 import { isDemoMode } from "@/lib/demo/mode";
 import { repositoryStars } from "@/lib/github";
@@ -51,7 +52,10 @@ export default async function Home() {
             __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
-        <Landing stars={await repositoryStars()} />
+        <Landing
+          stars={await repositoryStars()}
+          counted={readAnalyticsConfig(process.env) !== null}
+        />
       </>
     );
   }

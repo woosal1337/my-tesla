@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LandingNav } from "@/components/landing/landing-nav";
+import { analyticsEvents, eventProps, outboundProps } from "@/lib/analytics";
 import { LogoTile } from "@/components/tesla-mark";
 import { project } from "@/lib/project";
 import { cn } from "@/lib/utils";
@@ -122,6 +123,7 @@ function GitHubButton({ stars }: { stars: number | null }) {
   return (
     <a
       href={project.repositoryUrl}
+      {...eventProps(analyticsEvents.githubOpen, { place: "header" })}
       target="_blank"
       rel="noreferrer"
       className="inline-flex h-9 items-center gap-2 rounded bg-card px-3 text-sm font-medium transition-tesla hover:bg-accent"
@@ -138,10 +140,17 @@ function GitHubButton({ stars }: { stars: number | null }) {
   );
 }
 
-function DemoButton({ size = "md" }: { size?: "md" | "lg" }) {
+function DemoButton({
+  size = "md",
+  place,
+}: {
+  size?: "md" | "lg";
+  place: "header" | "hero" | "cta";
+}) {
   return (
     <Link
       href={demoHref}
+      {...eventProps(analyticsEvents.demoOpen, { place })}
       className={cn(
         "inline-flex items-center gap-2 rounded bg-primary font-medium text-primary-foreground transition-tesla hover:bg-primary/90",
         size === "lg" ? "h-11 px-6 text-base" : "h-9 px-4 text-sm",
@@ -206,7 +215,13 @@ function Screenshot({
   );
 }
 
-export function Landing({ stars }: { stars: number | null }) {
+export function Landing({
+  stars,
+  counted,
+}: {
+  stars: number | null;
+  counted: boolean;
+}) {
   return (
     <div className="min-h-dvh">
       <header
@@ -224,7 +239,7 @@ export function Landing({ stars }: { stars: number | null }) {
           <LandingNav docsUrl={project.docsUrl} />
           <div className="flex items-center gap-2">
             <GitHubButton stars={stars} />
-            <DemoButton />
+            <DemoButton place="header" />
           </div>
         </div>
       </header>
@@ -243,9 +258,10 @@ export function Landing({ stars }: { stars: number | null }) {
             Tesla app.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <DemoButton size="lg" />
+            <DemoButton size="lg" place="hero" />
             <a
               href={project.installUrl}
+              {...eventProps(analyticsEvents.installOpen, { place: "hero" })}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-11 items-center rounded bg-card px-6 text-base font-medium transition-tesla hover:bg-accent"
@@ -326,6 +342,9 @@ export function Landing({ stars }: { stars: number | null }) {
             The{" "}
             <a
               href={project.installUrl}
+              {...eventProps(analyticsEvents.installOpen, {
+                place: "self_host",
+              })}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-foreground underline underline-offset-4"
@@ -370,7 +389,7 @@ export function Landing({ stars }: { stars: number | null }) {
             settings in the demo stay in your browser.
           </p>
           <div className="mt-8 flex justify-center">
-            <DemoButton size="lg" />
+            <DemoButton size="lg" place="cta" />
           </div>
         </section>
       </main>
@@ -382,6 +401,7 @@ export function Landing({ stars }: { stars: number | null }) {
               {project.name} ·{" "}
               <a
                 href={project.licenseUrl}
+                {...outboundProps(project.licenseUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-foreground"
@@ -392,6 +412,7 @@ export function Landing({ stars }: { stars: number | null }) {
             <div className="flex gap-5">
               <a
                 href={project.repositoryUrl}
+                {...eventProps(analyticsEvents.githubOpen, { place: "footer" })}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-foreground"
@@ -400,6 +421,7 @@ export function Landing({ stars }: { stars: number | null }) {
               </a>
               <a
                 href={project.docsUrl}
+                {...eventProps(analyticsEvents.docsOpen, { place: "footer" })}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-foreground"
@@ -408,6 +430,7 @@ export function Landing({ stars }: { stars: number | null }) {
               </a>
               <a
                 href={project.teslamateUrl}
+                {...outboundProps(project.teslamateUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-foreground"
@@ -421,6 +444,8 @@ export function Landing({ stars }: { stars: number | null }) {
             with, endorsed by, or supported by the official TeslaMate project.
             &quot;Tesla&quot; and related marks are trademarks of Tesla, Inc.
             This project is not affiliated with Tesla, Inc.
+            {counted &&
+              " This demo site counts visits with self-hosted Open Analytics. It respects Do Not Track and Global Privacy Control."}
           </p>
         </div>
       </footer>

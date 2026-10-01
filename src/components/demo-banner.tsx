@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { analyticsEvents, eventProps } from "@/lib/analytics";
 import { project } from "@/lib/project";
 
 export function DemoBanner() {
@@ -9,11 +10,16 @@ export function DemoBanner() {
           Demo with synthetic data around Phoenix, Arizona
         </p>
         <div className="flex shrink-0 items-center gap-4 font-medium">
-          <Link href="/" className="underline-offset-4 hover:underline">
+          <Link
+            href="/"
+            {...eventProps(analyticsEvents.landingOpen)}
+            className="underline-offset-4 hover:underline"
+          >
             About {project.name}
           </Link>
           <a
             href={project.installUrl}
+            {...eventProps(analyticsEvents.installOpen, { place: "banner" })}
             target="_blank"
             rel="noreferrer"
             className="hidden underline-offset-4 hover:underline sm:inline"

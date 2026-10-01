@@ -13,6 +13,8 @@ The server reads environment variables at the first request. The browser never s
 | `PREFERENCES_FILE` | No | `.data/preferences.json` in the working folder. The container image sets `/data/preferences.json`. | The JSON file that holds the saved Settings. Keep it on a persistent volume. |
 | `IDENTITY_HEADER` | No | `cf-access-authenticated-user-email` | The request header that holds the user's email. Read [Protect the dashboard](authentication.md). |
 | `SITE_URL` | No | `VERCEL_PROJECT_PRODUCTION_URL` on Vercel, else empty | The public address, such as `https://tesla.example.com`. Link previews, the canonical link, `robots.txt`, and the sitemap use it. Read [Link previews and icons](demo-site.md#link-previews-and-icons). |
+| `OPEN_ANALYTICS_URL` | No | Empty | Demo mode only. The Open Analytics collector, such as `https://oa-c.example.com`. Read [Analytics on the demo site](demo-site.md#analytics-on-the-demo-site). |
+| `OPEN_ANALYTICS_KEY` | No | Empty | Demo mode only. The public tracking key of the Open Analytics site. Both variables must be set. |
 | `PORT` | No | `3000` | The port of the standalone server |
 | `HOSTNAME` | No | `0.0.0.0` in the image | The address of the standalone server |
 | `MQTT_URL` | No | Empty | The TeslaMate MQTT broker, such as `mqtt://mosquitto:1883`. Empty turns off the Live card. Read [Live status](live-status.md). |

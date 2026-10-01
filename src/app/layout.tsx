@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Splash } from "@/components/splash";
+import { readAnalyticsConfig } from "@/lib/analytics";
+import { isDemoMode } from "@/lib/demo/mode";
 import { project } from "@/lib/project";
 import { siteDescription, siteTagline, siteUrl } from "@/lib/site";
 import { getPreferences } from "@/lib/viewer";
@@ -78,6 +80,7 @@ export async function generateViewport(): Promise<Viewport> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const preferences = await getPreferences();
+  const analytics = isDemoMode() ? readAnalyticsConfig(process.env) : null;
   return (
     <html
       lang="en"
@@ -87,6 +90,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       }
       data-motion={preferences.motion}
     >
+      <head>
+        {analytics && (
+          <script
+            async
+            src={`${analytics.collectorUrl}/oa.js`}
+            data-key={analytics.key}
+            data-collector={analytics.collectorUrl}
+            data-respect-dnt="true"
+            data-respect-gpc="true"
+          />
+        )}
+      </head>
       <body className="min-h-dvh">
         {preferences.splash && <Splash />}
         {children}

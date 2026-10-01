@@ -3,6 +3,7 @@
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState, type MouseEvent } from "react";
 import { tabSpring } from "@/components/tab-nav";
+import { analyticsEvents, eventProps } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const sections = [
@@ -69,6 +70,7 @@ export function LandingNav({ docsUrl }: { docsUrl: string }) {
           <a
             key={id}
             href={`#${id}`}
+            {...eventProps(analyticsEvents.sectionJump, { section: id })}
             onClick={(event) => jump(event, id)}
             aria-current={active === id ? "location" : undefined}
             className={cn(
@@ -90,6 +92,7 @@ export function LandingNav({ docsUrl }: { docsUrl: string }) {
         ))}
         <a
           href={docsUrl}
+          {...eventProps(analyticsEvents.docsOpen, { place: "nav" })}
           target="_blank"
           rel="noreferrer"
           className={cn(

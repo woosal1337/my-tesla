@@ -6,6 +6,7 @@ import {
   resetPreferences,
   savePreferences,
 } from "@/app/cars/[carId]/settings/actions";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import { createFormatter } from "@/lib/format";
 import { periods } from "@/lib/insights";
 import {
@@ -124,9 +125,11 @@ export function SettingsForm({
 
   function set<K extends keyof Preferences>(key: K, value: Preferences[K]) {
     commit({ ...preferences, [key]: value });
+    trackEvent(analyticsEvents.settingsChange, { setting: key });
   }
 
   function reset() {
+    trackEvent(analyticsEvents.settingsChange, { setting: "reset" });
     setPreferences(defaults);
     setStatus("saving");
     startTransition(async () => {

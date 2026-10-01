@@ -57,3 +57,7 @@ TeslaMate stores the tire pressure in bar with one decimal. One step of 0.1 bar 
 ## Times are off by some hours
 
 Set `DISPLAY_TIME_ZONE` to your time zone, or choose one in Settings, Date and time. The default is UTC.
+
+## The Live card is missing or shows "Offline"
+
+Read the troubleshooting table in [Live status](live-status.md#troubleshooting).

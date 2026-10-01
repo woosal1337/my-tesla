@@ -18,7 +18,7 @@ A self-hosted, read-only web dashboard for the car data that [TeslaMate](https:/
 
 | Page | Content |
 |---|---|
-| Overview | Battery and range, odometer, temperatures, software version, tire pressure, last position on a map, today's activity strip, last drive and charge |
+| Overview | Battery and range, odometer, temperatures, software version, tire pressure, last position on a map, today's activity strip, last drive and charge. With the optional MQTT feed: a Live card with locks, Sentry Mode, open doors and windows, charging, climate, software updates, driving, and navigation. |
 | Drives | All drives by day, with distance, duration, and efficiency. Each drive has a route map. |
 | Charging | All charging sessions, with energy, levels, power, and cost. Each session has power, voltage, and current charts. |
 | Timeline | One day at a time: driving, charging, parked, asleep, and offline time on a 24-hour strip |
@@ -70,6 +70,7 @@ The full guide is [Installation](docs/installation.md).
 | Create the read-only role and reach the database | [Connect to the TeslaMate database](docs/teslamate-database.md) |
 | Put a login in front of the app | [Protect the dashboard](docs/authentication.md) |
 | Environment variables and user settings | [Configuration](docs/configuration.md) |
+| Show live locks, charging, and navigation from MQTT | [Live status](docs/live-status.md) |
 | Which outside services the browser contacts | [Privacy](docs/privacy.md) |
 | Run or deploy the public demo | [Demo site](docs/demo-site.md) |
 | Update the app and TeslaMate | [Upgrading](docs/upgrading.md) |

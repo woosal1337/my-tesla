@@ -13,4 +13,5 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - An image workflow for GitHub Container Registry on version tags.
 - A demo database with 60 days of synthetic data for development.
 - Demo mode (`DEMO_MODE=1`): a built-in PGlite demo database, a landing page, and Settings in a cookie for each visitor. The public demo runs at https://mytesla.chele.bi on Vercel.
+- Live status from the optional TeslaMate MQTT feed: a Live card on the Overview with locks, Sentry Mode, openings, charging, climate, software updates, driving, and navigation, updated through server-sent events.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.

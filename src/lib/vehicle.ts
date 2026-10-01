@@ -57,6 +57,20 @@ export function carActivity(input: {
   return input.state ?? "unknown";
 }
 
+const liveActivities: Record<string, CarActivity> = {
+  driving: "driving",
+  charging: "charging",
+  online: "online",
+  updating: "online",
+  suspended: "online",
+  asleep: "asleep",
+  offline: "offline",
+};
+
+export function liveActivity(state: string | null): CarActivity | null {
+  return state === null ? null : (liveActivities[state] ?? null);
+}
+
 const activityLabels: Record<CarActivity, { label: string; tone: Tone }> = {
   driving: { label: "Driving", tone: "active" },
   charging: { label: "Charging", tone: "charge" },

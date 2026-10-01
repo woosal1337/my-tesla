@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { LocationMap, MapsOff } from "@/components/maps";
 import { BatteryPanel } from "@/components/overview/battery-panel";
 import { CarRender } from "@/components/overview/car-render";
+import { LivePanel } from "@/components/overview/live-panel";
 import { RecentCard } from "@/components/overview/recent-card";
 import { Stat } from "@/components/overview/stat";
 import { TireCard } from "@/components/overview/tire-card";
@@ -14,6 +15,7 @@ import { PageTransition } from "@/components/page-transition";
 import { carImageUrl } from "@/lib/car-image";
 import { requireCar } from "@/lib/car-route";
 import { buildTimeline, dayWindow, localDayKey } from "@/lib/insights";
+import { getLive } from "@/lib/live/live";
 import { mapThemeOf } from "@/lib/preferences";
 import { carSnapshot, recentCharges, recentDrives } from "@/lib/queries";
 import { dayRecords } from "@/lib/timeline-data";
@@ -23,6 +25,7 @@ import {
   batteryCaption,
   batteryTone,
   carActivity,
+  liveActivity,
   variantLine,
 } from "@/lib/vehicle";
 import { getFormatter, getPreferences } from "@/lib/viewer";
@@ -52,19 +55,22 @@ export default async function OverviewPage({
   ]);
   const now = new Date();
   const today = dayWindow(localDayKey(now, f.timeZone), f.timeZone);
-  const [snapshot, [lastDrive], [lastCharge], todayRecords] = await Promise.all(
-    [
+  const [snapshot, [lastDrive], [lastCharge], todayRecords, live] =
+    await Promise.all([
       carSnapshot(car.id),
       recentDrives(car, 1),
       recentCharges(car.id, 1),
       dayRecords(car.id, today.start, today.end),
-    ],
-  );
+      getLive(car.id),
+    ]);
   const show = preferences.overview;
+  const liveNow = live?.connected ? live.view : null;
+  const showLive = show.live && live !== null;
   const showMaps = preferences.maps === "show";
   const mapTheme = mapThemeOf(preferences);
   const todaySegments = buildTimeline({ ...todayRecords, ...today, now });
-  const activity = carActivity(snapshot);
+  const activity =
+    liveActivity(liveNow?.state ?? null) ?? carActivity(snapshot);
   const { label, tone } = activityLabel(activity);
   const lastSeen = snapshot.positionAt ?? snapshot.stateSince;
   const battery = batteryTone(snapshot.batteryLevel, snapshot.charging);
@@ -162,8 +168,23 @@ export default async function OverviewPage({
             <Stat label="Software">{snapshot.softwareVersion ?? "—"}</Stat>
           </dl>
 
+          {showLive && (
+            <LivePanel
+              carId={car.id}
+              carName={car.name}
+              feed={live}
+              f={f}
+              className="mt-12"
+            />
+          )}
+
           {show.today && (
-            <section className="mt-12 rounded-xl bg-card p-5">
+            <section
+              className={cn(
+                "rounded-xl bg-card p-5",
+                showLive ? "mt-4" : "mt-12",
+              )}
+            >
               <header className="flex items-center justify-between gap-4">
                 <h2 className="text-sm text-muted-foreground">Today</h2>
                 <Link
@@ -192,13 +213,13 @@ export default async function OverviewPage({
             <div
               className={cn(
                 "grid grid-cols-1 gap-4",
-                show.today ? "mt-4" : "mt-12",
+                show.today || showLive ? "mt-4" : "mt-12",
                 show.tires && show.location && "md:grid-cols-2",
               )}
             >
               {show.tires && (
                 <TireCard
-                  tires={snapshot.tires}
+                  tires={liveNow?.tires ?? snapshot.tires}
                   format={(bar) => f.pressure(bar)}
                 />
               )}

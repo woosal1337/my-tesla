@@ -125,6 +125,7 @@ export const tabKeys = [
 
 export const overviewKeys = [
   { id: "render", label: "Car image" },
+  { id: "live", label: "Live status" },
   { id: "today", label: "Today" },
   { id: "tires", label: "Tires" },
   { id: "location", label: "Location" },
@@ -196,6 +197,7 @@ export const defaultPreferences: Preferences = {
   },
   overview: {
     render: true,
+    live: true,
     today: true,
     tires: true,
     location: true,

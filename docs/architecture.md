@@ -30,6 +30,8 @@ A Next.js App Router app that reads the TeslaMate PostgreSQL database on the ser
 | `src/lib/insights.ts` | Pure logic for the insight pages: local day windows, the timeline, battery health, level shares, idle drain, temperature bands, and the week grid. No I/O, full test cover. |
 | `src/components/charts/` | `SeriesChart` and `ScatterPoints` on Recharts through the shadcn chart part, the axis formats, and `niceDomain`, which gives five even ticks. |
 | `src/lib/demo/` | The demo data generator, the demo schema, the PGlite database for `DEMO_MODE`, and the Settings cookie. Read [decision 0006](decisions/0006-built-in-demo-database.md). |
+| `src/lib/live/` | The optional MQTT feed. `topics.ts`, `view.ts`, and `config.ts` are pure, with tests. `subscriber.ts` holds one read-only MQTT.js connection for each server process. `live.ts` gives `getLive()` and `watchLive()`, with demo values in demo mode. Read [decision 0008](decisions/0008-mqtt-live-status.md). |
+| `src/app/api/cars/[carId]/live/route.ts` | `GET` server-sent events: a change signal for the open Overview, with no car values. 204 without a feed. |
 | `src/lib/sql-template.ts` | The postgres.js tag interface on top of PGlite: parameters, nested fragments, and identifiers. Pure, with tests. |
 | `src/components/landing/`, `src/lib/github.ts`, `src/lib/project.ts` | The landing page of the demo site, the cached GitHub star count, and the project links. |
 | `tools/demo/` | The seed tool for the PostgreSQL demo database. Read [decision 0003](decisions/0003-demo-database.md). |
@@ -43,6 +45,8 @@ A Next.js App Router app that reads the TeslaMate PostgreSQL database on the ser
 
 TeslaMate writes car data into PostgreSQL. A request reaches this app through an authenticating proxy. A server component or route handler calls a `src/lib/` module. The module runs a read-only query as `teslamate_ro` and returns typed rows. The page renders the rows on the server.
 
+With `MQTT_URL` set, the server also reads the TeslaMate MQTT feed. It keeps the last values in memory, and a change sends a signal to the open Overview, which renders again on the server. Read [Live status](live-status.md).
+
 The settings change how the server renders, not what it reads. The root layout and each page call `getPreferences()`. The page formats every value with `getFormatter()` before it sends HTML or chart data to the browser. The Settings page saves a change through a server action, which writes the settings file and calls `updateTag()` for that user, so the next render reads the new file. The TeslaMate database stays read-only. Read [decision 0004](decisions/0004-saved-settings.md).
 
 ## Runtime and deployment
@@ -51,6 +55,6 @@ The `Dockerfile` builds a Next.js standalone server on `node:24-bookworm-slim`. 
 
 ## Decisions
 
-Read [the foundation decision](decisions/0001-project-foundation.md), [the UI decision](decisions/0002-ui-stack-and-motion.md), [the demo database decision](decisions/0003-demo-database.md), [the saved settings decision](decisions/0004-saved-settings.md), [the cache decision](decisions/0005-cache-components.md), [the built-in demo decision](decisions/0006-built-in-demo-database.md), [the logo decision](decisions/0007-silver-logo.md), [the stack research](../research/stack.md), and [the UI stack research](../research/ui-stack.md).
+Read [the foundation decision](decisions/0001-project-foundation.md), [the UI decision](decisions/0002-ui-stack-and-motion.md), [the demo database decision](decisions/0003-demo-database.md), [the saved settings decision](decisions/0004-saved-settings.md), [the cache decision](decisions/0005-cache-components.md), [the built-in demo decision](decisions/0006-built-in-demo-database.md), [the logo decision](decisions/0007-silver-logo.md), [the live status decision](decisions/0008-mqtt-live-status.md), [the stack research](../research/stack.md), and [the UI stack research](../research/ui-stack.md).
 Add a decision record when a choice changes a boundary or creates a lasting tradeoff.
 Keep operational steps in [Installation](installation.md) and [Troubleshooting](troubleshooting.md).

@@ -7,6 +7,9 @@ services:
       DATABASE_URL: postgresql://teslamate_ro:${TESLAMATE_RO_PASSWORD:?Set TESLAMATE_RO_PASSWORD}@database:5432/teslamate
       DISPLAY_TIME_ZONE: ${DISPLAY_TIME_ZONE:-UTC}
       IDENTITY_HEADER: ${IDENTITY_HEADER:-cf-access-authenticated-user-email}
+      MQTT_URL: ${MQTT_URL:-}
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
     volumes:
       - dashboard-data:/data
     ports:

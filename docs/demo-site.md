@@ -10,6 +10,7 @@ The public site at https://mytesla.chele.bi runs the app with `DEMO_MODE=1`. It 
 | `/` | Opens the start car | Shows the landing page |
 | Settings | Saved in `PREFERENCES_FILE` for each user | Saved in a cookie for each visitor |
 | Dashboard | No banner | A banner that says the data is synthetic |
+| Live card | From the MQTT feed, if `MQTT_URL` is set | Fixed demo values, with no live stream |
 
 The demo data ends when the server process starts. A process builds new data after 6 hours.
 

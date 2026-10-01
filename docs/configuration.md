@@ -14,6 +14,10 @@ The server reads environment variables at the first request. The browser never s
 | `IDENTITY_HEADER` | No | `cf-access-authenticated-user-email` | The request header that holds the user's email. Read [Protect the dashboard](authentication.md). |
 | `PORT` | No | `3000` | The port of the standalone server |
 | `HOSTNAME` | No | `0.0.0.0` in the image | The address of the standalone server |
+| `MQTT_URL` | No | Empty | The TeslaMate MQTT broker, such as `mqtt://mosquitto:1883`. Empty turns off the Live card. Read [Live status](live-status.md). |
+| `MQTT_USERNAME` | No | Empty | A broker user that can only read `teslamate/#` |
+| `MQTT_PASSWORD` | No | Empty | The password of that user. Set `MQTT_USERNAME` with it. |
+| `MQTT_NAMESPACE` | No | Empty | The same value as `MQTT_NAMESPACE` in TeslaMate, if you set one there |
 | `DEMO_MODE` | No | Empty | `1` runs the public demo: a built-in demo database, the landing page, and Settings in a cookie. Read [Demo site](demo-site.md). Never set it together with real data. |
 | `ALLOWED_DEV_ORIGINS` | No | Empty | Development only. A comma-separated list of extra host names for `next dev`. |
 
@@ -31,7 +35,7 @@ Open Settings from the tab bar. Each change saves at once, and a preview shows t
 | Location | Place names (geofence or address), address detail (full, street, city), maps on or off, map theme |
 | Display | Theme (system, light, dark), motion (full, reduced), start screen, live refresh, default period, start car |
 | Tabs | Show or hide Drives, Charging, Battery, Stats, and Places |
-| Overview | Show or hide the car image, Today, Tires, Location, and Last drive and charge |
+| Overview | Show or hide the car image, Live status, Today, Tires, Location, and Last drive and charge |
 
 The defaults come from the TeslaMate settings page: distance, temperature, tire pressure, preferred range, and theme. A saved value replaces a default. "Reset to defaults" removes your saved values.
 

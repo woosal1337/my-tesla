@@ -4,6 +4,7 @@ import {
   batteryCaption,
   batteryTone,
   carActivity,
+  liveActivity,
   colorName,
   driveEfficiency,
   modelName,
@@ -80,6 +81,21 @@ describe("activity", () => {
     [null, false, "normal"],
   ] as const)("batteryTone(%p, %p)", (level, charging, expected) => {
     expect(batteryTone(level, charging)).toBe(expected);
+  });
+});
+
+describe("liveActivity", () => {
+  test("maps the TeslaMate MQTT states", () => {
+    expect(liveActivity("driving")).toBe("driving");
+    expect(liveActivity("charging")).toBe("charging");
+    expect(liveActivity("suspended")).toBe("online");
+    expect(liveActivity("updating")).toBe("online");
+    expect(liveActivity("asleep")).toBe("asleep");
+  });
+
+  test("gives nothing for an unknown or missing state", () => {
+    expect(liveActivity("start")).toBeNull();
+    expect(liveActivity(null)).toBeNull();
   });
 });
 

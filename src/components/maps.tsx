@@ -239,3 +239,68 @@ export function PlacesMap({
     </Map>
   );
 }
+
+export type TripStop = {
+  key: string;
+  label: string;
+  detail: string;
+  latitude: number;
+  longitude: number;
+};
+
+export function TripMap({
+  routes,
+  stops,
+  theme,
+}: {
+  routes: LngLat[][];
+  stops: TripStop[];
+  theme?: MapTheme;
+}) {
+  const bounds = routeBounds([
+    ...routes.flat(),
+    ...stops.map((stop): LngLat => [stop.longitude, stop.latitude]),
+  ]);
+  if (!bounds) {
+    return (
+      <div className="grid h-full place-items-center text-sm text-subtle">
+        No route in this range.
+      </div>
+    );
+  }
+  return (
+    <Map
+      bounds={bounds}
+      fitBoundsOptions={{ padding: 56, maxZoom: 15 }}
+      theme={theme}
+      {...quietMap}
+    >
+      <CollapsedAttribution />
+      <MapControls position="top-right" showZoom />
+      {routes.map((route, index) => (
+        <MapRoute
+          key={index}
+          coordinates={route}
+          color={electricBlue}
+          width={3}
+          interactive={false}
+        />
+      ))}
+      {stops.map((stop) => (
+        <MapMarker
+          key={stop.key}
+          longitude={stop.longitude}
+          latitude={stop.latitude}
+        >
+          <MarkerContent>
+            <PlaceDot kind="charge" size={14} />
+          </MarkerContent>
+          <MarkerTooltip>
+            <span className="font-medium">{stop.label}</span>
+            <span className="opacity-70"> · {stop.detail}</span>
+          </MarkerTooltip>
+        </MapMarker>
+      ))}
+    </Map>
+  );
+}

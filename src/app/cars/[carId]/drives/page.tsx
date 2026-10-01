@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Map as MapIcon } from "lucide-react";
 import { DownloadLink } from "@/components/download-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageTransition } from "@/components/page-transition";
@@ -34,7 +35,20 @@ export default async function DrivesPage({
         }
         action={
           drives.length > 0 && (
-            <DownloadLink href={`/api/cars/${car.id}/drives.csv`} label="CSV" />
+            <div className="flex gap-2">
+              <Link
+                href={`/cars/${car.id}/drives/trip`}
+                transitionTypes={["tab-forward"]}
+                className="inline-flex h-9 items-center gap-2 rounded bg-card px-3 text-sm font-medium transition-tesla hover:bg-accent"
+              >
+                <MapIcon aria-hidden className="size-4" />
+                Trip
+              </Link>
+              <DownloadLink
+                href={`/api/cars/${car.id}/drives.csv`}
+                label="CSV"
+              />
+            </div>
           )
         }
       />

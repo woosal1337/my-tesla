@@ -80,6 +80,8 @@ export type Charge = {
   maxPowerKw: number | null;
   fastCharger: boolean;
   cost: number | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type PlaceColumns = {
@@ -315,6 +317,39 @@ export function recentDrives(car: Car, limit = 50): Promise<Drive[]> {
   return queryDrives(car, { limit });
 }
 
+export async function tripRoutes(
+  carId: number,
+  driveIds: number[],
+  pointsPerDrive = 150,
+): Promise<Map<number, LngLat[]>> {
+  const routes = new Map<number, LngLat[]>();
+  if (driveIds.length === 0) return routes;
+  await connection();
+  const rows = await database()<
+    { driveId: number; lng: number; lat: number }[]
+  >`
+    select "driveId", lng, lat
+    from (
+      select
+        drive_id::int as "driveId",
+        longitude::float8 as lng,
+        latitude::float8 as lat,
+        row_number() over (partition by drive_id order by date) as n,
+        count(*) over (partition by drive_id) as total
+      from positions
+      where car_id = ${carId} and drive_id = any(${driveIds}::int[])
+    ) points
+    where (n - 1) % greatest(1, total / ${pointsPerDrive}) = 0 or n = total
+    order by "driveId", n
+  `;
+  for (const row of rows) {
+    const route = routes.get(row.driveId) ?? [];
+    route.push([row.lng, row.lat]);
+    routes.set(row.driveId, route);
+  }
+  return routes;
+}
+
 export function exportDrives(
   car: Car,
   range: DateRange | null,
@@ -409,6 +444,8 @@ export async function recentCharges(
       cp.cost::float8 as cost,
       stats."maxPowerKw",
       coalesce(stats."fastCharger", false) as "fastCharger",
+      cp_position.latitude::float8 as latitude,
+      cp_position.longitude::float8 as longitude,
       json_build_object(
         'geofence', g.name, 'name', a.name, 'road', a.road,
         'houseNumber', a.house_number, 'city', a.city
@@ -416,6 +453,7 @@ export async function recentCharges(
     from charging_processes cp
     left join addresses a on a.id = cp.address_id
     left join geofences g on g.id = cp.geofence_id
+    left join positions cp_position on cp_position.id = cp.position_id
     left join lateral (
       select
         max(c.charger_power)::float8 as "maxPowerKw",

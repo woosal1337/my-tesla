@@ -50,6 +50,8 @@ const charge: Charge = {
   cost: 16.171,
   maxPowerKw: 170.04,
   fastCharger: true,
+  latitude: null,
+  longitude: null,
 };
 
 describe("localStamp", () => {

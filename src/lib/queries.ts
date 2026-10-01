@@ -308,7 +308,35 @@ export function recentDrives(car: Car, limit = 50): Promise<Drive[]> {
   return queryDrives(car, { limit });
 }
 
-type DrivePointRow = DrivePoint & { lng: number; lat: number };
+export type DrivePositionRow = DrivePoint & { lng: number; lat: number };
+
+export async function drivePositions(
+  carId: number,
+  driveId: number,
+): Promise<DrivePositionRow[]> {
+  await connection();
+  return database()<DrivePositionRow[]>`
+    select
+      longitude::float8 as lng,
+      latitude::float8 as lat,
+      (extract(epoch from date) * 1000)::float8 as at,
+      speed::float8 as "speedKmh",
+      power::float8 as "powerKw",
+      elevation::float8 as "elevationM",
+      battery_level::int as battery
+    from positions
+    where car_id = ${carId} and drive_id = ${driveId}
+    order by date
+  `;
+}
+
+export async function findDriveRecord(
+  car: Car,
+  driveId: number,
+): Promise<Drive | null> {
+  const [drive] = await queryDrives(car, { limit: 1, driveId });
+  return drive ?? null;
+}
 
 export async function findDrive(
   car: Car,
@@ -319,21 +347,9 @@ export async function findDrive(
   series: DrivePoint[];
   energy: DriveEnergy;
 } | null> {
-  const [drive] = await queryDrives(car, { limit: 1, driveId });
+  const drive = await findDriveRecord(car, driveId);
   if (!drive) return null;
-  const points = await database()<DrivePointRow[]>`
-    select
-      longitude::float8 as lng,
-      latitude::float8 as lat,
-      (extract(epoch from date) * 1000)::float8 as at,
-      speed::float8 as "speedKmh",
-      power::float8 as "powerKw",
-      elevation::float8 as "elevationM",
-      battery_level::int as battery
-    from positions
-    where car_id = ${car.id} and drive_id = ${driveId}
-    order by date
-  `;
+  const points = await drivePositions(car.id, driveId);
   const series = points.map(
     ({ at, speedKmh, powerKw, elevationM, battery }) => ({
       at,

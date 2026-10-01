@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Download } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -53,14 +53,24 @@ export default async function DrivePage({
   return (
     <PageTransition>
       <div className="pt-6 md:pt-10">
-        <Link
-          href={`/cars/${car.id}/drives`}
-          transitionTypes={["tab-back"]}
-          className="inline-flex items-center gap-1 rounded py-1 pr-2 text-sm text-muted-foreground transition-tesla hover:text-foreground"
-        >
-          <ChevronLeft className="size-4" />
-          Drives
-        </Link>
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href={`/cars/${car.id}/drives`}
+            transitionTypes={["tab-back"]}
+            className="inline-flex items-center gap-1 rounded py-1 pr-2 text-sm text-muted-foreground transition-tesla hover:text-foreground"
+          >
+            <ChevronLeft className="size-4" />
+            Drives
+          </Link>
+          <a
+            href={`/api/cars/${car.id}/drives/${drive.id}.gpx`}
+            download
+            className="inline-flex h-9 items-center gap-2 rounded bg-card px-3 text-sm font-medium transition-tesla hover:bg-accent"
+          >
+            <Download aria-hidden className="size-4" />
+            GPX
+          </a>
+        </div>
         <h1 className="mt-4 text-[32px] leading-[1.2] font-medium md:text-[40px]">
           {drive.to}
         </h1>

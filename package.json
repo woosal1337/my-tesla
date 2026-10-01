@@ -18,7 +18,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "check:source": "bun tools/check-source-policy.ts",
     "check:unused": "knip",
-    "seed:demo": "bun tools/demo/seed.ts"
+    "seed:demo": "bun tools/demo/seed.ts",
+    "brand:render": "bun tools/brand/render.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

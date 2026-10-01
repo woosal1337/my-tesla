@@ -45,7 +45,7 @@ An unknown file type fails the gate.
 
 Exceptions:
 
-1. Markdown files and `LICENSE` are documents, not source.
+1. Markdown files, the `.txt` alt texts of the preview images, and `LICENSE` are documents, not source.
 2. `bun.lock` is generated.
 3. Image and font files are assets.
 4. `next-env.d.ts` is generated and ignored by Git.

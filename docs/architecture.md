@@ -32,6 +32,8 @@ A Next.js App Router app that reads the TeslaMate PostgreSQL database on the ser
 | `src/lib/demo/` | The demo data generator, the demo schema, the PGlite database for `DEMO_MODE`, and the Settings cookie. Read [decision 0006](decisions/0006-built-in-demo-database.md). |
 | `src/lib/live/` | The optional MQTT feed. `topics.ts`, `view.ts`, and `config.ts` are pure, with tests. `subscriber.ts` holds one read-only MQTT.js connection for each server process. `live.ts` gives `getLive()` and `watchLive()`, with demo values in demo mode. Read [decision 0008](decisions/0008-mqtt-live-status.md). |
 | `src/app/api/cars/[carId]/live/route.ts` | `GET` server-sent events: a change signal for the open Overview, with no car values. 204 without a feed. |
+| `src/lib/site.ts`, `src/app/manifest.ts`, `robots.ts`, `sitemap.ts`, `opengraph-image.jpg` | The public address from `SITE_URL`, the link preview metadata, the JSON-LD data, the manifest, and the crawler rules. Read [Link previews and icons](demo-site.md#link-previews-and-icons). |
+| `tools/brand/render.ts` | Builds the preview images and icons from the T mark with headless Chrome and `sips`. |
 | `src/lib/sql-template.ts` | The postgres.js tag interface on top of PGlite: parameters, nested fragments, and identifiers. Pure, with tests. |
 | `src/components/landing/`, `src/lib/github.ts`, `src/lib/project.ts` | The landing page of the demo site, the cached GitHub star count, and the project links. |
 | `tools/demo/` | The seed tool for the PostgreSQL demo database. Read [decision 0003](decisions/0003-demo-database.md). |

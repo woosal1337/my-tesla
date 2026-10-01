@@ -26,7 +26,7 @@ const lineConfigNames = new Set([
   ".dockerignore",
   "Dockerfile",
 ]);
-const proseExtensions = new Set([".md"]);
+const proseExtensions = new Set([".md", ".txt"]);
 const assetExtensions = new Set([
   ".ico",
   ".png",

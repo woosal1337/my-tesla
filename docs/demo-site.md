@@ -31,6 +31,7 @@ You need no database. Open http://localhost:3000.
    |---|---|
    | `DEMO_MODE` | `1` |
    | `DISPLAY_TIME_ZONE` | `America/Phoenix` |
+   | `SITE_URL` | Your domain, such as `https://mytesla.chele.bi` |
 
 3. Deploy. Each push to `main` deploys to production. Each push to another branch gets a preview URL.
 4. Add your domain in the project settings, and point a `CNAME` record at `cname.vercel-dns.com`.
@@ -41,3 +42,23 @@ Do not set `DATABASE_URL` on a public deployment. The app has no login, so a pub
 ## Update the landing page screenshots
 
 The images in `public/landing/` come from the demo pages at 1440 × 900 pixels, in light and dark. Take them from a local demo server, and hide the demo banner first.
+
+## Link previews and icons
+
+A shared link shows a 1200 × 630 preview image, the title, and the description. These files set it:
+
+| File | Use |
+|---|---|
+| `src/app/opengraph-image.jpg`, `twitter-image.jpg`, and their `.alt.txt` files | The preview image for Open Graph and the X card, under 100 KB, so WhatsApp shows it too |
+| `src/app/layout.tsx` | Title, description, Open Graph, X card, application name, and Apple web app settings |
+| `src/app/page.tsx` | The landing page title, the canonical link, and JSON-LD for a `SoftwareApplication` |
+| `src/app/icon.svg`, `favicon.ico`, `apple-icon.png` | The browser icons and the iPhone home screen icon |
+| `src/app/manifest.ts`, `public/icons/` | The web app manifest with 192, 512, and maskable icons |
+| `src/app/robots.ts`, `sitemap.ts` | In demo mode, search engines may index `/`. A normal install blocks them all. |
+
+`bun run brand:render` builds every image from the T mark in `src/lib/logo.ts` and the screenshot `public/landing/overview-dark.png`. It needs macOS, for `sips`, and Google Chrome. Run it again after a change to the logo or the screenshot.
+
+The script also writes `docs/images/social-preview.png` at 1280 × 640. GitHub has no API for the repository social preview. Upload the file by hand: open the repository settings, then Social preview, then Edit.
+
+Messaging apps keep a preview for days. After an image change, refresh the preview in the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/). WhatsApp uses the same data.
+

@@ -7,6 +7,12 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { repositoryStars } from "@/lib/github";
 import { project } from "@/lib/project";
 import { autoCar } from "@/lib/preferences";
+import {
+  siteDescription,
+  siteTagline,
+  siteUrl,
+  softwareApplication,
+} from "@/lib/site";
 import { defaultCarId, listCars } from "@/lib/queries";
 import { getPreferences } from "@/lib/viewer";
 
@@ -16,11 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
   await connection();
   if (!isDemoMode()) return {};
   return {
-    title: {
-      absolute: `${project.name} · A dashboard for your TeslaMate data`,
-    },
-    description:
-      "A self-hosted, read-only dashboard for the car data that TeslaMate records. Try the demo with 60 days of synthetic data.",
+    title: { absolute: `${project.name} · ${siteTagline}` },
+    description: `${siteDescription} Try the demo with 60 days of synthetic data.`,
+    alternates: { canonical: "/" },
     robots: { index: true, follow: true },
   };
 }
@@ -37,7 +41,20 @@ async function startCarId(): Promise<number | null> {
 
 export default async function Home() {
   await connection();
-  if (isDemoMode()) return <Landing stars={await repositoryStars()} />;
+  if (isDemoMode()) {
+    const structuredData = softwareApplication(siteUrl(process.env));
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+          }}
+        />
+        <Landing stars={await repositoryStars()} />
+      </>
+    );
+  }
   const carId = await startCarId();
   if (carId !== null) redirect(`/cars/${carId}`);
   return (

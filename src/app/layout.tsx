@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Splash } from "@/components/splash";
+import { project } from "@/lib/project";
+import { siteDescription, siteTagline, siteUrl } from "@/lib/site";
 import { getPreferences } from "@/lib/viewer";
 import "./globals.css";
 
@@ -11,9 +13,45 @@ const inter = Inter({
   display: "swap",
 });
 
+const shareTitle = `${project.name} · ${siteTagline}`;
+
 export const metadata: Metadata = {
-  title: { default: "My Tesla", template: "%s · My Tesla" },
-  description: "A self-hosted, read-only dashboard for TeslaMate data.",
+  metadataBase: siteUrl(process.env),
+  title: { default: project.name, template: `%s · ${project.name}` },
+  description: siteDescription,
+  applicationName: project.name,
+  authors: [
+    { name: `${project.name} contributors`, url: project.repositoryUrl },
+  ],
+  keywords: [
+    "Tesla",
+    "TeslaMate",
+    "dashboard",
+    "self-hosted",
+    "electric vehicle",
+    "battery health",
+    "charging",
+    "MQTT",
+  ],
+  category: "technology",
+  openGraph: {
+    type: "website",
+    siteName: project.name,
+    locale: "en_US",
+    title: shareTitle,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: shareTitle,
+    description: siteDescription,
+  },
+  appleWebApp: {
+    capable: true,
+    title: project.name,
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: { telephone: false, address: false, email: false },
   robots: { index: false, follow: false },
 };
 

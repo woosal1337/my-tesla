@@ -230,7 +230,7 @@ export default async function StatsPage({
 
       <div className="mt-12 grid grid-cols-1 gap-4">
         <Panel
-          title="Distance"
+          title={`Distance (${f.units.distance})`}
           action={
             <span className="text-xs text-subtle">Per {bucketLabel}</span>
           }
@@ -260,7 +260,7 @@ export default async function StatsPage({
         </Panel>
 
         <Panel
-          title="Energy"
+          title="Energy (kWh)"
           action={
             <span className="text-xs text-subtle">Per {bucketLabel}</span>
           }
@@ -298,7 +298,7 @@ export default async function StatsPage({
         </Panel>
 
         <Panel
-          title="Temperature"
+          title={`Temperature (${f.units.temperature})`}
           action={
             <span className="text-xs text-subtle">
               Average while driving, per {bucketLabel}
@@ -442,7 +442,7 @@ export default async function StatsPage({
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Panel title="Tire pressure">
+          <Panel title={`Tire pressure (${f.units.pressure})`}>
             {pressureSeries.length > 1 ? (
               <SeriesChart
                 data={pressureSeries}

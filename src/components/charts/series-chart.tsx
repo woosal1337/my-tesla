@@ -43,6 +43,7 @@ export function SeriesChart({
     series.map((line) => [line.key, { label: line.label, color: line.color }]),
   );
   const hasRight = series.some((line) => line.axis === "right");
+  const mixedUnits = new Set(series.map((line) => line.unit ?? "")).size > 1;
   const hasBars = series.some((line) => line.kind === "bar");
   const numericX = xFormat !== "number" || !hasBars;
 
@@ -57,7 +58,7 @@ export function SeriesChart({
                 style={{ background: line.color }}
               />
               {line.label}
-              {line.unit ? ` (${line.unit})` : ""}
+              {mixedUnits && line.unit ? ` (${line.unit})` : ""}
             </span>
           ))}
         </div>

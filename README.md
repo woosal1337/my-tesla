@@ -32,7 +32,7 @@ A self-hosted, read-only web dashboard for the car data that [TeslaMate](https:/
 | Charging | All charging sessions, with energy, levels, power, and cost. Each session has power, voltage, and current charts. All sessions export as CSV. An insights page shows the cost per kWh for AC and DC, the cost per 100 km, the DC curves, when the car charges, and the top places. |
 | Timeline | One day at a time: driving, charging, parked, asleep, and offline time on a 24-hour strip |
 | Battery | Estimated health, capacity, range at 100 %, charge cycles, AC and DC energy, time at each level, idle drain |
-| Stats | Distance, energy, cost, efficiency against temperature, drive times, longest drives, tire pressure trend, software updates |
+| Stats | Distance, energy, cost, efficiency against temperature and speed, drive times, longest drives, tire pressure trend, software updates |
 | Places | A map of visited and charging places, the most visited places, charging cost by place, geofences |
 | Settings | Units, date and time formats, number style, currency, place names, maps, theme, tabs, and Overview cards. Saved on the server for each user. |
 

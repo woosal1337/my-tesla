@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { cache } from "react";
 import { database } from "./database";
 import { rangeColumn, type RangeKind } from "./range-columns";
+import type { SpeedBandRow } from "./speed-bands";
 import { placeLabel } from "./vehicle";
 import { getPlaceStyle, getRangeKind } from "./viewer";
 
@@ -345,5 +346,30 @@ export const longestDrives = cache(
       from: placeLabel(a, style),
       to: placeLabel(b, style),
     }));
+  },
+);
+
+export const speedBandRows = cache(
+  async (
+    carId: number,
+    from: Date | null,
+    edgesKmh: number[],
+  ): Promise<SpeedBandRow[]> => {
+    await connection();
+    return database()<SpeedBandRow[]>`
+      select
+        width_bucket(speed::float8, ${edgesKmh}::float8[]) as band,
+        count(*)::int as points,
+        sum(power)::float8 as "powerSum",
+        sum(speed)::float8 as "speedSum"
+      from positions
+      where car_id = ${carId}
+        and drive_id is not null
+        and speed::float8 >= ${edgesKmh[0]}::float8
+        and power is not null
+        and date >= (${sinceOf(from)}::timestamptz at time zone 'UTC')
+      group by 1
+      order by 1
+    `;
   },
 );

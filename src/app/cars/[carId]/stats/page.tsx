@@ -27,8 +27,10 @@ import {
   pressureTrend,
   softwareUpdates,
   statsBuckets,
+  speedBandRows,
 } from "@/lib/stats-data";
 import { efficiencyDigits } from "@/lib/units";
+import { speedBands, speedEdges } from "@/lib/speed-bands";
 import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
@@ -68,6 +70,7 @@ export default async function StatsPage({
     preferences.period,
   );
   const from = periodStart(period, now);
+  const edges = speedEdges(preferences.distance);
   const unit = bucketUnit(period);
   const [
     buckets,
@@ -78,6 +81,7 @@ export default async function StatsPage({
     pressure,
     updates,
     longest,
+    speedRows,
   ] = await Promise.all([
     statsBuckets(car.id, from, unit, timeZone, sundayFirst),
     driveTotals(car.id, from),
@@ -87,6 +91,7 @@ export default async function StatsPage({
     pressureTrend(car.id, from, unit === "month" ? "week" : "day", timeZone),
     softwareUpdates(car.id),
     longestDrives(car.id, from),
+    speedBandRows(car.id, from, edges.kmh),
   ]);
 
   const whPerKm = drives.distanceKm
@@ -97,6 +102,11 @@ export default async function StatsPage({
     charges.cost !== null && distanceTotal
       ? (charges.cost / distanceTotal) * 100
       : null;
+  const speeds = speedBands(speedRows, edges.shown);
+  const widestSpeed = Math.max(
+    1,
+    ...speeds.map((band) => f.efficiencyValue(band.whPerKm) ?? 0),
+  );
   const fahrenheit = preferences.temperature === "f";
   const bands = temperatureBands(
     efficiency.map((point) => ({
@@ -335,8 +345,8 @@ export default async function StatsPage({
           )}
         </Panel>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-          <Panel title="Efficiency and temperature" className="lg:col-span-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Panel title="Efficiency and temperature" className="lg:col-span-2">
             {scatter.length > 2 ? (
               <ScatterPoints
                 points={scatter}
@@ -353,7 +363,7 @@ export default async function StatsPage({
               <PanelNote>No record yet.</PanelNote>
             )}
           </Panel>
-          <Panel title="By temperature" className="lg:col-span-2">
+          <Panel title="By temperature">
             {bands.length ? (
               <ul className="space-y-4">
                 {bands.map((band) => (
@@ -374,6 +384,48 @@ export default async function StatsPage({
                         className="h-full rounded-full bg-primary transition-[width] duration-700 ease-tesla starting:w-0!"
                         style={{
                           width: `${((f.efficiencyValue(band.whPerKm) ?? 0) / widest) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <PanelNote>No record yet.</PanelNote>
+            )}
+          </Panel>
+          <Panel
+            title="By speed"
+            action={
+              speeds.length ? (
+                <span className="text-xs text-subtle">
+                  Share of driving time
+                </span>
+              ) : undefined
+            }
+          >
+            {speeds.length ? (
+              <ul className="space-y-4">
+                {speeds.map((band) => (
+                  <li key={band.from}>
+                    <div className="flex items-baseline justify-between gap-4 text-sm">
+                      <span className="tabular">
+                        {band.to === null
+                          ? `${band.from}+ ${f.units.speed}`
+                          : `${band.from} to ${band.to} ${f.units.speed}`}
+                      </span>
+                      <span className="text-muted-foreground tabular">
+                        {Math.round(band.share * 100)}% ·{" "}
+                        <span className="text-foreground">
+                          {f.efficiency(band.whPerKm)}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary transition-[width] duration-700 ease-tesla starting:w-0!"
+                        style={{
+                          width: `${((f.efficiencyValue(band.whPerKm) ?? 0) / widestSpeed) * 100}%`,
                         }}
                       />
                     </div>

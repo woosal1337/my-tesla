@@ -1,8 +1,9 @@
-import { ChevronLeft, Download } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SeriesChart } from "@/components/charts/series-chart";
+import { DownloadLink } from "@/components/download-link";
 import { MapsOff, RouteMap } from "@/components/maps";
 import { Stat } from "@/components/overview/stat";
 import { PageTransition } from "@/components/page-transition";
@@ -62,14 +63,10 @@ export default async function DrivePage({
             <ChevronLeft className="size-4" />
             Drives
           </Link>
-          <a
+          <DownloadLink
             href={`/api/cars/${car.id}/drives/${drive.id}.gpx`}
-            download
-            className="inline-flex h-9 items-center gap-2 rounded bg-card px-3 text-sm font-medium transition-tesla hover:bg-accent"
-          >
-            <Download aria-hidden className="size-4" />
-            GPX
-          </a>
+            label="GPX"
+          />
         </div>
         <h1 className="mt-4 text-[32px] leading-[1.2] font-medium md:text-[40px]">
           {drive.to}

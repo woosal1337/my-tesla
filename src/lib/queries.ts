@@ -234,15 +234,22 @@ type DriveRow = {
   end: PlaceColumns;
 };
 
+type DateRange = { start: Date; end: Date };
+
+const exportLimit = 100_000;
+
 async function queryDrives(
   car: Car,
-  options: { limit: number; driveId?: number },
+  options: { limit: number; driveId?: number; range?: DateRange | null },
 ): Promise<Drive[]> {
   await connection();
   const sql = database();
   const [kind, style] = await Promise.all([getRangeKind(), getPlaceStyle()]);
   const onlyDrive =
     options.driveId === undefined ? sql`` : sql`and d.id = ${options.driveId}`;
+  const inRange = options.range
+    ? sql`and d.start_date >= (${options.range.start.toISOString()}::timestamptz at time zone 'UTC') and d.start_date < (${options.range.end.toISOString()}::timestamptz at time zone 'UTC')`
+    : sql``;
   const rows = await sql<DriveRow[]>`
     select
       d.id::int as id,
@@ -275,7 +282,7 @@ async function queryDrives(
     left join geofences eg on eg.id = d.end_geofence_id
     left join positions sp on sp.id = d.start_position_id
     left join positions ep on ep.id = d.end_position_id
-    where d.car_id = ${car.id} and d.end_date is not null ${onlyDrive}
+    where d.car_id = ${car.id} and d.end_date is not null ${onlyDrive} ${inRange}
     order by d.start_date desc
     limit ${options.limit}
   `;
@@ -306,6 +313,13 @@ async function queryDrives(
 
 export function recentDrives(car: Car, limit = 50): Promise<Drive[]> {
   return queryDrives(car, { limit });
+}
+
+export function exportDrives(
+  car: Car,
+  range: DateRange | null,
+): Promise<Drive[]> {
+  return queryDrives(car, { limit: exportLimit, range });
 }
 
 export type DrivePositionRow = DrivePoint & { lng: number; lat: number };
@@ -369,9 +383,17 @@ export async function findDrive(
 
 type ChargeRow = Omit<Charge, "place"> & { place: PlaceColumns };
 
+export function exportCharges(
+  carId: number,
+  range: DateRange | null,
+): Promise<Charge[]> {
+  return recentCharges(carId, exportLimit, range);
+}
+
 export async function recentCharges(
   carId: number,
   limit = 50,
+  range: DateRange | null = null,
 ): Promise<Charge[]> {
   await connection();
   const style = await getPlaceStyle();
@@ -401,7 +423,11 @@ export async function recentCharges(
       from charges c
       where c.charging_process_id = cp.id
     ) stats on true
-    where cp.car_id = ${carId}
+    where cp.car_id = ${carId} ${
+      range
+        ? database()`and cp.start_date >= (${range.start.toISOString()}::timestamptz at time zone 'UTC') and cp.start_date < (${range.end.toISOString()}::timestamptz at time zone 'UTC')`
+        : database()``
+    }
     order by cp.start_date desc
     limit ${limit}
   `;

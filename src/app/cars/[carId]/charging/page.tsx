@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DownloadLink } from "@/components/download-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageTransition } from "@/components/page-transition";
 import { SectionHeader } from "@/components/section-header";
@@ -54,6 +55,14 @@ export default async function ChargingPage({
           charges.length
             ? `${charges.length} recent charges · ${f.energy(totalKwh)} added`
             : undefined
+        }
+        action={
+          charges.length > 0 && (
+            <DownloadLink
+              href={`/api/cars/${car.id}/charges.csv`}
+              label="CSV"
+            />
+          )
         }
       />
       {charges.length === 0 ? (

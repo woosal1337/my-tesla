@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DownloadLink } from "@/components/download-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageTransition } from "@/components/page-transition";
 import { SectionHeader } from "@/components/section-header";
@@ -30,6 +31,11 @@ export default async function DrivesPage({
           drives.length
             ? `${drives.length} recent drives · ${f.distance(totalKm)}`
             : undefined
+        }
+        action={
+          drives.length > 0 && (
+            <DownloadLink href={`/api/cars/${car.id}/drives.csv`} label="CSV" />
+          )
         }
       />
       {drives.length === 0 ? (

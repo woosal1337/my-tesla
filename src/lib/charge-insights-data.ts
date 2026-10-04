@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { cache } from "react";
+import { chargeSessions } from "./charge-sessions";
 import { database } from "./database";
 
 export type ChargeTypeTotals = {
@@ -56,6 +57,7 @@ export const chargeTypeTotals = cache(
   async (carId: number, from: Date | null): Promise<ChargeTypeTotals[]> => {
     await connection();
     const sql = database();
+    const { relation: sessions } = await chargeSessions(carId);
     return sql<ChargeTypeTotals[]>`
       select
         fast,
@@ -68,7 +70,7 @@ export const chargeTypeTotals = cache(
           cp.charge_energy_added as added,
           cp.cost,
           ${fastSession()} as fast
-        from charging_processes cp
+        from ${sessions} cp
         where cp.car_id = ${carId}
           and cp.charge_energy_added > 0.01
           and cp.start_date >= (${sinceOf(from)}::timestamptz at time zone 'UTC')

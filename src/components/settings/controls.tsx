@@ -2,7 +2,8 @@
 
 import { ChevronDown } from "lucide-react";
 import { motion } from "motion/react";
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
+import { parsePrice, priceText } from "@/lib/charge-cost";
 import { cn } from "@/lib/utils";
 
 const spring = {
@@ -174,5 +175,77 @@ export function Toggle({
         )}
       />
     </button>
+  );
+}
+
+export function PriceInput({
+  label,
+  value,
+  suffix,
+  decimalComma,
+  onChange,
+}: {
+  label: string;
+  value: number | null;
+  suffix: string;
+  decimalComma: boolean;
+  onChange: (value: number | null) => void;
+}) {
+  const shown = priceText(value, decimalComma);
+  const [text, setText] = useState(shown);
+  const [synced, setSynced] = useState(shown);
+  const [invalid, setInvalid] = useState(false);
+  const hintId = useId();
+  if (shown !== synced) {
+    setSynced(shown);
+    setText(shown);
+    setInvalid(false);
+  }
+
+  function commit() {
+    const parsed = parsePrice(text);
+    if (parsed === "invalid") {
+      setInvalid(true);
+      return;
+    }
+    setInvalid(false);
+    setText(priceText(parsed, decimalComma));
+    if (parsed !== value) onChange(parsed);
+  }
+
+  return (
+    <div className="sm:w-64">
+      <div
+        className={cn(
+          "flex h-9 items-center rounded bg-background pr-3 transition-tesla focus-within:ring-2 focus-within:ring-ring",
+          invalid && "ring-2 ring-destructive",
+        )}
+      >
+        <input
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          aria-label={label}
+          aria-invalid={invalid}
+          aria-describedby={invalid ? hintId : undefined}
+          placeholder="Not set"
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+          }}
+          className="h-full w-full min-w-0 bg-transparent pl-3 text-sm font-medium tabular outline-none placeholder:font-normal placeholder:text-subtle"
+        />
+        <span className="shrink-0 pl-2 text-xs text-muted-foreground">
+          {suffix}
+        </span>
+      </div>
+      {invalid && (
+        <p id={hintId} className="mt-1.5 text-xs text-destructive">
+          Use a number, for example {priceText(3.25, decimalComma)}.
+        </p>
+      )}
+    </div>
   );
 }

@@ -42,6 +42,7 @@ function charge(id: number, hour: number, cost: number | null): Charge {
     endLevel: 80,
     durationMin: 60,
     cost,
+    costEstimated: false,
     maxPowerKw: 11,
     fastCharger: false,
     latitude: null,

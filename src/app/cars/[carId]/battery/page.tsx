@@ -12,12 +12,14 @@ import {
   chargeTotals,
   idlePeriods,
   levelTime,
+  longChargeKwh,
 } from "@/lib/battery-data";
 import { requireCar } from "@/lib/car-route";
 import type { Formatter } from "@/lib/format";
 import {
-  batteryHealth,
+  batteryCapacity,
   drainRate,
+  healthCharges,
   levelHistogram,
   levelShares,
   median,
@@ -64,6 +66,18 @@ function HealthBar({
       </div>
     </div>
   );
+}
+
+function missingChargesText(
+  missing: number,
+  minimumKwh: number | null,
+  f: Formatter,
+): string {
+  const count = missing < healthCharges ? `${missing} more` : `${missing}`;
+  const charges = missing === 1 ? "charge" : "charges";
+  return minimumKwh === null
+    ? `Needs ${count} long ${charges}`
+    : `Needs ${count} ${charges} of ${f.number(Math.ceil(minimumKwh))} kWh or more`;
 }
 
 function ShareRow({
@@ -154,23 +168,26 @@ export default async function BatteryPage({
     preferences.period,
   );
   const from = periodStart(period, now);
-  const [capacity, latest, totals, levels, charges, idle] = await Promise.all([
-    capacityHistory(car.id),
-    batteryNow(car.id),
-    chargeTotals(car.id),
-    levelTime(car.id, from),
-    chargeLevels(car.id, from),
-    idlePeriods(car.id, from),
-  ]);
+  const [capacity, latest, totals, levels, charges, idle, minimumKwh] =
+    await Promise.all([
+      capacityHistory(car.id),
+      batteryNow(car.id),
+      chargeTotals(car.id),
+      levelTime(car.id, from),
+      chargeLevels(car.id, from),
+      idlePeriods(car.id, from),
+      longChargeKwh(car.id),
+    ]);
 
-  const health = batteryHealth(capacity);
+  const estimate = batteryCapacity(capacity);
+  const health = estimate?.healthPercent ?? null;
   const bestRange = capacity.length
     ? Math.max(...capacity.map((point) => point.rangeKm))
     : null;
   const rangeNow =
     median(capacity.slice(-5).map((point) => point.rangeKm)) ??
     latest.rangeAt100Km;
-  const cycles = health ? totals.addedKwh / health.newKwh : null;
+  const cycles = estimate ? totals.addedKwh / estimate.bestKwh : null;
   const efficiency = totals.usedKwh ? totals.addedKwh / totals.usedKwh : null;
   const shares = levelShares(
     levels.map((row) => ({ level: row.level, weightMs: row.seconds * 1000 })),
@@ -206,18 +223,26 @@ export default async function BatteryPage({
         <Metric
           size="lg"
           label="Health"
-          value={health ? f.number(health.healthPercent, 1) : "—"}
+          value={health === null ? "—" : f.number(health, 1)}
           unit="%"
           detail={
-            health ? `From ${capacity.length} charges` : "Needs 3 long charges"
+            health === null
+              ? missingChargesText(
+                  estimate?.missingCharges ?? healthCharges,
+                  minimumKwh,
+                  f,
+                )
+              : `From ${capacity.length} charges`
           }
         />
         <Metric
           size="lg"
           label="Capacity now"
-          value={health ? f.number(health.nowKwh, 1) : "—"}
+          value={estimate ? f.number(estimate.nowKwh, 1) : "—"}
           unit="kWh"
-          detail={health ? `Best ${f.number(health.newKwh, 1)} kWh` : undefined}
+          detail={
+            estimate ? `Best ${f.number(estimate.bestKwh, 1)} kWh` : undefined
+          }
         />
         <Metric
           size="lg"
@@ -238,9 +263,9 @@ export default async function BatteryPage({
         />
       </dl>
 
-      {health && (
+      {estimate && health !== null && (
         <div className="mt-10">
-          <HealthBar now={health.nowKwh} best={health.newKwh} f={f} />
+          <HealthBar now={estimate.nowKwh} best={estimate.bestKwh} f={f} />
         </div>
       )}
 

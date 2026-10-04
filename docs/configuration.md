@@ -36,13 +36,27 @@ Open Settings from the tab bar. Each change saves at once, and a preview shows t
 |---|---|
 | Units | Distance (km, mi), temperature (°C, °F), tire pressure (bar, psi, kPa), efficiency (Wh per distance, kWh per 100, distance per kWh), range (rated, ideal) |
 | Date and time | Time zone, 24-hour or 12-hour clock, date order, first day of the week |
-| Numbers | Number style (`1,234.5`, `1.234,5`, or `1 234,5`), currency |
+| Numbers | Number style (`1,234.5`, `1.234,5`, or `1 234,5`) |
+| Charging cost | Currency, price per kWh, fast charging price. Read [Charging cost](#charging-cost). |
 | Location | Place names (geofence or address), address detail (full, street, city), maps on or off, map theme |
 | Display | Theme (system, light, dark), motion (full, reduced), start screen, live refresh, default period, start car |
 | Tabs | Show or hide Drives, Charging, Battery, Stats, and Places |
 | Overview | Show or hide the car image, Live status, Today, Tires, Location, and Last drive and charge |
 
 The defaults come from the TeslaMate settings page: distance, temperature, tire pressure, preferred range, and theme. A saved value replaces a default. "Reset to defaults" removes your saved values.
+
+## Charging cost
+
+TeslaMate records a cost only for a charge in a geofence with a price. For the other charges, set a price in the app:
+
+1. Open Settings, then Charging cost.
+2. Choose the currency.
+3. Type the price per kWh, then press Enter. Use a dot or a comma for the decimals.
+4. Optional: type a separate price for DC fast chargers.
+
+For each completed charge without a TeslaMate cost, the app multiplies the energy from the charger by the price. The energy from the charger is the larger of the energy added and the energy used, as in TeslaMate. A cost that TeslaMate recorded always stays.
+
+The charge page shows the source of each cost and a breakdown: the energy billed, the price per kWh, the cost per kWh in the battery, the charging losses, and the cost per 100 km of range. The Stats chart and the CSV file also name the charges that use your price. Empty the field to remove a price. [Decision 0011](decisions/0011-charging-cost-from-a-price.md) explains the rule.
 
 ## Where Settings live
 

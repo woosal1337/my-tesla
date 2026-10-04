@@ -54,6 +54,22 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ defaultCar: "../2" }).defaultCar).toBe("auto");
   });
 
+  test("reads the charging prices", () => {
+    const parsed = parsePreferences({
+      chargePrice: 3.256789,
+      fastChargePrice: 9,
+    });
+    expect(parsed.chargePrice).toBe(3.2568);
+    expect(parsed.fastChargePrice).toBe(9);
+    const base = parsePreferences({ chargePrice: 4 });
+    expect(parsePreferences({ chargePrice: -1 }, base).chargePrice).toBe(4);
+    expect(parsePreferences({ chargePrice: "4" }, base).chargePrice).toBe(4);
+    expect(
+      parsePreferences({ chargePrice: null }, base).chargePrice,
+    ).toBeNull();
+    expect(defaultPreferences.chargePrice).toBeNull();
+  });
+
   test("falls back to the base for input that is not an object", () => {
     expect(parsePreferences(null)).toEqual(defaultPreferences);
     expect(parsePreferences("mi")).toEqual(defaultPreferences);

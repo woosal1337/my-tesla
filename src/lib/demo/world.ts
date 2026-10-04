@@ -44,7 +44,7 @@ export const geofences: Geofence[] = [
     latitude: 35.187,
     longitude: -111.661,
     radius: 50,
-    costPerUnit: 0.48,
+    costPerUnit: null,
   },
 ];
 

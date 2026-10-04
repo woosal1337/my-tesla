@@ -36,6 +36,7 @@ import { unitLabels } from "@/lib/units";
 import { cn } from "@/lib/utils";
 import {
   Choice,
+  PriceInput,
   Select,
   SettingRow,
   SettingsSection,
@@ -56,6 +57,7 @@ const sections = [
   { id: "units", label: "Units" },
   { id: "time", label: "Date and time" },
   { id: "numbers", label: "Numbers" },
+  { id: "cost", label: "Charging cost" },
   { id: "location", label: "Location" },
   { id: "display", label: "Display" },
   { id: "tabs", label: "Tabs" },
@@ -171,6 +173,9 @@ export function SettingsForm({
     label:
       option.id === "none" ? option.label : `${option.label}, ${option.id}`,
   }));
+  const priceSuffix =
+    preferences.currency === "none" ? "per kWh" : `${preferences.currency}/kWh`;
+  const decimalComma = preferences.numberStyle !== "comma-dot";
 
   return (
     <div className="pt-6 md:pt-10">
@@ -356,6 +361,13 @@ export function SettingsForm({
                 />
               }
             />
+          </SettingsSection>
+
+          <SettingsSection
+            id="cost"
+            title="Charging cost"
+            description="TeslaMate records a cost only for a charge in a geofence with a price. The app uses your price for the other charges."
+          >
             <SettingRow
               label="Currency"
               hint="TeslaMate stores costs without a currency."
@@ -365,6 +377,32 @@ export function SettingsForm({
                   value={preferences.currency}
                   options={currencyChoices}
                   onChange={(value) => set("currency", value)}
+                />
+              }
+            />
+            <SettingRow
+              label="Price per kWh"
+              hint="The app multiplies the energy from the charger by this price."
+              control={
+                <PriceInput
+                  label="Price per kWh"
+                  value={preferences.chargePrice}
+                  suffix={priceSuffix}
+                  decimalComma={decimalComma}
+                  onChange={(value) => set("chargePrice", value)}
+                />
+              }
+            />
+            <SettingRow
+              label="Fast charging price"
+              hint="Optional. Replaces the price above at DC fast chargers."
+              control={
+                <PriceInput
+                  label="Fast charging price"
+                  value={preferences.fastChargePrice}
+                  suffix={priceSuffix}
+                  decimalComma={decimalComma}
+                  onChange={(value) => set("fastChargePrice", value)}
                 />
               }
             />

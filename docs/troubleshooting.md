@@ -23,6 +23,14 @@ The `detail` field gives the database error.
 
 TeslaMate records only from the moment you sign in. Drives, charges, and statistics appear after the car drives and charges. TeslaMate can import older data from TeslaFi exports. Read the TeslaMate documentation for the import.
 
+## Battery health shows a dash
+
+The health estimate needs 3 long charges. A long charge adds enough energy for 100 km of range. Under Health, the page names how many long charges it still needs, and their minimum size in kWh. Capacity now and Charge cycles show from the first long charge.
+
+## A charge shows "TeslaMate did not close this charge"
+
+TeslaMate restarted during the charge, so it started a new charge and left the old one open. The app ends the old charge at its last record, and it counts its energy in the totals. Nothing needs a fix. [Decision 0012](decisions/0012-charges-left-open.md) explains the rule.
+
 ## A page shows an error after a TeslaMate upgrade
 
 The new TeslaMate version can change a table. Read [Upgrading](upgrading.md).

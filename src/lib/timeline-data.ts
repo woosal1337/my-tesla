@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { cache } from "react";
+import { chargeSessions } from "./charge-sessions";
 import { database } from "./database";
 import type { TimelineCharge, TimelineDrive, TimelineState } from "./insights";
 import { placeLabel } from "./vehicle";
@@ -24,7 +25,10 @@ export const dayRecords = cache(
   async (carId: number, start: Date, end: Date): Promise<DayRecords> => {
     await connection();
     const sql = database();
-    const style = await getPlaceStyle();
+    const [style, { relation: sessions }] = await Promise.all([
+      getPlaceStyle(),
+      chargeSessions(carId),
+    ]);
     const from = start.toISOString();
     const to = end.toISOString();
     const [states, drives, charges] = await Promise.all([
@@ -79,7 +83,7 @@ export const dayRecords = cache(
             'geofence', g.name, 'name', a.name, 'road', a.road,
             'houseNumber', a.house_number, 'city', a.city
           ) as at
-        from charging_processes cp
+        from ${sessions} cp
         left join addresses a on a.id = cp.address_id
         left join geofences g on g.id = cp.geofence_id
         where cp.car_id = ${carId}

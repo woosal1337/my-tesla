@@ -52,6 +52,7 @@ function TypeCard({
       </p>
       <p className="mt-1 text-sm text-subtle tabular">
         {totals?.sessions ?? 0} sessions
+        {totals && totals.cost !== null && ` · ${f.cost(totals.cost)}`}
         {perKwh !== null && ` · ${f.cost(perKwh)} per kWh`}
       </p>
     </div>

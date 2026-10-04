@@ -47,6 +47,10 @@ export default async function ChargingPage({
     (sum, charge) => sum + (charge.energyAddedKwh ?? 0),
     0,
   );
+  const costs = charges
+    .map((charge) => charge.cost)
+    .filter((cost): cost is number => cost !== null);
+  const totalCost = costs.reduce((sum, cost) => sum + cost, 0);
 
   return (
     <PageTransition>
@@ -54,7 +58,13 @@ export default async function ChargingPage({
         title="Charging"
         summary={
           charges.length
-            ? `${charges.length} recent charges · ${f.energy(totalKwh)} added`
+            ? [
+                `${charges.length} recent charges`,
+                `${f.energy(totalKwh)} added`,
+                costs.length ? `${f.cost(totalCost)} spent` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")
             : undefined
         }
         action={

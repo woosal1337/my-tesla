@@ -197,20 +197,31 @@ export function median(values: number[]): number | null {
 
 export type CapacityPoint = { at: Date; kwh: number };
 
-export function batteryHealth(points: CapacityPoint[]): {
-  newKwh: number;
+export type BatteryCapacity = {
   nowKwh: number;
-  healthPercent: number;
-} | null {
-  if (points.length < 3) return null;
-  const sorted = [...points].sort((a, b) => a.at.getTime() - b.at.getTime());
-  const newKwh = Math.max(...sorted.map((point) => point.kwh));
-  const nowKwh = median(sorted.slice(-5).map((point) => point.kwh));
-  if (nowKwh === null || newKwh <= 0) return null;
+  bestKwh: number;
+  healthPercent: number | null;
+  missingCharges: number;
+};
+
+export const healthCharges = 3;
+
+export function batteryCapacity(
+  points: CapacityPoint[],
+): BatteryCapacity | null {
+  const sorted = points
+    .filter((point) => point.kwh > 0)
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
+  if (sorted.length === 0) return null;
+  const bestKwh = Math.max(...sorted.map((point) => point.kwh));
+  const nowKwh = median(sorted.slice(-5).map((point) => point.kwh)) ?? bestKwh;
+  const missingCharges = Math.max(0, healthCharges - sorted.length);
   return {
-    newKwh,
     nowKwh,
-    healthPercent: Math.min(100, (nowKwh / newKwh) * 100),
+    bestKwh,
+    healthPercent:
+      missingCharges === 0 ? Math.min(100, (nowKwh / bestKwh) * 100) : null,
+    missingCharges,
   };
 }
 

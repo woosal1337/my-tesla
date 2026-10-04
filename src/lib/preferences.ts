@@ -1,3 +1,4 @@
+import { readPrice } from "./charge-cost";
 import { periods, type PeriodId } from "./insights";
 
 type Option<T extends string> = { id: T; label: string };
@@ -147,6 +148,8 @@ export type Preferences = {
   dateOrder: Ids<typeof dateOrderOptions>;
   numberStyle: Ids<typeof numberStyleOptions>;
   currency: Ids<typeof currencyOptions>;
+  chargePrice: number | null;
+  fastChargePrice: number | null;
   timeZone: string;
   weekStart: Ids<typeof weekStartOptions>;
   placeNames: Ids<typeof placeNameOptions>;
@@ -176,6 +179,8 @@ export const defaultPreferences: Preferences = {
   dateOrder: "day-month",
   numberStyle: "comma-dot",
   currency: "none",
+  chargePrice: null,
+  fastChargePrice: null,
   timeZone: autoTimeZone,
   weekStart: "monday",
   placeNames: "geofence",
@@ -282,6 +287,10 @@ export function parsePreferences(
     result.defaultCar = car;
   }
   if (typeof input.splash === "boolean") result.splash = input.splash;
+  for (const key of ["chargePrice", "fastChargePrice"] as const) {
+    const price = readPrice(input[key]);
+    if (input[key] === null || price !== null) result[key] = price;
+  }
   result.tabs = flags(tabKeys, input.tabs, base.tabs);
   result.overview = flags(overviewKeys, input.overview, base.overview);
   return result;

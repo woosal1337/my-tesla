@@ -44,6 +44,7 @@ const colors = {
   distance: "var(--chart-1)",
   used: "var(--chart-1)",
   charged: "var(--charge)",
+  cost: "var(--charge)",
   outside: "var(--chart-1)",
   cabin: "var(--chart-4)",
   efficiency: "var(--chart-1)",
@@ -132,6 +133,7 @@ export default async function StatsPage({
     distance: round1(f.distanceValue(bucket.distanceKm)),
     used: round1(bucket.usedKwh),
     charged: round1(bucket.chargedKwh),
+    cost: bucket.cost === null ? null : Math.round(bucket.cost * 100) / 100,
     outside: round1(f.temperatureValue(bucket.outsideC)),
     cabin: round1(f.temperatureValue(bucket.cabinC)),
   }));
@@ -311,6 +313,46 @@ export default async function StatsPage({
             <PanelNote>No record yet.</PanelNote>
           )}
         </Panel>
+
+        {charges.cost !== null && (
+          <Panel
+            title={
+              preferences.currency === "none"
+                ? "Charging cost"
+                : `Charging cost (${preferences.currency})`
+            }
+            action={
+              <span className="text-xs text-subtle">
+                {[
+                  `Per ${bucketLabel}`,
+                  charges.estimatedCosts
+                    ? `${charges.estimatedCosts} of ${charges.sessions} charges from your price`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            }
+          >
+            <SeriesChart
+              data={series}
+              xKey="at"
+              xFormat={xFormat}
+              chartStyle={f.chartStyle}
+              series={[
+                {
+                  key: "cost",
+                  label: "Cost",
+                  color: colors.cost,
+                  digits: 2,
+                  kind: "bar",
+                },
+              ]}
+              yDomain={[0, "auto"]}
+              height={220}
+            />
+          </Panel>
+        )}
 
         <Panel
           title={`Temperature (${f.units.temperature})`}

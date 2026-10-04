@@ -87,7 +87,13 @@ export function chargeHeader(currency: string | null): string[] {
     "Duration (min)",
     "Peak power (kW)",
     currency ? `Cost (${currency})` : "Cost",
+    "Cost source",
   ];
+}
+
+function costSource(charge: Charge): string | null {
+  if (charge.cost === null) return null;
+  return charge.costEstimated ? "Estimate" : "TeslaMate";
 }
 
 export function chargeRow(charge: Charge, timeZone: string): CsvValue[] {
@@ -102,6 +108,7 @@ export function chargeRow(charge: Charge, timeZone: string): CsvValue[] {
     charge.durationMin,
     round(charge.maxPowerKw, 1),
     round(charge.cost, 2),
+    costSource(charge),
   ];
 }
 

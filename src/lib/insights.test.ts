@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   buildTimeline,
-  batteryHealth,
+  batteryCapacity,
   bucketUnit,
   dayWindow,
   drainRate,
@@ -162,11 +162,26 @@ describe("battery", () => {
     const points = [60, 60.4, 59.8, 59.9, 59.2, 58.8, 58.9, 59].map(
       (kwh, index) => ({ at: new Date(2026, 0, index + 1), kwh }),
     );
-    const health = batteryHealth(points);
-    expect(health?.newKwh).toBe(60.4);
-    expect(health?.nowKwh).toBe(59);
-    expect(health?.healthPercent).toBeCloseTo(97.68, 2);
-    expect(batteryHealth(points.slice(0, 2))).toBeNull();
+    const capacity = batteryCapacity(points);
+    expect(capacity?.bestKwh).toBe(60.4);
+    expect(capacity?.nowKwh).toBe(59);
+    expect(capacity?.healthPercent).toBeCloseTo(97.68, 2);
+    expect(capacity?.missingCharges).toBe(0);
+  });
+
+  test("gives the capacity before there are enough charges for health", () => {
+    const points = [61.5, 61.8].map((kwh, index) => ({
+      at: new Date(2026, 9, index + 2),
+      kwh,
+    }));
+    expect(batteryCapacity(points)).toEqual({
+      nowKwh: 61.65,
+      bestKwh: 61.8,
+      healthPercent: null,
+      missingCharges: 1,
+    });
+    expect(batteryCapacity([])).toBeNull();
+    expect(batteryCapacity([{ at: new Date(0), kwh: 0 }])).toBeNull();
   });
 
   test("counts levels in buckets of ten points", () => {

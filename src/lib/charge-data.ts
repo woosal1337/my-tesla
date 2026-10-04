@@ -1,5 +1,6 @@
 import "server-only";
 import { connection } from "next/server";
+import { chargeSessions } from "./charge-sessions";
 import { database } from "./database";
 import { rangeColumn } from "./range-columns";
 import { placeLabel } from "./vehicle";
@@ -21,6 +22,10 @@ export type ChargeSession = {
   durationMin: number | null;
   outsideTempAvg: number | null;
   cost: number | null;
+  costEstimated: boolean;
+  price: number | null;
+  billedKwh: number | null;
+  unclosed: boolean;
   fast: boolean;
   brand: string | null;
   connector: string | null;
@@ -54,7 +59,11 @@ export async function findChargeSession(
   chargeId: number,
 ): Promise<ChargeSession | null> {
   await connection();
-  const [kind, style] = await Promise.all([getRangeKind(), getPlaceStyle()]);
+  const [kind, style, { relation: sessions }] = await Promise.all([
+    getRangeKind(),
+    getPlaceStyle(),
+    chargeSessions(carId),
+  ]);
   const [row] = await database()<SessionRow[]>`
     select
       cp.id::int as id,
@@ -71,6 +80,10 @@ export async function findChargeSession(
       cp.duration_min::int as "durationMin",
       cp.outside_temp_avg::float8 as "outsideTempAvg",
       cp.cost::float8 as cost,
+      cp.cost_estimated as "costEstimated",
+      cp.price::float8 as price,
+      cp.billed_kwh::float8 as "billedKwh",
+      cp.unclosed,
       coalesce(stats.fast, false) as fast,
       stats.brand,
       stats.connector,
@@ -93,7 +106,7 @@ export async function findChargeSession(
         where car_id = cp.car_id and start_date > cp.start_date
         order by start_date asc limit 1
       ) as "nextId"
-    from charging_processes cp
+    from ${sessions} cp
     left join positions p on p.id = cp.position_id
     left join addresses a on a.id = cp.address_id
     left join geofences g on g.id = cp.geofence_id

@@ -15,7 +15,7 @@ The generator makes:
 
 - weekday commutes and errands, and weekend trips,
 - a road trip with two Supercharger stops and a hotel night,
-- home charges, Supercharger sessions, and idle drain,
+- home charges, Supercharger sessions, and idle drain. The Flagstaff Supercharger has no geofence price, so its sessions show the price setting,
 - slow battery wear, two software updates, and a slow tire leak.
 
 A fixed seed makes the same data on each run.

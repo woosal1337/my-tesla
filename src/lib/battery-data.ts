@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { cache } from "react";
+import { chargeSessions, type ChargeSessions } from "./charge-sessions";
 import { database } from "./database";
 import type { CapacityPoint, IdlePeriod } from "./insights";
 import { rangeColumn } from "./range-columns";
@@ -24,7 +25,9 @@ export type BatteryNow = {
   at: Date | null;
 };
 
-const efficiency = (carId: number) => database()`
+type Sessions = ChargeSessions["relation"];
+
+const efficiency = (carId: number, sessions: Sessions) => database()`
   select coalesce(derived, rated) as kwh_per_km
   from (
     select
@@ -36,7 +39,7 @@ const efficiency = (carId: number) => database()`
       count(*) as samples,
       c.efficiency::float8 as rated
     from cars c
-    left join charging_processes cp
+    left join ${sessions} cp
       on cp.car_id = c.id
       and cp.duration_min > 10
       and cp.end_battery_level <= 95
@@ -53,9 +56,12 @@ const efficiency = (carId: number) => database()`
 export const capacityHistory = cache(
   async (carId: number): Promise<BatteryCapacityPoint[]> => {
     await connection();
-    const kind = await getRangeKind();
+    const [kind, { relation: sessions }] = await Promise.all([
+      getRangeKind(),
+      chargeSessions(carId),
+    ]);
     return database()<BatteryCapacityPoint[]>`
-      with e as (${efficiency(carId)})
+      with e as (${efficiency(carId, sessions)})
       select
         cp.end_date at time zone 'UTC' as at,
         (c.rated_battery_range_km * e.kwh_per_km * 100
@@ -63,7 +69,7 @@ export const capacityHistory = cache(
         (c.preferred_range_km * 100.0
           / c.usable_battery_level)::float8 as "rangeKm",
         p.odometer::float8 as "odometerKm"
-      from charging_processes cp
+      from ${sessions} cp
       cross join e
       join lateral (
         select
@@ -82,6 +88,18 @@ export const capacityHistory = cache(
         and cp.charge_energy_added >= e.kwh_per_km * 100
       order by cp.end_date
     `;
+  },
+);
+
+export const longChargeKwh = cache(
+  async (carId: number): Promise<number | null> => {
+    await connection();
+    const { relation: sessions } = await chargeSessions(carId);
+    const [row] = await database()<{ kwh: number | null }[]>`
+      with e as (${efficiency(carId, sessions)})
+      select (e.kwh_per_km * 100)::float8 as kwh from e
+    `;
+    return row?.kwh ?? null;
   },
 );
 
@@ -106,6 +124,7 @@ export const batteryNow = cache(async (carId: number): Promise<BatteryNow> => {
 export const chargeTotals = cache(
   async (carId: number): Promise<BatteryTotals> => {
     await connection();
+    const { relation: sessions } = await chargeSessions(carId);
     const [row] = await database()<BatteryTotals[]>`
       with sessions as (
         select
@@ -115,7 +134,7 @@ export const chargeTotals = cache(
             select bool_or(c.fast_charger_present)
             from charges c where c.charging_process_id = cp.id
           ), false) as fast
-        from charging_processes cp
+        from ${sessions} cp
         where cp.car_id = ${carId} and cp.charge_energy_added > 0.01
       )
       select
@@ -165,11 +184,12 @@ export const chargeLevels = cache(
   ): Promise<{ startLevel: number; endLevel: number }[]> => {
     await connection();
     const since = (from ?? new Date(0)).toISOString();
+    const { relation: sessions } = await chargeSessions(carId);
     return database()<{ startLevel: number; endLevel: number }[]>`
       select
         start_battery_level::int as "startLevel",
         end_battery_level::int as "endLevel"
-      from charging_processes
+      from ${sessions} cp
       where car_id = ${carId}
         and end_date is not null
         and charge_energy_added > 0.01
@@ -188,7 +208,10 @@ export const idlePeriods = cache(
   ): Promise<IdlePeriod[]> => {
     await connection();
     const since = (from ?? new Date(0)).toISOString();
-    const kind = await getRangeKind();
+    const [kind, { relation: sessions }] = await Promise.all([
+      getRangeKind(),
+      chargeSessions(carId),
+    ]);
     return database()<IdlePeriod[]>`
       with merged as (
         select
@@ -201,7 +224,7 @@ export const idlePeriods = cache(
           p.usable_battery_level as start_usable,
           p.odometer as start_km,
           p.odometer as end_km
-        from charging_processes c
+        from ${sessions} c
         join positions p on p.id = c.position_id
         where c.car_id = ${carId}
           and c.start_date >= (${since}::timestamptz at time zone 'UTC')

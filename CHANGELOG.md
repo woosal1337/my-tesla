@@ -4,6 +4,21 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Added
+
+- Charging prices in Settings: a price per kWh and an optional fast charging price. Each completed charge without a TeslaMate cost gets the price times the energy from the charger.
+- Charge page: a cost panel with the energy billed, the price per kWh, the cost per kWh in the battery, the charging losses, and the cost per 100 km of range and per 1 % of battery.
+- Cost totals: the Charging page sums the cost of the listed charges, Stats has a charging cost chart, and the insights cards show the total cost of AC and DC charging. The CSV file has a `Cost source` column.
+
+### Changed
+
+- Battery page: Capacity now and Charge cycles show from the first long charge. Health names how many long charges it still needs, and their minimum size.
+- Demo data: the Flagstaff Supercharger geofence has no price, so the demo shows the price setting.
+
+### Fixed
+
+- A charge that TeslaMate leaves open after a restart now ends at its last charge record. Its energy, levels, duration, and cost count in every total. Only the newest open charge shows as in progress.
+
 ## [1.3.0] - 2026-10-02
 
 ### Added

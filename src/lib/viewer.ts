@@ -3,6 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
 import { cache } from "react";
+import type { ChargePrices } from "./charge-cost";
 import { createFormatter, type Formatter } from "./format";
 import { database } from "./database";
 import { isDemoMode } from "./demo/mode";
@@ -95,4 +96,9 @@ export async function getPlaceStyle(): Promise<PlaceStyle> {
 
 export async function getRangeKind(): Promise<"rated" | "ideal"> {
   return (await getPreferences()).range;
+}
+
+export async function getChargePrices(): Promise<ChargePrices> {
+  const { chargePrice, fastChargePrice } = await getPreferences();
+  return { perKwh: chargePrice, fastPerKwh: fastChargePrice };
 }

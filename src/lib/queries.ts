@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { cache } from "react";
+import { chargeSessions } from "./charge-sessions";
 import { database } from "./database";
 import { rangeColumn } from "./range-columns";
 import { sampleRoute, type LngLat } from "./route";
@@ -80,6 +81,7 @@ export type Charge = {
   maxPowerKw: number | null;
   fastCharger: boolean;
   cost: number | null;
+  costEstimated: boolean;
   latitude: number | null;
   longitude: number | null;
 };
@@ -161,13 +163,18 @@ export const carSnapshot = cache(
         tpms.tpms_pressure_rr::float8 as "tpmsRearRight",
         st.state::text as state,
         st.start_date at time zone 'UTC' as "stateSince",
-        exists (
-          select 1 from drives d where d.car_id = ${carId} and d.end_date is null
-        ) as driving,
-        exists (
-          select 1 from charging_processes cp
-          where cp.car_id = ${carId} and cp.end_date is null
-        ) as charging,
+        coalesce((
+          select d.end_date is null from drives d
+          where d.car_id = ${carId}
+          order by d.start_date desc
+          limit 1
+        ), false) as driving,
+        coalesce((
+          select cp.end_date is null from charging_processes cp
+          where cp.car_id = ${carId}
+          order by cp.start_date desc
+          limit 1
+        ), false) as charging,
         split_part(upd.version, ' ', 1) as "softwareVersion"
       from (select ${carId}::int as car_id) car
       left join lateral (
@@ -431,7 +438,10 @@ export async function recentCharges(
   range: DateRange | null = null,
 ): Promise<Charge[]> {
   await connection();
-  const style = await getPlaceStyle();
+  const [style, { relation: sessions }] = await Promise.all([
+    getPlaceStyle(),
+    chargeSessions(carId),
+  ]);
   const rows = await database()<ChargeRow[]>`
     select
       cp.id::int as id,
@@ -442,6 +452,7 @@ export async function recentCharges(
       cp.end_battery_level::int as "endLevel",
       cp.duration_min::int as "durationMin",
       cp.cost::float8 as cost,
+      cp.cost_estimated as "costEstimated",
       stats."maxPowerKw",
       coalesce(stats."fastCharger", false) as "fastCharger",
       cp_position.latitude::float8 as latitude,
@@ -450,7 +461,7 @@ export async function recentCharges(
         'geofence', g.name, 'name', a.name, 'road', a.road,
         'houseNumber', a.house_number, 'city', a.city
       ) as place
-    from charging_processes cp
+    from ${sessions} cp
     left join addresses a on a.id = cp.address_id
     left join geofences g on g.id = cp.geofence_id
     left join positions cp_position on cp_position.id = cp.position_id

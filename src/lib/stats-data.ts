@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { cache } from "react";
+import { chargeSessions } from "./charge-sessions";
 import { database } from "./database";
 import { rangeColumn, type RangeKind } from "./range-columns";
 import type { SpeedBandRow } from "./speed-bands";
@@ -34,6 +35,7 @@ export type ChargeTotals = {
   sessions: number;
   addedKwh: number;
   cost: number | null;
+  estimatedCosts: number;
 };
 
 export type EfficiencyPoint = {
@@ -97,7 +99,11 @@ export const statsBuckets = cache(
     await connection();
     const since = sinceOf(from);
     const shift = unit === "week" && weekStartsSunday ? 1 : 0;
-    const used = usedEnergy(await getRangeKind());
+    const [kind, { relation: sessions }] = await Promise.all([
+      getRangeKind(),
+      chargeSessions(carId),
+    ]);
+    const used = usedEnergy(kind);
     return database()<StatsBucket[]>`
       with first_drive as (
         select min(start_date) at time zone 'UTC' as at
@@ -156,7 +162,7 @@ export const statsBuckets = cache(
           ) - make_interval(days => ${shift}) as bucket,
           sum(charge_energy_added) as charged,
           sum(cost) as cost
-        from charging_processes
+        from ${sessions} cp
         where car_id = ${carId}
           and start_date >= (${since}::timestamptz at time zone 'UTC')
         group by 1
@@ -203,12 +209,14 @@ export const driveTotals = cache(
 export const periodChargeTotals = cache(
   async (carId: number, from: Date | null): Promise<ChargeTotals> => {
     await connection();
+    const { relation: sessions } = await chargeSessions(carId);
     const [row] = await database()<ChargeTotals[]>`
       select
         count(*)::int as sessions,
         coalesce(sum(charge_energy_added), 0)::float8 as "addedKwh",
-        sum(cost)::float8 as cost
-      from charging_processes
+        sum(cost)::float8 as cost,
+        count(*) filter (where cost_estimated)::int as "estimatedCosts"
+      from ${sessions} cp
       where car_id = ${carId}
         and charge_energy_added > 0.01
         and start_date >= (${sinceOf(from)}::timestamptz at time zone 'UTC')

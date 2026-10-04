@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,6 +10,7 @@ import { Metric } from "@/components/metric";
 import { PageTransition } from "@/components/page-transition";
 import { Panel, PanelNote } from "@/components/panel";
 import { requireCar } from "@/lib/car-route";
+import { costBreakdown } from "@/lib/charge-cost";
 import { chargeCurve, findChargeSession } from "@/lib/charge-data";
 import { mapThemeOf } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
@@ -149,6 +150,28 @@ export default async function ChargePage({
   const kind = session.fast
     ? [session.brand, "DC fast charge"].filter(Boolean).join(" ")
     : `AC${session.phases ? `, ${session.phases} phase` : ""}`;
+  const levelsAdded =
+    session.startLevel !== null && session.endLevel !== null
+      ? session.endLevel - session.startLevel
+      : null;
+  const breakdown = costBreakdown({
+    cost: session.cost,
+    addedKwh: added,
+    billedKwh: session.billedKwh,
+    rangeAdded,
+    levelsAdded,
+  });
+  const costSource = session.costEstimated
+    ? "Estimate from your price"
+    : "Recorded in TeslaMate";
+  const settingsLink = (
+    <Link
+      href={`/cars/${car.id}/settings#cost`}
+      className="underline underline-offset-2 transition-tesla hover:text-foreground"
+    >
+      Settings
+    </Link>
+  );
 
   return (
     <PageTransition>
@@ -188,6 +211,16 @@ export default async function ChargePage({
           {f.day(session.startAt, now)} {f.clock(session.startAt)}
           {session.endAt ? ` to ${f.clock(session.endAt)}` : " · charging now"}
         </p>
+        {session.unclosed && (
+          <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+            <CircleAlert
+              aria-hidden
+              className="mt-0.5 size-4 shrink-0 text-warning"
+            />
+            TeslaMate did not close this charge. This happens when TeslaMate
+            restarts during a charge. The values come from the charge records.
+          </p>
+        )}
       </div>
 
       <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
@@ -252,9 +285,11 @@ export default async function ChargePage({
           label="Cost"
           value={session.cost === null ? missing : f.cost(session.cost)}
           detail={
-            session.cost !== null && added
-              ? `${f.cost(session.cost / added)} per kWh added`
-              : undefined
+            session.cost !== null ? (
+              costSource
+            ) : ongoing ? undefined : (
+              <>Set a price in {settingsLink}</>
+            )
           }
         />
         <Metric
@@ -272,6 +307,71 @@ export default async function ChargePage({
       </dl>
 
       <div className="mt-12 grid grid-cols-1 gap-4">
+        {breakdown && (
+          <Panel
+            title="Cost"
+            action={<span className="text-xs text-subtle">{costSource}</span>}
+          >
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3">
+              <Metric
+                label="Energy billed"
+                value={
+                  session.billedKwh === null
+                    ? "—"
+                    : f.number(session.billedKwh, 1)
+                }
+                unit="kWh"
+                detail="From the charger"
+              />
+              <Metric
+                label="Price per kWh"
+                value={f.cost(breakdown.perKwhBilled)}
+                detail={
+                  session.costEstimated ? "Your price" : "Cost ÷ energy billed"
+                }
+              />
+              <Metric
+                label="Per kWh in the battery"
+                value={f.cost(breakdown.perKwhAdded)}
+                detail={
+                  added === null
+                    ? undefined
+                    : `${f.number(added, 1)} kWh stored`
+                }
+              />
+              <Metric
+                label="Charging losses"
+                value={f.cost(breakdown.lossCost)}
+                detail={
+                  breakdown.lossKwh === null
+                    ? undefined
+                    : `${f.number(breakdown.lossKwh, 1)} kWh not stored`
+                }
+              />
+              <Metric
+                label={`Per 100 ${f.units.distance} of range`}
+                value={f.cost(breakdown.per100Range)}
+                detail={
+                  rangeAdded === null
+                    ? undefined
+                    : `${f.number(Math.round(rangeAdded))} ${f.units.distance} added`
+                }
+              />
+              <Metric
+                label="Per 1% of battery"
+                value={f.cost(breakdown.perLevel)}
+                detail={
+                  levelsAdded === null ? undefined : `${levelsAdded}% added`
+                }
+              />
+            </dl>
+            {session.costEstimated && (
+              <p className="mt-6 text-xs text-subtle">
+                Change the price in {settingsLink}.
+              </p>
+            )}
+          </Panel>
+        )}
         <Panel title="Power by battery level">
           {powerByLevel.length > 1 ? (
             <SeriesChart

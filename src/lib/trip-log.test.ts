@@ -48,6 +48,7 @@ const charge: Charge = {
   endLevel: 78,
   durationMin: 22,
   cost: 16.171,
+  costEstimated: false,
   maxPowerKw: 170.04,
   fastCharger: true,
   latitude: null,
@@ -110,8 +111,11 @@ describe("drive rows", () => {
 
 describe("charge rows", () => {
   test("name the currency and the charger type", () => {
-    expect(chargeHeader("USD").at(-1)).toBe("Cost (USD)");
-    expect(chargeHeader(null).at(-1)).toBe("Cost");
+    expect(chargeHeader("USD").slice(-2)).toEqual([
+      "Cost (USD)",
+      "Cost source",
+    ]);
+    expect(chargeHeader(null).at(-2)).toBe("Cost");
     expect(chargeRow(charge, zone)).toEqual([
       "2026-09-09 11:40",
       null,
@@ -123,6 +127,14 @@ describe("charge rows", () => {
       22,
       170,
       16.17,
+      "TeslaMate",
+    ]);
+    expect(
+      chargeRow({ ...charge, cost: 9.5, costEstimated: true }, zone).at(-1),
+    ).toBe("Estimate");
+    expect(chargeRow({ ...charge, cost: null }, zone).slice(-2)).toEqual([
+      null,
+      null,
     ]);
   });
 });

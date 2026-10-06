@@ -132,6 +132,34 @@ describe("carSummary", () => {
     });
   });
 
+  test("gives the expected end of a charge", () => {
+    const arrived = Date.UTC(2026, 9, 5, 22, 0);
+    const charging = liveView(
+      {
+        state: "charging",
+        charging_state: "Charging",
+        plugged_in: "true",
+        charge_limit_soc: "80",
+        charger_power: "3",
+        time_to_full_charge: "1.25",
+      },
+      { time_to_full_charge: arrived },
+      arrived,
+    );
+    const summary = carSummary({
+      ...base,
+      live: { connected: true, hasValues: true, view: charging },
+    });
+    expect(summary.state).toBe("charging");
+    expect(summary.live).toMatchObject({
+      charging: {
+        limitPercent: 80,
+        hoursToFull: 1.25,
+        fullAt: "2026-10-05T23:15:00.000Z",
+      },
+    });
+  });
+
   test("marks a lost feed and keeps the recorded state", () => {
     const summary = carSummary({
       ...base,

@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Added
+
+- End of a charge: while the car charges, the Live card and the page of the charge in progress show when the charge reaches the limit and the time left. The value is the estimate of the car, the same as in the Tesla app, and the time left counts down in the browser. `summary.json` gives `live.charging.fullAt`.
+
 ## [1.4.0] - 2026-10-05
 
 ### Added

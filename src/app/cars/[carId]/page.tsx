@@ -179,6 +179,7 @@ export default async function OverviewPage({
               carId={car.id}
               carName={car.name}
               feed={live}
+              now={now}
               f={f}
               className="mt-12"
             />

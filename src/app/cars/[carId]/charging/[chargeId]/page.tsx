@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BackLink } from "@/components/back-link";
+import { ChargeCountdown } from "@/components/charge-countdown";
 import { niceDomain } from "@/components/charts/nice-domain";
 import { SeriesChart } from "@/components/charts/series-chart";
+import { LiveStream } from "@/components/live-stream";
 import { LocationMap } from "@/components/maps";
 import { Metric } from "@/components/metric";
 import { PageTransition } from "@/components/page-transition";
@@ -12,6 +14,8 @@ import { Panel, PanelNote } from "@/components/panel";
 import { requireCar } from "@/lib/car-route";
 import { costBreakdown } from "@/lib/charge-cost";
 import { chargeCurve, findChargeSession } from "@/lib/charge-data";
+import { finishText } from "@/lib/live/estimate";
+import { getLive } from "@/lib/live/live";
 import { mapThemeOf } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 import { ongoingText } from "@/lib/vehicle";
@@ -102,8 +106,16 @@ export default async function ChargePage({
   const id = parseId(chargeId);
   const session = id === null ? null : await findChargeSession(car.id, id);
   if (!session) notFound();
-  const curve = await chargeCurve(session.id);
+  const inProgress = session.endAt === null && !session.unclosed;
+  const [curve, live] = await Promise.all([
+    chargeCurve(session.id),
+    inProgress ? getLive(car.id) : Promise.resolve(null),
+  ]);
   const now = new Date();
+  const liveCharge =
+    live?.connected && live.view.charging.state === "Charging"
+      ? live.view.charging
+      : null;
   const base = `/cars/${car.id}/charging`;
 
   const byLevel = new Map<number, { sum: number; count: number }>();
@@ -210,7 +222,17 @@ export default async function ChargePage({
         <p className="mt-2 text-sm text-muted-foreground tabular">
           {f.day(session.startAt, now)} {f.clock(session.startAt)}
           {session.endAt ? ` to ${f.clock(session.endAt)}` : " · charging now"}
+          {liveCharge?.fullAt && (
+            <>
+              {` · ${finishText(liveCharge.fullAt, liveCharge.limitPercent, f, now)} · `}
+              <ChargeCountdown
+                fullAt={liveCharge.fullAt.getTime()}
+                renderedAt={now.getTime()}
+              />
+            </>
+          )}
         </p>
+        {live && <LiveStream carId={car.id} />}
         {session.unclosed && (
           <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
             <CircleAlert

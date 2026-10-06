@@ -34,6 +34,7 @@ Times are ISO 8601 in UTC. A value that TeslaMate does not have is `null`.
 | `updatedAt` | The time of the last position or state change |
 | `battery.rangeKind` | `rated` or `ideal`, from the Settings of the shared `owner` user |
 | `live` | `null` without `MQTT_URL`. `{ "connected": false }` when the feed is down. |
+| `live.charging.fullAt` | The time at which the charge reaches the limit, from the estimate of the car. `null` when the car does not charge. |
 | `live.openParts` | The names of the open doors, windows, trunk, frunk, and sunroof. `null` when the feed has not sent them. |
 | `location` | Only with `?location=1`: `latitude`, `longitude`, `at`, and `navigation` with the destination of the active route |
 

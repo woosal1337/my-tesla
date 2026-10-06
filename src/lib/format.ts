@@ -27,6 +27,17 @@ const numberLocales: Record<Preferences["numberStyle"], string> = {
   "space-comma": "fr-FR",
 };
 
+export function durationText(minutes: number | null | undefined): string {
+  if (!isNumber(minutes) || minutes < 0) return missing;
+  const rounded = Math.round(minutes);
+  if (rounded < 60) return `${rounded} min`;
+  const hours = Math.floor(rounded / 60);
+  const rest = rounded % 60;
+  return rest
+    ? `${hours} h ${String(rest).padStart(2, "0")} min`
+    : `${hours} h`;
+}
+
 function isNumber(value: number | null | undefined): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
@@ -97,16 +108,7 @@ export function createFormatter(settings: FormatSettings, timeZone: string) {
     return dayText(parts, style);
   }
 
-  function duration(minutes: number | null | undefined): string {
-    if (!isNumber(minutes) || minutes < 0) return missing;
-    const rounded = Math.round(minutes);
-    if (rounded < 60) return `${rounded} min`;
-    const hours = Math.floor(rounded / 60);
-    const rest = rounded % 60;
-    return rest
-      ? `${hours} h ${String(rest).padStart(2, "0")} min`
-      : `${hours} h`;
-  }
+  const duration = durationText;
 
   return {
     settings,

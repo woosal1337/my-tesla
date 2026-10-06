@@ -12,13 +12,13 @@ export type LiveFeed = {
 
 export async function getLive(carId: number): Promise<LiveFeed | null> {
   const feed = isDemoMode()
-    ? { connected: true, values: demoLiveValues(carId) }
+    ? { connected: true, values: demoLiveValues(carId), stamps: {} }
     : await mqttValues(carId);
   if (!feed) return null;
   return {
     connected: feed.connected,
     hasValues: Object.keys(feed.values).length > 0,
-    view: liveView(feed.values),
+    view: liveView(feed.values, feed.stamps),
   };
 }
 

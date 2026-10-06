@@ -14,8 +14,11 @@ import {
   Unplug,
   type LucideIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
+import { ChargeCountdown } from "@/components/charge-countdown";
 import { LiveStream } from "@/components/live-stream";
 import type { Formatter } from "@/lib/format";
+import { finishText } from "@/lib/live/estimate";
 import type { LiveFeed } from "@/lib/live/live";
 import type { LiveView } from "@/lib/live/view";
 import { cn } from "@/lib/utils";
@@ -27,6 +30,7 @@ type TileContent = {
   icon: LucideIcon;
   title: string;
   detail?: string | null;
+  note?: ReactNode;
   tone?: Tone;
 };
 
@@ -37,7 +41,13 @@ const toneClass: Record<Tone, string> = {
   warning: "text-warning",
 };
 
-function Tile({ icon: Icon, title, detail, tone = "normal" }: TileContent) {
+function Tile({
+  icon: Icon,
+  title,
+  detail,
+  note,
+  tone = "normal",
+}: TileContent) {
   return (
     <div className="flex min-w-0 gap-3">
       <Icon
@@ -51,6 +61,7 @@ function Tile({ icon: Icon, title, detail, tone = "normal" }: TileContent) {
             {detail}
           </p>
         )}
+        {note && <p className="mt-0.5 truncate text-sm text-subtle">{note}</p>}
       </div>
     </div>
   );
@@ -100,7 +111,11 @@ function openingsTile(view: LiveView): TileContent | null {
   };
 }
 
-function chargingTile(view: LiveView, f: Formatter): TileContent | null {
+function chargingTile(
+  view: LiveView,
+  f: Formatter,
+  now: Date,
+): TileContent | null {
   const charge = view.charging;
   if (charge.pluggedIn === null && charge.state === null) return null;
   const limit =
@@ -114,10 +129,16 @@ function chargingTile(view: LiveView, f: Formatter): TileContent | null {
       title: "Charging",
       detail: joined([
         charge.powerKw !== null && `${f.number(charge.powerKw)} kW`,
-        charge.hoursToFull !== null &&
-          charge.hoursToFull > 0 &&
-          `${f.duration(charge.hoursToFull * 60)} to ${percent(charge.limitPercent) ?? "full"}`,
+        charge.fullAt
+          ? finishText(charge.fullAt, charge.limitPercent, f, now)
+          : limit,
       ]),
+      note: charge.fullAt && (
+        <ChargeCountdown
+          fullAt={charge.fullAt.getTime()}
+          renderedAt={now.getTime()}
+        />
+      ),
       tone: "charge",
     };
   }
@@ -270,12 +291,14 @@ export function LivePanel({
   carName,
   feed,
   f,
+  now,
   className,
 }: {
   carId: number;
   carName: string;
   feed: LiveFeed;
   f: Formatter;
+  now: Date;
   className?: string;
 }) {
   const view = feed.view;
@@ -284,7 +307,7 @@ export function LivePanel({
     routeTile(view, f),
     lockTile(view),
     openingsTile(view),
-    chargingTile(view, f),
+    chargingTile(view, f, now),
     climateTile(view, f),
     softwareTile(view),
   ].filter((tile): tile is TileContent => tile !== null);

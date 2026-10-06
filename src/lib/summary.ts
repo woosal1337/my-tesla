@@ -27,6 +27,7 @@ type LiveSummary = {
     limitPercent: number | null;
     powerKw: number | null;
     hoursToFull: number | null;
+    fullAt: string | null;
     scheduledStart: string | null;
   };
   driving: {
@@ -125,6 +126,7 @@ function liveSummary(view: LiveView): LiveSummary {
       limitPercent: view.charging.limitPercent,
       powerKw: view.charging.powerKw,
       hoursToFull: view.charging.hoursToFull,
+      fullAt: iso(view.charging.fullAt),
       scheduledStart: iso(view.charging.scheduledStart),
     },
     driving: view.driving,

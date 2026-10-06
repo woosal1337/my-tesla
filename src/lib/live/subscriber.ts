@@ -7,6 +7,7 @@ import {
   withMessage,
   type LiveValues,
 } from "./topics";
+import type { LiveStamps } from "./view";
 
 type Listener = () => void;
 
@@ -14,6 +15,7 @@ type Feed = {
   client: MqttClient;
   connected: boolean;
   values: Map<number, LiveValues>;
+  stamps: Map<number, LiveStamps>;
   listeners: Map<number, Set<Listener>>;
   ready: Promise<void>;
 };
@@ -37,6 +39,7 @@ function startFeed(config: MqttConfig): Feed {
     client,
     connected: false,
     values: new Map(),
+    stamps: new Map(),
     listeners: new Map(),
     ready: Promise.resolve(),
   };
@@ -64,6 +67,10 @@ function startFeed(config: MqttConfig): Feed {
     const next = withMessage(current, parsed.key, payload.toString("utf8"));
     if (next === current) return;
     feed.values.set(parsed.carId, next);
+    feed.stamps.set(parsed.carId, {
+      ...feed.stamps.get(parsed.carId),
+      [parsed.key]: Date.now(),
+    });
     feed.listeners.get(parsed.carId)?.forEach((listener) => listener());
   });
   return feed;
@@ -78,13 +85,19 @@ function currentFeed(): Feed | null {
   return store[feedKey];
 }
 
-export async function mqttValues(
-  carId: number,
-): Promise<{ connected: boolean; values: LiveValues } | null> {
+export async function mqttValues(carId: number): Promise<{
+  connected: boolean;
+  values: LiveValues;
+  stamps: LiveStamps;
+} | null> {
   const feed = currentFeed();
   if (!feed) return null;
   await feed.ready;
-  return { connected: feed.connected, values: feed.values.get(carId) ?? {} };
+  return {
+    connected: feed.connected,
+    values: feed.values.get(carId) ?? {},
+    stamps: feed.stamps.get(carId) ?? {},
+  };
 }
 
 export function watchMqtt(

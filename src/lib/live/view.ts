@@ -1,5 +1,7 @@
 import type { LiveValues } from "./topics";
 
+export type LiveStamps = Readonly<Record<string, number>>;
+
 type LiveTires = {
   frontLeft: number;
   frontRight: number;
@@ -30,6 +32,7 @@ export type LiveView = {
     limitPercent: number | null;
     powerKw: number | null;
     hoursToFull: number | null;
+    fullAt: Date | null;
     portOpen: boolean | null;
     currentA: number | null;
     currentMaxA: number | null;
@@ -174,8 +177,22 @@ function updateVersion(values: LiveValues): string | null {
   return typeof latest === "string" && latest.trim() ? latest.trim() : null;
 }
 
-export function liveView(values: LiveValues): LiveView {
+function fullAt(
+  hoursToFull: number | null,
+  receivedAt: number | undefined,
+  now: number,
+): Date | null {
+  if (hoursToFull === null || hoursToFull <= 0) return null;
+  return new Date((receivedAt ?? now) + hoursToFull * 3_600_000);
+}
+
+export function liveView(
+  values: LiveValues,
+  stamps: LiveStamps = {},
+  now: number = Date.now(),
+): LiveView {
   const gear = text(values.shift_state);
+  const hoursToFull = amount(values.time_to_full_charge);
   const openingsKnown = [
     "doors_open",
     "windows_open",
@@ -196,7 +213,8 @@ export function liveView(values: LiveValues): LiveView {
       state: text(values.charging_state),
       limitPercent: amount(values.charge_limit_soc),
       powerKw: amount(values.charger_power),
-      hoursToFull: amount(values.time_to_full_charge),
+      hoursToFull,
+      fullAt: fullAt(hoursToFull, stamps.time_to_full_charge, now),
       portOpen: flag(values.charge_port_door_open),
       currentA: amount(values.charge_current_request),
       currentMaxA: amount(values.charge_current_request_max),

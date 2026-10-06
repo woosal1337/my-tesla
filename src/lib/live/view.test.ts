@@ -137,6 +137,29 @@ describe("liveView", () => {
     expect(view.tireWarnings).toEqual(["rear left"]);
   });
 
+  test("dates the end of a charge from the time the estimate arrived", () => {
+    const arrived = Date.UTC(2026, 9, 5, 22, 0);
+    const charging = {
+      ...parked,
+      charging_state: "Charging",
+      plugged_in: "true",
+      charge_limit_soc: "80",
+      time_to_full_charge: "2.5",
+    };
+    const view = liveView(
+      charging,
+      { time_to_full_charge: arrived },
+      arrived + 600_000,
+    );
+    expect(view.charging.hoursToFull).toBe(2.5);
+    expect(view.charging.fullAt?.toISOString()).toBe(
+      "2026-10-06T00:30:00.000Z",
+    );
+    const unstamped = liveView(charging, {}, arrived);
+    expect(unstamped.charging.fullAt?.getTime()).toBe(arrived + 9_000_000);
+    expect(liveView(parked).charging.fullAt).toBeNull();
+  });
+
   test("gives nulls for a car with no values", () => {
     const view = liveView({});
     expect(view.locked).toBeNull();

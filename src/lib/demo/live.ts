@@ -40,7 +40,7 @@ const cars: Record<number, LiveValues> = {
     update_available: "true",
     update_version: "2026.32.6",
     download_perc: "100",
-    install_perc: "0",
+    install_perc: "1",
     tpms_soft_warning_fl: "false",
     tpms_soft_warning_fr: "false",
     tpms_soft_warning_rl: "false",
@@ -64,7 +64,7 @@ const cars: Record<number, LiveValues> = {
     version: "2026.20.300",
     update_available: "false",
     download_perc: "0",
-    install_perc: "0",
+    install_perc: "1",
   },
 };
 

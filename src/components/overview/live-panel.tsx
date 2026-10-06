@@ -19,7 +19,7 @@ import { ChargeCountdown } from "@/components/charge-countdown";
 import { LiveStream } from "@/components/live-stream";
 import type { Formatter } from "@/lib/format";
 import type { LiveFeed } from "@/lib/live/live";
-import type { LiveView } from "@/lib/live/view";
+import { updatePhase, type LiveView } from "@/lib/live/view";
 import { cn } from "@/lib/utils";
 
 type Tone = "normal" | "active" | "charge" | "warning";
@@ -201,35 +201,33 @@ function climateTile(view: LiveView, f: Formatter): TileContent | null {
   };
 }
 
+const updateTitles = {
+  ready: "Update ready",
+  downloading: "Downloading update",
+  installing: "Installing update",
+};
+
 function softwareTile(view: LiveView): TileContent | null {
   const software = view.software;
   if (software.version === null) return null;
-  const next = software.updateVersion;
-  if ((software.installPercent ?? 0) > 0) {
+  const phase = updatePhase(software);
+  if (phase.kind === "current") {
     return {
       key: "software",
-      icon: Download,
-      title: "Installing update",
-      detail: joined([next, percent(software.installPercent)]),
-      tone: "active",
-    };
-  }
-  if (software.updateAvailable) {
-    const downloading =
-      software.downloadPercent !== null && software.downloadPercent < 100;
-    return {
-      key: "software",
-      icon: Download,
-      title: downloading ? "Downloading update" : "Update ready",
-      detail: joined([next, downloading && percent(software.downloadPercent)]),
-      tone: "active",
+      icon: BadgeCheck,
+      title: "Up to date",
+      detail: software.version,
     };
   }
   return {
     key: "software",
-    icon: BadgeCheck,
-    title: "Up to date",
-    detail: software.version,
+    icon: Download,
+    title: updateTitles[phase.kind],
+    detail: joined([
+      software.updateVersion,
+      phase.kind !== "ready" && percent(phase.percent),
+    ]),
+    tone: "active",
   };
 }
 

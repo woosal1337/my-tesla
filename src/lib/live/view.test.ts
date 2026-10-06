@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { liveView } from "./view";
+import { liveView, updatePhase } from "./view";
 
 const parked = {
   state: "online",
@@ -166,5 +166,46 @@ describe("liveView", () => {
     expect(view.openingsKnown).toBe(false);
     expect(view.tires).toBeNull();
     expect(view.charging.pluggedIn).toBeNull();
+  });
+});
+
+describe("updatePhase", () => {
+  const software = (values: Record<string, string>) =>
+    liveView({ version: "2026.32.7", ...values }).software;
+
+  test("reads the idle install value of 1 as no update", () => {
+    expect(
+      updatePhase(
+        software({
+          update_available: "false",
+          download_perc: "0",
+          install_perc: "1",
+          software_update:
+            '{"installed_version":"2026.32.7","latest_version":"2026.32.7"}',
+        }),
+      ),
+    ).toEqual({ kind: "current" });
+    expect(updatePhase(software({ install_perc: "40" }))).toEqual({
+      kind: "current",
+    });
+  });
+
+  test("follows an update from download to install", () => {
+    const pending = { update_available: "true", update_version: "2026.38.1" };
+    expect(
+      updatePhase(
+        software({ ...pending, download_perc: "45", install_perc: "1" }),
+      ),
+    ).toEqual({ kind: "downloading", percent: 45 });
+    expect(
+      updatePhase(
+        software({ ...pending, download_perc: "100", install_perc: "1" }),
+      ),
+    ).toEqual({ kind: "ready" });
+    expect(
+      updatePhase(
+        software({ ...pending, download_perc: "100", install_perc: "37" }),
+      ),
+    ).toEqual({ kind: "installing", percent: 37 });
   });
 });

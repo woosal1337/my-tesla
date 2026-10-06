@@ -249,3 +249,24 @@ export function liveView(
     serviceMode: flag(values.service_mode),
   };
 }
+
+export type UpdatePhase =
+  | { kind: "current" }
+  | { kind: "ready" }
+  | { kind: "downloading"; percent: number }
+  | { kind: "installing"; percent: number };
+
+const idleInstallPercent = 1;
+
+export function updatePhase(software: LiveView["software"]): UpdatePhase {
+  if (software.updateAvailable !== true) return { kind: "current" };
+  const install = software.installPercent ?? 0;
+  if (install > idleInstallPercent) {
+    return { kind: "installing", percent: install };
+  }
+  const download = software.downloadPercent;
+  if (download !== null && download < 100) {
+    return { kind: "downloading", percent: download };
+  }
+  return { kind: "ready" };
+}

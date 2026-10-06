@@ -52,8 +52,11 @@ export function BatteryPanel({
           {rangeUnit}
         </span>
         {fullAt !== null && renderedAt !== undefined && (
-          <span className="flex items-center gap-1.5 text-lg font-medium text-charge">
-            <PlugZap aria-hidden className="size-5" />
+          <span className="text-lg font-medium text-charge">
+            <PlugZap
+              aria-hidden
+              className="mr-1.5 inline-block size-[1em] align-[-0.125em]"
+            />
             <ChargeCountdown fullAt={fullAt} renderedAt={renderedAt} />
           </span>
         )}

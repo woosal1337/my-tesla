@@ -4,6 +4,12 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-10-06
+
+### Fixed
+
+- Overview: the time left of a charge sits on the same line and at the same height as the range. The icon has the height of the text.
+
 ## [1.5.1] - 2026-10-06
 
 ### Changed
@@ -84,7 +90,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/woosal1337/my-tesla/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/woosal1337/my-tesla/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/woosal1337/my-tesla/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/woosal1337/my-tesla/compare/v1.3.0...v1.4.0

@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-10-06
+
 ### Changed
 
 - The time left of a charge is easier to find. The Overview shows it in green next to the battery level, and the page of the charge in progress shows it in large green text. The battery caption names the charge limit. The Live card and the charge page show only the time left, not the end clock time.
@@ -82,7 +84,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/woosal1337/my-tesla/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/woosal1337/my-tesla/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/woosal1337/my-tesla/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/woosal1337/my-tesla/compare/v1.2.0...v1.3.0

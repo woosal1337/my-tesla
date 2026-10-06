@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Changed
+
+- The time left of a charge is easier to find. The Overview shows it in green next to the battery level, and the page of the charge in progress shows it in large green text. The battery caption names the charge limit. The Live card and the charge page show only the time left, not the end clock time.
+
 ## [1.5.0] - 2026-10-06
 
 ### Added

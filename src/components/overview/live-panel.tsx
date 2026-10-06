@@ -18,7 +18,6 @@ import type { ReactNode } from "react";
 import { ChargeCountdown } from "@/components/charge-countdown";
 import { LiveStream } from "@/components/live-stream";
 import type { Formatter } from "@/lib/format";
-import { finishText } from "@/lib/live/estimate";
 import type { LiveFeed } from "@/lib/live/live";
 import type { LiveView } from "@/lib/live/view";
 import { cn } from "@/lib/utils";
@@ -129,9 +128,7 @@ function chargingTile(
       title: "Charging",
       detail: joined([
         charge.powerKw !== null && `${f.number(charge.powerKw)} kW`,
-        charge.fullAt
-          ? finishText(charge.fullAt, charge.limitPercent, f, now)
-          : limit,
+        limit,
       ]),
       note: charge.fullAt && (
         <ChargeCountdown

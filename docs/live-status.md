@@ -8,7 +8,7 @@ TeslaMate can send the current state of each car to an MQTT broker. My Tesla rea
 |---|---|
 | Lock | Locked or unlocked, Sentry Mode, someone inside |
 | Openings | All closed, or each open door, window, trunk, frunk, and the sunroof |
-| Charging | Plugged in, charging state, power, the end time of the charge and the time left, the limit, a scheduled start |
+| Charging | Plugged in, charging state, power, the limit, the time left, a scheduled start |
 | Climate | Climate on or off, preconditioning, Dog Mode, Camp Mode, cabin temperature |
 | Software | Up to date, download progress, update ready, install progress |
 | Driving | Gear, speed, and power, while the car is in D, R, or N |
@@ -20,9 +20,13 @@ TeslaMate keeps most of these values only in MQTT. They are not in the database.
 
 ### End of a charge
 
-While the car charges, the Charging tile shows when the charge reaches the limit, such as "80% at 03:45", and the time left. The value comes from `time_to_full_charge`, the estimate that the car calculates. The Tesla app shows the same estimate.
+While the car charges, the app shows the time left until the charge limit, such as "2 h 10 min left", in three places:
 
-The server records the time at which each value arrives, so the end time does not move when another value changes. The browser counts the time left down every 15 seconds. The page of the charge in progress shows the same line, and it updates by itself while the charge runs. `summary.json` gives the end time as `live.charging.fullAt`.
+1. On the Overview, in green next to the battery level. The caption under the bar names the limit.
+2. In large green text on the page of the charge in progress. This page updates by itself while the charge runs.
+3. In the Charging tile of the Live card.
+
+The value comes from `time_to_full_charge`, the estimate that the car calculates. The Tesla app shows the same estimate. The server records the time at which each value arrives, so the end does not move when another value changes. The browser counts the time left down every 15 seconds. `summary.json` gives the end time as `live.charging.fullAt`.
 
 ## How it works
 

@@ -22,7 +22,7 @@ export function ChargeCountdown({
   const minutes = (fullAt - Math.max(now, renderedAt)) / 60_000;
   return (
     <span className="tabular">
-      {minutes < 1 ? "almost done" : `${durationText(minutes)} left`}
+      {minutes < 1 ? "Almost done" : `${durationText(minutes)} left`}
     </span>
   );
 }

@@ -71,6 +71,8 @@ export default async function OverviewPage({
     ]);
   const show = preferences.overview;
   const liveNow = live?.connected ? live.view : null;
+  const chargingNow =
+    liveNow?.charging.state === "Charging" ? liveNow.charging : null;
   const showLive = show.live && live !== null;
   const showMaps = preferences.maps === "show";
   const mapTheme = mapThemeOf(preferences);
@@ -79,7 +81,8 @@ export default async function OverviewPage({
     liveActivity(liveNow?.state ?? null) ?? carActivity(snapshot);
   const { label, tone } = activityLabel(activity);
   const lastSeen = snapshot.positionAt ?? snapshot.stateSince;
-  const battery = batteryTone(snapshot.batteryLevel, snapshot.charging);
+  const charging = snapshot.charging || chargingNow !== null;
+  const battery = batteryTone(snapshot.batteryLevel, charging);
   const hasData =
     snapshot.batteryLevel !== null || snapshot.positionAt !== null;
   const renderUrl = show.render ? carImageUrl(car) : null;
@@ -144,8 +147,11 @@ export default async function OverviewPage({
               caption={batteryCaption({
                 level: snapshot.batteryLevel,
                 usableLevel: snapshot.usableBatteryLevel,
-                charging: snapshot.charging,
+                charging,
+                limitPercent: chargingNow?.limitPercent,
               })}
+              fullAt={chargingNow?.fullAt?.getTime() ?? null}
+              renderedAt={now.getTime()}
             />
           </section>
 

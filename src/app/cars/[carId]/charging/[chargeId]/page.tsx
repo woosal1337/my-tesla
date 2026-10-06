@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, CircleAlert } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleAlert, PlugZap } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,7 +14,6 @@ import { Panel, PanelNote } from "@/components/panel";
 import { requireCar } from "@/lib/car-route";
 import { costBreakdown } from "@/lib/charge-cost";
 import { chargeCurve, findChargeSession } from "@/lib/charge-data";
-import { finishText } from "@/lib/live/estimate";
 import { getLive } from "@/lib/live/live";
 import { mapThemeOf } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
@@ -222,16 +221,16 @@ export default async function ChargePage({
         <p className="mt-2 text-sm text-muted-foreground tabular">
           {f.day(session.startAt, now)} {f.clock(session.startAt)}
           {session.endAt ? ` to ${f.clock(session.endAt)}` : " · charging now"}
-          {liveCharge?.fullAt && (
-            <>
-              {` · ${finishText(liveCharge.fullAt, liveCharge.limitPercent, f, now)} · `}
-              <ChargeCountdown
-                fullAt={liveCharge.fullAt.getTime()}
-                renderedAt={now.getTime()}
-              />
-            </>
-          )}
         </p>
+        {liveCharge?.fullAt && (
+          <p className="mt-4 flex items-center gap-2 text-2xl font-medium text-charge">
+            <PlugZap aria-hidden className="size-6 shrink-0" />
+            <ChargeCountdown
+              fullAt={liveCharge.fullAt.getTime()}
+              renderedAt={now.getTime()}
+            />
+          </p>
+        )}
         {live && <LiveStream carId={car.id} />}
         {session.unclosed && (
           <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">

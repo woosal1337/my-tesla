@@ -198,6 +198,14 @@ describe("batteryCaption", () => {
     expect(batteryCaption({ level: 50, usableLevel: 40, charging: true })).toBe(
       "Charging",
     );
+    expect(
+      batteryCaption({
+        level: 50,
+        usableLevel: 50,
+        charging: true,
+        limitPercent: 100,
+      }),
+    ).toBe("Charging to 100%");
   });
 
   test("names a cold battery only for a gap of three points or more", () => {

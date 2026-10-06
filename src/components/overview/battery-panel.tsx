@@ -1,6 +1,8 @@
 "use client";
 
+import { PlugZap } from "lucide-react";
 import { AnimatedNumber } from "@/components/animated-number";
+import { ChargeCountdown } from "@/components/charge-countdown";
 import { cn } from "@/lib/utils";
 
 type BatteryPanelProps = {
@@ -12,6 +14,8 @@ type BatteryPanelProps = {
   animated: boolean;
   tone: "charge" | "low" | "normal";
   caption: string;
+  fullAt?: number | null;
+  renderedAt?: number;
 };
 
 const fillTone = {
@@ -29,6 +33,8 @@ export function BatteryPanel({
   animated,
   tone,
   caption,
+  fullAt = null,
+  renderedAt,
 }: BatteryPanelProps) {
   const width = Math.min(100, Math.max(0, level ?? 0));
   return (
@@ -45,6 +51,12 @@ export function BatteryPanel({
           <AnimatedNumber value={range} locale={locale} animated={animated} />{" "}
           {rangeUnit}
         </span>
+        {fullAt !== null && renderedAt !== undefined && (
+          <span className="flex items-center gap-1.5 text-lg font-medium text-charge">
+            <PlugZap aria-hidden className="size-5" />
+            <ChargeCountdown fullAt={fullAt} renderedAt={renderedAt} />
+          </span>
+        )}
       </div>
       <div
         role="meter"

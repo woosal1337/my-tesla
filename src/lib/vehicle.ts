@@ -104,8 +104,13 @@ export function batteryCaption(input: {
   level: number | null;
   usableLevel: number | null;
   charging: boolean;
+  limitPercent?: number | null;
 }): string {
-  if (input.charging) return "Charging";
+  if (input.charging) {
+    return input.limitPercent
+      ? `Charging to ${Math.round(input.limitPercent)}%`
+      : "Charging";
+  }
   if (
     input.level !== null &&
     input.usableLevel !== null &&

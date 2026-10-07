@@ -19,7 +19,8 @@
     "check:source": "bun tools/check-source-policy.ts",
     "check:unused": "knip",
     "seed:demo": "bun tools/demo/seed.ts",
-    "brand:render": "bun tools/brand/render.ts"
+    "brand:render": "bun tools/brand/render.ts",
+    "check:layout": "bun tools/layout/audit.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -51,6 +52,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "knip": "6.39.0",
+    "playwright-core": "1.63.0",
     "postcss": "8.5.28",
     "prettier": "3.9.9",
     "tailwindcss": "^4",

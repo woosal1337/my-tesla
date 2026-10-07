@@ -67,6 +67,30 @@ Record a real failure case for the source policy and an installed hook before ac
 Restore the probe file after the check. Keep checks free of commits or pushes made only to test a hook.
 Report device, integration, CI, and live checks separately.
 
+## Layout check
+
+The layout check opens every page of the demo in WebKit, the Safari engine, and in Chrome. It uses widths of 390, 768, 1007, 1280, and 1440 px, with metric and with US units. It fails when a value wraps to a second line, when a value is cut off, or when a page is wider than the screen.
+
+1. Install the test browsers one time:
+
+   ```bash
+   bunx playwright-core install webkit chromium
+   ```
+
+2. Start the demo:
+
+   ```bash
+   DEMO_MODE=1 bun run dev
+   ```
+
+3. Run the check in a second terminal:
+
+   ```bash
+   bun run check:layout
+   ```
+
+Set `BASE_URL` for another address. Add `webkit` or `chromium` to check one engine. On a busy machine, check one engine at a time, because the system can stop a browser when memory runs low. The check then stops after 90 s without progress. The check needs about 12 minutes, so it is not part of CI. Run it after a change to a page layout, a font size, or a value format.
+
 ## Continuous integration
 
 `.github/workflows/checks.yml` installs Node.js 24 and Bun 1.3.14, runs `bun install --frozen-lockfile`, runs the gates, and runs `bun run build`. It needs only `contents: read`. The actions use full commit hashes.

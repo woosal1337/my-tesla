@@ -4,6 +4,18 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-07
+
+### Fixed
+
+- Overview: a tire pressure in psi wrapped to two lines in Safari. A value with a tooltip now stays on one line.
+- Stats, Trip, and a charge page: a long duration overlapped the next value or ran off the screen on a tablet. The large values now scale with the screen width.
+- A duration of 100 hours or more shows whole hours, such as "126 h".
+
+### Added
+
+- `bun run check:layout`: a layout check in WebKit and Chrome at five widths. Read [Quality](docs/quality.md#layout-check).
+
 ## [1.6.0] - 2026-10-07
 
 ### Added
@@ -102,7 +114,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/woosal1337/my-tesla/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/woosal1337/my-tesla/compare/v1.5.3...v1.6.0
 [1.5.3]: https://github.com/woosal1337/my-tesla/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/woosal1337/my-tesla/compare/v1.5.1...v1.5.2

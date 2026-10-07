@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-07
+
 ### Added
 
 - Value colors: consumption, charging efficiency, AC voltage, battery health, parked drain, tire pressure, and a low battery show green when better than usual and red when worse or a problem. A tooltip on hover or tap gives the meaning of the value and the expected value. [Value colors](docs/value-colors.md) lists the rules and their sources.
@@ -100,7 +102,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.5.3...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/woosal1337/my-tesla/compare/v1.5.3...v1.6.0
 [1.5.3]: https://github.com/woosal1337/my-tesla/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/woosal1337/my-tesla/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/woosal1337/my-tesla/compare/v1.5.0...v1.5.1

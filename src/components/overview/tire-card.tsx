@@ -24,7 +24,7 @@ function Tire({
         side === "left" ? "items-end text-right" : "items-start text-left",
       )}
     >
-      <span className="text-lg font-medium tabular">
+      <span className="text-lg font-medium whitespace-nowrap tabular">
         {assessment ? (
           <Assessed assessment={assessment}>{value}</Assessed>
         ) : (

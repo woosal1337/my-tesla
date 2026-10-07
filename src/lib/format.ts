@@ -31,6 +31,7 @@ export function durationText(minutes: number | null | undefined): string {
   if (!isNumber(minutes) || minutes < 0) return missing;
   const rounded = Math.round(minutes);
   if (rounded < 60) return `${rounded} min`;
+  if (rounded >= 6000) return `${Math.round(rounded / 60)} h`;
   const hours = Math.floor(rounded / 60);
   const rest = rounded % 60;
   return rest

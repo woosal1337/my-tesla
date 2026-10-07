@@ -28,6 +28,8 @@ describe("metric units", () => {
     [59.6, "1 h"],
     [65, "1 h 05 min"],
     [185, "3 h 05 min"],
+    [5999, "99 h 59 min"],
+    [7534, "126 h"],
   ])("duration(%p)", (value, expected) => {
     expect(metric.duration(value)).toBe(expected);
   });

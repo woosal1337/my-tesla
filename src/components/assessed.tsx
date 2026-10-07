@@ -24,7 +24,7 @@ export function Assessed({
         delay={120}
         closeDelay={80}
         className={cn(
-          "cursor-help rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "cursor-help rounded-sm text-left whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-ring",
           hint &&
             "underline decoration-current/40 decoration-dotted decoration-1 underline-offset-[0.25em]",
           tone,

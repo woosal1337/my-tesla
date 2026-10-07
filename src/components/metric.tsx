@@ -27,7 +27,7 @@ export function Metric({
         className={cn(
           "mt-1 flex items-baseline gap-1.5 font-medium tabular",
           size === "lg"
-            ? "text-[30px] leading-none sm:text-[40px]"
+            ? "text-[clamp(24px,7.4vw,40px)] leading-none md:text-[clamp(24px,3.7vw,40px)]"
             : "text-2xl",
         )}
       >

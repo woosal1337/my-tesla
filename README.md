@@ -41,6 +41,7 @@ Other properties:
 - **Read-only.** The app connects with a separate role that can only read. It refuses the TeslaMate superuser.
 - **Server-rendered.** Every value is read and formatted on the server. No database value reaches the browser without a server module.
 - **Light and dark.** The theme follows the system, or you choose one in Settings.
+- **Value colors.** Consumption, charging efficiency, battery health, parked drain, and tire pressure show green when better than usual and red when worse. A tooltip gives the expected value. Read [Value colors](docs/value-colors.md).
 - **Phone ready.** Every page works at 390 px wide, with a bottom tab bar.
 
 ## Screenshots
@@ -129,6 +130,7 @@ The full guide is [Installation](docs/installation.md).
 | Which outside services the browser contacts | [Privacy](docs/privacy.md) |
 | Run or deploy the public demo | [Demo site](docs/demo-site.md) |
 | Update the app and TeslaMate | [Upgrading](docs/upgrading.md) |
+| What the green and red values mean | [Value colors](docs/value-colors.md) |
 | Fix common problems | [Troubleshooting](docs/troubleshooting.md) |
 | How the app is built | [Architecture](docs/architecture.md) and [decisions](docs/decisions/) |
 | Run the app from source and contribute | [Development](docs/development.md), [demo data](docs/demo-data.md), [quality gates](docs/quality.md), and [CONTRIBUTING.md](CONTRIBUTING.md) |

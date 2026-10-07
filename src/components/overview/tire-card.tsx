@@ -1,15 +1,21 @@
 import { CircleAlert } from "lucide-react";
+import { Assessed } from "@/components/assessed";
+import type { Assessment } from "@/lib/assessment";
 import type { CarSnapshot } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+
+type TireKey = keyof NonNullable<CarSnapshot["tires"]>;
 
 function Tire({
   label,
   value,
   side,
+  assessment,
 }: {
   label: string;
   value: string;
   side: "left" | "right";
+  assessment: Assessment | null;
 }) {
   return (
     <div
@@ -18,7 +24,13 @@ function Tire({
         side === "left" ? "items-end text-right" : "items-start text-left",
       )}
     >
-      <span className="text-lg font-medium tabular">{value}</span>
+      <span className="text-lg font-medium tabular">
+        {assessment ? (
+          <Assessed assessment={assessment}>{value}</Assessed>
+        ) : (
+          value
+        )}
+      </span>
       <span className="text-xs text-subtle">{label}</span>
     </div>
   );
@@ -52,39 +64,34 @@ function CarOutline() {
 export function TireCard({
   tires,
   format,
+  assess = () => null,
   warnings = [],
 }: {
   tires: CarSnapshot["tires"];
   format: (bar: number) => string;
+  assess?: (bar: number) => Assessment | null;
   warnings?: string[];
 }) {
+  const tire = (key: TireKey, label: string, side: "left" | "right") =>
+    tires && (
+      <Tire
+        label={label}
+        value={format(tires[key])}
+        side={side}
+        assessment={assess(tires[key])}
+      />
+    );
   return (
     <section className="flex flex-col rounded-xl bg-card p-5">
       <h2 className="text-sm text-muted-foreground">Tire pressure</h2>
       {tires ? (
         <div className="flex flex-1 items-center justify-center py-6">
           <div className="grid grid-cols-[1fr_auto_1fr] grid-rows-2 items-center gap-x-6 sm:gap-x-10">
-            <Tire
-              label="Front left"
-              value={format(tires.frontLeft)}
-              side="left"
-            />
+            {tire("frontLeft", "Front left", "left")}
             <CarOutline />
-            <Tire
-              label="Front right"
-              value={format(tires.frontRight)}
-              side="right"
-            />
-            <Tire
-              label="Rear left"
-              value={format(tires.rearLeft)}
-              side="left"
-            />
-            <Tire
-              label="Rear right"
-              value={format(tires.rearRight)}
-              side="right"
-            />
+            {tire("frontRight", "Front right", "right")}
+            {tire("rearLeft", "Rear left", "left")}
+            {tire("rearRight", "Rear right", "right")}
           </div>
         </div>
       ) : (

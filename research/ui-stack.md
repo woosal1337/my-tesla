@@ -59,7 +59,7 @@ Checked on 2026-10-01 against the demo database, on desktop, phone, dark, and li
 3. **Charts.** Area for a trend, bars for counts per day, week, or month, and a line on the right axis for a second unit. Only a faint horizontal grid. A legend shows when a chart has more than one series. `niceDomain` gives five even ticks for a value axis that does not start at zero.
 4. **Period.** Battery habits, Stats, and Places share one segmented control. The period lives in the URL, so a link keeps it.
 5. **Phone width.** Every page grid uses `grid-cols-1`, which is `minmax(0, 1fr)`. Without it, a Recharts wrapper keeps its first width and pushes the page 11 px wider than the phone.
-6. **No advice colors.** The level bands use one color. An LFP battery and an NMC battery need different charge limits, and the app does not know which one the car has.
+6. **Advice colors only with a reference.** The level bands use one color. An LFP battery and an NMC battery need different charge limits, and the app does not know which one the car has. Since [decision 0013](../docs/decisions/0013-value-colors.md), values with a known reference get a green, default, or red tone and a tooltip.
 
 ## Overview car on scroll
 

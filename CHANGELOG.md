@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Added
+
+- Value colors: consumption, charging efficiency, AC voltage, battery health, parked drain, tire pressure, and a low battery show green when better than usual and red when worse or a problem. A tooltip on hover or tap gives the meaning of the value and the expected value. [Value colors](docs/value-colors.md) lists the rules and their sources.
+
 ## [1.5.3] - 2026-10-07
 
 ### Fixed

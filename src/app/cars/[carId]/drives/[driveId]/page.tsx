@@ -8,6 +8,7 @@ import { MapsOff, RouteMap } from "@/components/maps";
 import { Stat } from "@/components/overview/stat";
 import { PageTransition } from "@/components/page-transition";
 import { Panel } from "@/components/panel";
+import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import { mapThemeOf } from "@/lib/preferences";
 import { findDrive } from "@/lib/queries";
@@ -90,7 +91,17 @@ export default async function DrivePage({
       <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
         <Stat label="Distance">{f.distance(drive.distanceKm)}</Stat>
         <Stat label="Duration">{f.duration(drive.durationMin)}</Stat>
-        <Stat label="Consumption">{f.efficiency(drive.efficiencyWhPerKm)}</Stat>
+        <Stat
+          label="Consumption"
+          assessment={assessConsumption(
+            drive.efficiencyWhPerKm,
+            ratedWhPerKm(car),
+            f,
+            drive.distanceKm,
+          )}
+        >
+          {f.efficiency(drive.efficiencyWhPerKm)}
+        </Stat>
         <Stat
           label="Battery"
           detail={

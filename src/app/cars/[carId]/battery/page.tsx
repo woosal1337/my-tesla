@@ -14,6 +14,15 @@ import {
   levelTime,
   longChargeKwh,
 } from "@/lib/battery-data";
+import {
+  assessAsleep,
+  assessBatteryHealth,
+  assessChargingEfficiency,
+  assessIdleLoss,
+  assessIdlePower,
+  assessmentTitle,
+  toneClass,
+} from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import type { Formatter } from "@/lib/format";
 import {
@@ -28,6 +37,7 @@ import {
   readPeriod,
   type IdlePeriod,
 } from "@/lib/insights";
+import { cn } from "@/lib/utils";
 import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
@@ -122,6 +132,7 @@ function IdleRow({
   const hours = period.durationS / 3600;
   const watts =
     period.energyKwh === null ? null : (period.energyKwh / hours) * 1000;
+  const power = assessIdlePower(watts, f);
   return (
     <tr className="border-t border-border">
       <td className="py-3 pr-4">
@@ -145,7 +156,13 @@ function IdleRow({
           ? "—"
           : `${f.number(f.distanceValue(period.rangeLostKm) ?? 0, 1)} ${f.units.distance}`}
       </td>
-      <td className="py-3 text-right text-muted-foreground">
+      <td
+        className={cn(
+          "py-3 text-right text-muted-foreground",
+          power && toneClass[power.tone],
+        )}
+        title={power ? assessmentTitle(power) : undefined}
+      >
         {watts === null ? "—" : `${f.number(watts)} W`}
       </td>
     </tr>
@@ -225,6 +242,11 @@ export default async function BatteryPage({
           label="Health"
           value={health === null ? "—" : f.number(health, 1)}
           unit="%"
+          assessment={assessBatteryHealth(
+            health,
+            capacity.at(-1)?.odometerKm ?? null,
+            f,
+          )}
           detail={
             health === null
               ? missingChargesText(
@@ -340,6 +362,10 @@ export default async function BatteryPage({
                       efficiency === null ? "—" : Math.round(efficiency * 100)
                     }
                     unit="%"
+                    assessment={assessChargingEfficiency(
+                      efficiency === null ? null : efficiency * 100,
+                      totals.dcKwh > totals.acKwh,
+                    )}
                     detail={`${f.number(totals.usedKwh)} kWh from chargers`}
                   />
                 </dl>
@@ -458,16 +484,19 @@ export default async function BatteryPage({
                   label="Battery lost"
                   value={f.number(drain.levelPerDay, 1)}
                   unit="%/day"
+                  assessment={assessIdleLoss(drain.levelPerDay, f)}
                 />
                 <Metric
                   label="Average power"
                   value={drain.watts === null ? "—" : Math.round(drain.watts)}
                   unit="W"
+                  assessment={assessIdlePower(drain.watts, f)}
                 />
                 <Metric
                   label="Asleep"
                   value={Math.round(drain.standby * 100)}
                   unit="%"
+                  assessment={assessAsleep(drain.standby)}
                   detail={`of ${f.number(drain.hours)} h parked`}
                 />
               </dl>

@@ -6,6 +6,7 @@ import { DownloadLink } from "@/components/download-link";
 import { MapsOff, TripMap, type TripStop } from "@/components/maps";
 import { Metric } from "@/components/metric";
 import { PageTransition } from "@/components/page-transition";
+import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import type { Formatter } from "@/lib/format";
 import { mapThemeOf } from "@/lib/preferences";
@@ -204,6 +205,12 @@ export default async function TripPage({
                   : f.efficiencyNumber(totals.consumptionWhPerKm)
               }
               unit={f.units.efficiency}
+              assessment={assessConsumption(
+                totals.consumptionWhPerKm,
+                ratedWhPerKm(car),
+                f,
+                totals.distanceKm,
+              )}
             />
             <Metric
               label="Energy used"

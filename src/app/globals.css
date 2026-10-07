@@ -41,6 +41,8 @@
   --color-subtle: var(--subtle);
   --color-charge: var(--charge);
   --color-warning: var(--warning);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -77,6 +79,8 @@
   --destructive: light-dark(#d93c3c, #ef5a5a);
   --warning: light-dark(#e8a33d, #f0b453);
   --charge: light-dark(#1fae5b, #2fd073);
+  --good: light-dark(#1fae5b, #2fd073);
+  --bad: light-dark(#d93c3c, #ef5a5a);
   --border: light-dark(#eeeeee, #262930);
   --input: light-dark(#d0d1d2, #393c41);
   --ring: light-dark(#3e6ae1, #5b82ee);

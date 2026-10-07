@@ -12,6 +12,7 @@ import { RecentCard } from "@/components/overview/recent-card";
 import { Stat } from "@/components/overview/stat";
 import { TireCard } from "@/components/overview/tire-card";
 import { PageTransition } from "@/components/page-transition";
+import { assessBatteryLevel, assessTirePressure } from "@/lib/assessment";
 import { carImageUrl } from "@/lib/car-image";
 import { requireCar } from "@/lib/car-route";
 import { buildTimeline, dayWindow, localDayKey } from "@/lib/insights";
@@ -152,6 +153,10 @@ export default async function OverviewPage({
               })}
               fullAt={chargingNow?.fullAt?.getTime() ?? null}
               renderedAt={now.getTime()}
+              levelAssessment={assessBatteryLevel(
+                snapshot.batteryLevel,
+                charging,
+              )}
             />
           </section>
 
@@ -234,6 +239,7 @@ export default async function OverviewPage({
                 <TireCard
                   tires={liveNow?.tires ?? snapshot.tires}
                   format={(bar) => f.pressure(bar)}
+                  assess={(bar) => assessTirePressure(bar, f)}
                   warnings={leaks.map((leak) =>
                     leakWarning(leak, (bar) => f.pressure(bar)),
                   )}

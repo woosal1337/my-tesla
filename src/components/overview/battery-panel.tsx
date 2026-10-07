@@ -2,7 +2,9 @@
 
 import { PlugZap } from "lucide-react";
 import { AnimatedNumber } from "@/components/animated-number";
+import { Assessed } from "@/components/assessed";
 import { ChargeCountdown } from "@/components/charge-countdown";
+import type { Assessment } from "@/lib/assessment";
 import { cn } from "@/lib/utils";
 
 type BatteryPanelProps = {
@@ -16,6 +18,7 @@ type BatteryPanelProps = {
   caption: string;
   fullAt?: number | null;
   renderedAt?: number;
+  levelAssessment?: Assessment | null;
 };
 
 const fillTone = {
@@ -35,18 +38,28 @@ export function BatteryPanel({
   caption,
   fullAt = null,
   renderedAt,
+  levelAssessment = null,
 }: BatteryPanelProps) {
   const width = Math.min(100, Math.max(0, level ?? 0));
+  const levelNumber = (
+    <AnimatedNumber
+      value={level}
+      suffix="%"
+      locale={locale}
+      animated={animated}
+      className="text-[64px] leading-none font-medium tracking-tight tabular"
+    />
+  );
   return (
     <div>
       <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
-        <AnimatedNumber
-          value={level}
-          suffix="%"
-          locale={locale}
-          animated={animated}
-          className="text-[64px] leading-none font-medium tracking-tight tabular"
-        />
+        {levelAssessment ? (
+          <Assessed assessment={levelAssessment} hint={false}>
+            {levelNumber}
+          </Assessed>
+        ) : (
+          levelNumber
+        )}
         <span className="text-lg text-muted-foreground tabular">
           <AnimatedNumber value={range} locale={locale} animated={animated} />{" "}
           {rangeUnit}

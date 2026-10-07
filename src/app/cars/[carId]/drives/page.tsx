@@ -5,13 +5,42 @@ import { DownloadLink } from "@/components/download-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageTransition } from "@/components/page-transition";
 import { SectionHeader } from "@/components/section-header";
+import type { ReactNode } from "react";
+import {
+  assessConsumption,
+  assessmentTitle,
+  ratedWhPerKm,
+  toneClass,
+  type Assessment,
+} from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import { recentDrives } from "@/lib/queries";
+import { cn } from "@/lib/utils";
 import { getFormatter } from "@/lib/viewer";
 
 export const instant = false;
 
 export const metadata: Metadata = { title: "Drives" };
+
+function DriveConsumption({
+  assessment,
+  children,
+}: {
+  assessment: Assessment | null;
+  children: ReactNode;
+}) {
+  return (
+    <p
+      className={cn(
+        "text-xs text-subtle",
+        assessment && toneClass[assessment.tone],
+      )}
+      title={assessment ? assessmentTitle(assessment) : undefined}
+    >
+      {children}
+    </p>
+  );
+}
 
 export default async function DrivesPage({
   params,
@@ -19,6 +48,7 @@ export default async function DrivesPage({
   const [car, f] = await Promise.all([requireCar(params), getFormatter()]);
   const drives = await recentDrives(car);
   const now = new Date();
+  const rated = ratedWhPerKm(car);
   const totalKm = drives.reduce(
     (sum, drive) => sum + (drive.distanceKm ?? 0),
     0,
@@ -89,9 +119,16 @@ export default async function DrivesPage({
                           <p className="font-medium">
                             {f.distance(drive.distanceKm)}
                           </p>
-                          <p className="text-xs text-subtle">
+                          <DriveConsumption
+                            assessment={assessConsumption(
+                              drive.efficiencyWhPerKm,
+                              rated,
+                              f,
+                              drive.distanceKm,
+                            )}
+                          >
                             {f.efficiency(drive.efficiencyWhPerKm)}
-                          </p>
+                          </DriveConsumption>
                         </div>
                       </Link>
                     </li>

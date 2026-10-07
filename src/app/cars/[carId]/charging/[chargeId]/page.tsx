@@ -12,6 +12,7 @@ import { Metric } from "@/components/metric";
 import { PageTransition } from "@/components/page-transition";
 import { Panel, PanelNote } from "@/components/panel";
 import { requireCar } from "@/lib/car-route";
+import { assessChargingEfficiency, assessVoltage } from "@/lib/assessment";
 import { costBreakdown } from "@/lib/charge-cost";
 import { chargeCurve, findChargeSession } from "@/lib/charge-data";
 import { getLive } from "@/lib/live/live";
@@ -296,6 +297,7 @@ export default async function ChargePage({
           label="Charging efficiency"
           value={efficiency === null ? missing : Math.round(efficiency)}
           unit="%"
+          assessment={assessChargingEfficiency(efficiency, session.fast)}
           detail={
             session.energyUsedKwh
               ? `${f.number(session.energyUsedKwh, 1)} kWh from the charger`
@@ -319,6 +321,7 @@ export default async function ChargePage({
             session.avgVoltage === null ? "—" : Math.round(session.avgVoltage)
           }
           unit="V"
+          assessment={assessVoltage(session.avgVoltage, session.fast)}
           detail={
             session.maxCurrent === null
               ? undefined

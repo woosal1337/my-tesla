@@ -10,6 +10,7 @@ import { PageTransition } from "@/components/page-transition";
 import { Panel, PanelNote } from "@/components/panel";
 import { PeriodLinks } from "@/components/period-links";
 import { WeekHeatmap } from "@/components/week-heatmap";
+import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import {
   bucketUnit,
@@ -206,6 +207,12 @@ export default async function StatsPage({
           label="Efficiency"
           value={f.efficiencyNumber(whPerKm)}
           unit={f.units.efficiency}
+          assessment={assessConsumption(
+            whPerKm,
+            ratedWhPerKm(car),
+            f,
+            drives.distanceKm,
+          )}
         />
       </dl>
 

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Assessed } from "@/components/assessed";
+import type { Assessment } from "@/lib/assessment";
 import { cn } from "@/lib/utils";
 import { ongoingText } from "@/lib/vehicle";
 
@@ -8,12 +10,14 @@ export function Metric({
   unit,
   detail,
   size = "md",
+  assessment = null,
 }: {
   label: string;
   value: ReactNode;
   unit?: string;
   detail?: ReactNode;
   size?: "md" | "lg";
+  assessment?: Assessment | null;
 }) {
   const pending = value === "—" || value === ongoingText;
   return (
@@ -33,7 +37,11 @@ export function Metric({
             value === ongoingText && "text-[0.75em] text-muted-foreground",
           )}
         >
-          {value}
+          {assessment && !pending ? (
+            <Assessed assessment={assessment}>{value}</Assessed>
+          ) : (
+            value
+          )}
         </span>
         {unit && !pending && (
           <span

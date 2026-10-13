@@ -85,6 +85,11 @@ const profiles: Profile[] = [
     paints: legacyPaints,
     wheels: {
       gemini19: { wheel: "$WY19B", trim: "$MTY09", interior: "$INPB0" },
+      apollo19metallicshadow: {
+        wheel: "$WY19C",
+        trim: "$MTY09",
+        interior: "$INPB0",
+      },
       induction20: { wheel: "$WY20P", trim: "$MTY09", interior: "$INPB0" },
       uberturbine21: { wheel: "$WY21P", trim: "$MTY12", interior: "$INPB0" },
     },

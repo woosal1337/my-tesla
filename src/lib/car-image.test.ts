@@ -77,6 +77,19 @@ describe("carImageUrl", () => {
     expect(parsed.searchParams.has("context")).toBe(false);
   });
 
+  test("shows the dark 19 inch wheels of a 2024 Model Y", () => {
+    expect(
+      optionsOf(
+        carImageUrl({
+          model: "Y",
+          exteriorColor: "SolidBlack",
+          wheelType: "Apollo19MetallicShadow",
+          trimBadging: "74D",
+        }),
+      ),
+    ).toBe("$MTY09,$PBSB,$WY19C,$INPB0");
+  });
+
   test("builds the 2024 Model 3 render", () => {
     expect(
       optionsOf(

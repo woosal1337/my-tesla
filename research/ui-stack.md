@@ -115,16 +115,21 @@ Local production build against a TeslaMate database through an SSH tunnel, 2026-
 
 ## Car renders
 
-Checked on 2026-10-01. Tesla's compositor draws a car from option codes: `https://static-assets.tesla.com/configurator/compositor`. TeslaMate stores the model, exterior color, wheel type, trim badging, and marketing name, not the option codes. `src/lib/car-image.ts` maps those fields to codes with the verified tables of [tn9design/tesla-vehicle-config-decoder](https://github.com/tn9design/tesla-vehicle-config-decoder).
+Checked on 2026-10-01. Tesla's compositor draws a car from option codes: `https://static-assets.tesla.com/configurator/compositor`, and `https://static-assets.tesla.com/v1/compositor/` for the older cars. TeslaMate stores the model, exterior color, wheel type, trim badging, and marketing name, not the option codes. `src/lib/car-image.ts` maps those fields to codes with the verified tables of [tn9design/tesla-vehicle-config-decoder](https://github.com/tn9design/tesla-vehicle-config-decoder).
 
 | Car | TeslaMate fields | Codes |
 |---|---|---|
 | A 2025 Model Y | Y, StealthGrey, Aperture18, badge 50 | `$MTY61,$PN01,$WY18P,$IBB3` |
 
-1. The wheel type picks the generation. Aperture, Crossflow, Helix, and Arachnid are the 2025 Model Y. Gemini, Induction, and Uberturbine are the 2020-2024 Model Y on `v1/compositor`.
+1. The color and the wheel type pick the generation. Aperture, Photon, Crossflow, Helix, and Arachnid are the 2025 Model Y. Gemini, Apollo, Induction, and Uberturbine are the 2020-2024 Model Y on `v1/compositor`. Pinwheel, Stiletto, Sport, and the 20 inch Uberturbine are the 2017-2023 Model 3 on `v1/compositor`, with a paint and a wheel code only. Photon, Glider, Nova, Helix 19, Prismata, and Warp are the 2024 Model 3.
 2. A badge that ends in `d` picks the all-wheel-drive trim.
 3. `bkba_opt=1` gives a transparent PNG, 1440 x 810.
 4. An unknown code returns HTTP 412. The page hides the image when it fails to load.
 5. Akamai returns 403 to curl and Node on a development machine, and 200 to Chrome. So the browser loads the render directly, with `unoptimized` on `next/image`. Tesla sees the browser address and the car configuration.
 6. The codes `MTY68`, `MTY78`, and `MTY85` also render with the Aperture wheels, and look the same at this angle. One of them can be the Model Y Standard from late 2025. The table keeps the verified `MTY61`.
+7. Checked on 2026-10-14 with the names that TeslaMate users report in [vide/matedroid](https://github.com/vide/matedroid/blob/main/docs/ASSETS.md). TeslaMate writes some names in two ways, such as `BlackDiamond` and `StealthGray`, and it can add an ending to a wheel name, such as `Pinwheel18CapKit` and `Apollo19MetallicShadow`. The table matches the start of the wheel name, the longest name first.
+8. A wheel name can fit two generations: `Uberturbine21` is the 2020-2024 Model Y Performance and the 2025 one. The first generation with both the color and the wheel wins, and the older one comes first. A white 2025 Performance then shows the older body.
+9. An unknown wheel shows the usual wheels of the generation, when the color fits one generation only. With a color of two generations, the car shows no image.
+10. The 138 addresses that the table makes for these names were loaded: 136 gave a render. Marine Blue with the 18 inch wheels gives HTTP 412, and Tesla does not sell it.
+11. `v1/compositor` answers 200 with a black shape for a color that it does not know, such as `PN01` on a Model S. Model S, Model X, and Cybertruck have no table: `v1/compositor` draws the body from before 2021.
 

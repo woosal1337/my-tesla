@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CircleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -79,6 +79,16 @@ export default async function DrivePage({
           {drive.outsideTempAvg !== null &&
             ` · ${f.temperature(drive.outsideTempAvg)} outside`}
         </p>
+        {drive.leftOpen && (
+          <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+            <CircleAlert
+              aria-hidden
+              className="mt-0.5 size-4 shrink-0 text-warning"
+            />
+            TeslaMate did not close this drive. This happens when TeslaMate
+            restarts during a drive. The values come from the position records.
+          </p>
+        )}
       </div>
 
       <div className="mt-8 h-[22rem] overflow-hidden rounded-xl bg-card md:h-[28rem]">

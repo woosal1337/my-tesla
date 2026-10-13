@@ -20,6 +20,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ### Fixed
 
+- Drives, a drive page, the drives CSV, and Trips: a drive that TeslaMate left open was missing. This happens when TeslaMate restarts during a drive. The app now fills such a drive from its positions, so a trip no longer splits at it. The drive page shows a note. [Decision 0018](docs/decisions/0018-drives-left-open.md) explains the rule.
 - Drives and Charging: the summary under the title and the levels of a charge broke inside a value on a phone, such as "1,105" and "km" on two lines. A line now breaks only between values.
 - Charging insights: "1 sessions" now reads "1 session".
 - Battery: the headers of the idle drain table sat 16 px right of their numbers.

@@ -39,6 +39,7 @@ function drive(
     outsideTempAvg: 25,
     startLevel: 80,
     endLevel: 70,
+    leftOpen: false,
   };
 }
 

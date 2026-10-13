@@ -1,4 +1,5 @@
 import type postgres from "postgres";
+import { driveSessionsRelation } from "./drive-sessions-sql";
 
 const longestStopMin = { parked: 30, charging: 120 };
 
@@ -11,6 +12,28 @@ export type TripLegRow = {
 export type TripSelection =
   { range: { start: Date; end: Date } } | { driveId: number };
 
+function utc(sql: postgres.Sql, at: Date) {
+  return sql`(${at.toISOString()}::timestamptz at time zone 'UTC')`;
+}
+
+function withinReach(
+  sql: postgres.Sql,
+  carId: number,
+  selection: TripSelection,
+) {
+  if ("driveId" in selection) {
+    const chosen = sql`(
+      select chosen.start_date from drives chosen
+      where chosen.id = ${selection.driveId} and chosen.car_id = ${carId}
+    )`;
+    return sql`and d.start_date
+      between ${chosen} - interval '7 days' and ${chosen} + interval '7 days'`;
+  }
+  const { start, end } = selection.range;
+  return sql`and d.start_date >= ${utc(sql, start)} - interval '7 days'
+    and d.start_date < ${utc(sql, end)} + interval '7 days'`;
+}
+
 function selected(sql: postgres.Sql, selection: TripSelection) {
   if ("driveId" in selection) {
     return sql`t.trip_id = (
@@ -18,19 +41,24 @@ function selected(sql: postgres.Sql, selection: TripSelection) {
     )`;
   }
   const { start, end } = selection.range;
-  return sql`t.trip_start >= (${start.toISOString()}::timestamptz at time zone 'UTC')
-    and t.trip_start < (${end.toISOString()}::timestamptz at time zone 'UTC')`;
+  return sql`t.trip_start >= ${utc(sql, start)}
+    and t.trip_start < ${utc(sql, end)}`;
 }
 
 export function tripLegsQuery(
   sql: postgres.Sql,
   options: { carId: number; selection: TripSelection },
 ) {
+  const { carId, selection } = options;
+  const drives = driveSessionsRelation(
+    sql,
+    carId,
+    withinReach(sql, carId, selection),
+  );
   return sql<TripLegRow[]>`
     with scope as (
       select d.id, d.start_date, d.end_date
-      from drives d
-      where d.car_id = ${options.carId} and d.end_date is not null
+      from ${drives} d
     ),
     legs as (
       select
@@ -52,7 +80,7 @@ export function tripLegsQuery(
         union all
         select cp.start_date, null, cp.start_date
         from charging_processes cp
-        where cp.car_id = ${options.carId}
+        where cp.car_id = ${carId}
       ) e
     ),
     stops as (
@@ -97,7 +125,7 @@ export function tripLegsQuery(
       t.trip_id::int as "tripId",
       (t.starts_trip = 0 and t.charged_before) as "chargedBefore"
     from tripped t
-    where ${selected(sql, options.selection)}
+    where ${selected(sql, selection)}
     order by t.start_date, t.id
   `;
 }

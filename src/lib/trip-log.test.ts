@@ -36,6 +36,7 @@ const drive: Drive = {
   outsideTempAvg: 30.04,
   startLevel: 44,
   endLevel: 32,
+  leftOpen: false,
 };
 
 const charge: Charge = {

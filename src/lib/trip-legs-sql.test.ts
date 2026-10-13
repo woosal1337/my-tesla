@@ -10,13 +10,15 @@ let sql: postgres.Sql;
 
 const roadTripper = 1;
 const stopper = 2;
+const restarted = 3;
 
 const cars = `
   insert into cars
     (id, eid, vid, vin, settings_id, efficiency, inserted_at, updated_at)
   values
     (1, 1, 1, 'VIN1', 1, 0.15, now(), now()),
-    (2, 2, 2, 'VIN2', 2, 0.15, now(), now())
+    (2, 2, 2, 'VIN2', 2, 0.15, now(), now()),
+    (3, 3, 3, 'VIN3', 3, 0.15, now(), now())
 `;
 
 const drives = `
@@ -32,7 +34,17 @@ const drives = `
     (702, 2, '2025-06-10 08:00', '2025-06-10 09:00'),
     (703, 2, '2025-06-10 10:00', '2025-06-10 11:00'),
     (704, 2, '2025-06-10 12:00', '2025-06-10 13:00'),
-    (705, 2, '2025-06-10 14:00', '2025-06-10 15:00')
+    (705, 2, '2025-06-10 14:00', '2025-06-10 15:00'),
+    (801, 3, '2025-06-10 06:00', '2025-06-10 07:00'),
+    (802, 3, '2025-06-10 07:10', null),
+    (803, 3, '2025-06-10 08:41', '2025-06-10 09:00')
+`;
+
+const positions = `
+  insert into positions (id, car_id, drive_id, date, latitude, longitude, odometer)
+  values
+    (1, 3, 802, '2025-06-10 07:10', 40.7, 31.6, 1000),
+    (2, 3, 802, '2025-06-10 08:40', 40.9, 29.5, 1100)
 `;
 
 const charges = `
@@ -59,7 +71,7 @@ beforeAll(async () => {
   db = new PGlite();
   await db.exec("set timezone = 'UTC'");
   await db.exec(demoSchema);
-  for (const statement of [cars, drives, charges]) {
+  for (const statement of [cars, drives, positions, charges]) {
     await db.exec(statement);
   }
   sql = createSql(
@@ -113,6 +125,16 @@ describe("tripLegsQuery", () => {
     expect(await legs(roadTripper, { driveId: 104 })).toEqual([
       [104, 104, false],
     ]);
+  });
+
+  test("keeps a trip together across a drive that TeslaMate left open", async () => {
+    const oneTrip = [
+      [801, 801, false],
+      [802, 801, false],
+      [803, 801, false],
+    ];
+    expect(await legs(restarted, day("2025-06-10"))).toEqual(oneTrip);
+    expect(await legs(restarted, { driveId: 802 })).toEqual(oneTrip);
   });
 
   test("gives no trip for a drive of another car or an open drive", async () => {

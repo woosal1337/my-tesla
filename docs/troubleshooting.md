@@ -31,6 +31,10 @@ The health estimate needs 3 long charges. A long charge adds enough energy for 1
 
 TeslaMate restarted during the charge, so it started a new charge and left the old one open. The app ends the old charge at its last record, and it counts its energy in the totals. Nothing needs a fix. [Decision 0012](decisions/0012-charges-left-open.md) explains the rule.
 
+## A drive shows "TeslaMate did not close this drive"
+
+TeslaMate restarted during the drive, so it started a new drive and left the old one open. The app ends the old drive at its last position, and it takes the distance and the other values from the positions. A place that TeslaMate did not look up shows as "Unknown place". Nothing needs a fix. [Decision 0018](decisions/0018-drives-left-open.md) explains the rule.
+
 ## A page shows an error after a TeslaMate upgrade
 
 The new TeslaMate version can change a table. Read [Upgrading](upgrading.md).

@@ -12,10 +12,10 @@ TeslaMate ends a drive each time the car parks. A journey with a break and a cha
 
 1. A trip is a run of drives of one car in time order. A drive continues the trip when the stop before it is 30 minutes or shorter. With a charge in the stop, the limit is 120 minutes. A longer stop starts a new trip, so a night ends a trip.
 2. A stop has a charge when a charging session starts in it: at or after the end of the drive before, and before the start of the next drive.
-3. These are the rule and the default limits of `get_trips` in teslamate-mcp. On a real database, the two queries put every drive in the same trip.
+3. These are the rule and the default limits of `get_trips` in teslamate-mcp. On a real database, the two queries put every closed drive in the same trip. A drive that TeslaMate left open is a leg too, by [decision 0018](0018-drives-left-open.md), so a trip does not split at such a drive.
 4. The id of a trip is the id of its first drive. The id of any drive of the trip finds the same trip.
 5. A date range selects the trips that start in it. A trip that starts before the range stays out, with all its drives. A trip that starts in the range stays whole, with the drives after the end of the range.
-6. The grouping runs in SQL over all drives of the car, in one pass. The page then loads the drives and the charges of the selected trips, and pure code joins them into trips with stops. `tripLegsQuery()` takes the `sql` tag as a parameter, so that a PGlite test can run it.
+6. The grouping runs in SQL, in one pass over the drives from 7 days before the selection to 7 days after it. A trip cannot cross a stop above 2 hours, so no trip reaches that far. The page then loads the drives and the charges of the selected trips, and pure code joins them into trips with stops. `tripLegsQuery()` takes the `sql` tag as a parameter, so that a PGlite test can run it.
 7. A round trip starts and ends at the same place. Its title names the place of its longest stop.
 8. A trip of one drive links to the drive page. A trip of two or more drives has its own page.
 

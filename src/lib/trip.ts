@@ -70,6 +70,8 @@ export type TripStep =
   | { kind: "leg"; at: Date; leg: TripLeg }
   | { kind: "stop"; at: Date; stop: TripStop };
 
+export type TripSegment = { kind: "drive" | "stop" | "charge"; share: number };
+
 const shortestStopMs = 2 * 60_000;
 const shortestLegKm = 0.05;
 
@@ -341,6 +343,32 @@ export function tripSteps(trip: Trip): TripStep[] {
       { kind: "leg", at: leg.startAt, leg },
       ...(stop ? [{ kind: "stop" as const, at: stop.startAt, stop }] : []),
     ];
+  });
+}
+
+export function tripPath(trip: Trip): string {
+  return trip.drives.length === 1
+    ? `/drives/${trip.drives[0].id}`
+    : `/drives/trip/${trip.id}`;
+}
+
+export function tripOrigin(trip: Trip): string {
+  const { roundTrip } = tripDestination(trip);
+  return `${roundTrip ? "round trip from" : "from"} ${trip.from}`;
+}
+
+export function newestFirst(trips: Trip[]): Trip[] {
+  return [...trips].sort((a, b) => b.startAt.getTime() - a.startAt.getTime());
+}
+
+export function tripSegments(trip: Trip): TripSegment[] {
+  const totalMs = trip.endAt.getTime() - trip.startAt.getTime();
+  if (totalMs <= 0 || trip.stops.length === 0) return [];
+  return tripSteps(trip).map((step): TripSegment => {
+    const { startAt, endAt } = step.kind === "leg" ? step.leg : step.stop;
+    const share = (endAt.getTime() - startAt.getTime()) / totalMs;
+    if (step.kind === "leg") return { kind: "drive", share };
+    return { kind: step.stop.charged ? "charge" : "stop", share };
   });
 }
 

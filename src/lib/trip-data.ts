@@ -4,11 +4,12 @@ import { database } from "./database";
 import {
   drivesById,
   exportCharges,
+  recentDrives,
   type Car,
   type Charge,
   type Drive,
 } from "./queries";
-import { buildTrips, type Trip } from "./trip";
+import { buildTrips, newestFirst, type Trip } from "./trip";
 import { tripLegsQuery, type TripSelection } from "./trip-legs-sql";
 
 type Window = { start: Date; end: Date };
@@ -40,6 +41,17 @@ export function tripsInRange(car: Car, range: Window) {
     start: range.start,
     end: latestEnd(drives, range.end),
   }));
+}
+
+export async function recentTrips(car: Car): Promise<Trip[]> {
+  const drives = await recentDrives(car);
+  const oldest = drives.at(-1);
+  if (!oldest) return [];
+  const { trips } = await tripsInRange(car, {
+    start: oldest.startAt,
+    end: new Date(),
+  });
+  return newestFirst(trips);
 }
 
 export async function findTrip(

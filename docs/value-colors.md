@@ -14,7 +14,7 @@ Move the pointer over a value with a dotted underline, or tap it on a phone. The
 
 | Value | Pages | Green | Default | Red |
 |---|---|---|---|---|
-| Consumption | Drives, a drive, Stats, Trips, a trip | 3% or more under the rated value | Up to 35% over the rated value | More than 35% over the rated value |
+| Consumption | Drives, a drive, Stats, Report, a trip | 3% or more under the rated value | Up to 35% over the rated value | More than 35% over the rated value |
 | Charging efficiency | A charge, Battery | AC 90% or more, DC 95% or more | AC 80 to 90%, DC 88 to 95% | AC under 80%, DC under 88% |
 | Voltage of an AC charge | A charge | No green | 207 to 253 V | Under 207 V or over 253 V |
 | Battery health | Battery | At most 1 point under the fleet average for the distance | 1 to 6 points under | More than 6 points under |

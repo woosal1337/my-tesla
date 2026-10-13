@@ -16,6 +16,7 @@ import type { LngLat } from "@/lib/route";
 import {
   stopsText,
   tripDestination,
+  tripOrigin,
   tripSteps,
   tripSummary,
   type Trip,
@@ -162,14 +163,13 @@ export default async function TripPage({
   return (
     <PageTransition>
       <div className="pt-6 md:pt-10">
-        <BackLink href={`${base}/drives/trip`} label="Trips" />
+        <BackLink href={`${base}/drives`} label="Drives" />
         <h1 className="mt-4 text-[32px] leading-[1.2] font-medium md:text-[40px]">
           {destination.place}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground tabular">
-          {destination.roundTrip ? "round trip from" : "from"} {trip.from} ·{" "}
-          {f.day(trip.startAt, now)} {f.clock(trip.startAt)} to{" "}
-          {f.clock(trip.endAt)}
+          {tripOrigin(trip)} · {f.day(trip.startAt, now)}{" "}
+          {f.clock(trip.startAt)} to {f.clock(trip.endAt)}
         </p>
       </div>
 

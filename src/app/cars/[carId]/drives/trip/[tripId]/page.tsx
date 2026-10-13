@@ -77,7 +77,8 @@ function tripMarkers(
       charge && charge.longitude !== null && charge.latitude !== null
         ? [charge.longitude, charge.latitude]
         : undefined;
-    return markerAt(charged ?? routes.get(trip.drives[index].id)?.at(-1), {
+    const arrived = trip.legs[index].drives.at(-1);
+    return markerAt(charged ?? (arrived && routes.get(arrived.id)?.at(-1)), {
       key: `stop-${index}`,
       kind: stop.charged ? "charge" : "stop",
       label: stop.place,
@@ -110,16 +111,16 @@ function StepRow({
   base: string;
   f: Formatter;
 }) {
-  if (step.kind === "drive") {
-    const { drive } = step;
+  if (step.kind === "leg") {
+    const { leg } = step;
     return (
       <TripRow
-        href={`${base}/drives/${drive.id}`}
+        href={`${base}/drives/${leg.driveId}`}
         clock={f.clock(step.at)}
         icon={Route}
         tone="drive"
-        title={`${drive.from} → ${drive.to}`}
-        detail={`${f.distance(drive.distanceKm)} · ${f.duration(drive.durationMin)} · ${f.efficiency(drive.efficiencyWhPerKm)}`}
+        title={`${leg.from} → ${leg.to}`}
+        detail={`${f.distance(leg.distanceKm)} · ${f.duration(leg.durationMin)} · ${f.efficiency(leg.consumptionWhPerKm)}`}
       />
     );
   }
@@ -188,7 +189,10 @@ export default async function TripPage({
       </div>
 
       <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
-        <Stat label="Distance" detail={`${summary.drives} drives`}>
+        <Stat
+          label="Distance"
+          detail={`${summary.legs} ${summary.legs === 1 ? "drive" : "drives"}`}
+        >
           {f.distance(summary.distanceKm)}
         </Stat>
         <Stat

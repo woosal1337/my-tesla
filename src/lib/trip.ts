@@ -27,6 +27,18 @@ export type TripStop = {
   charges: Charge[];
 };
 
+type TripLeg = {
+  driveId: number;
+  startAt: Date;
+  endAt: Date;
+  durationMin: number;
+  from: string;
+  to: string;
+  distanceKm: number;
+  consumptionWhPerKm: number | null;
+  drives: Drive[];
+};
+
 export type Trip = {
   id: number;
   startAt: Date;
@@ -34,10 +46,12 @@ export type Trip = {
   from: string;
   to: string;
   drives: Drive[];
+  legs: TripLeg[];
   stops: TripStop[];
 };
 
 export type TripSummary = TripTotals & {
+  legs: number;
   totalMin: number;
   stoppedMin: number;
   stops: number;
@@ -53,8 +67,11 @@ export type TripItem =
   | { kind: "charge"; at: Date; charge: Charge };
 
 export type TripStep =
-  | { kind: "drive"; at: Date; drive: Drive }
+  | { kind: "leg"; at: Date; leg: TripLeg }
   | { kind: "stop"; at: Date; stop: TripStop };
+
+const shortestStopMs = 2 * 60_000;
+const shortestLegKm = 0.05;
 
 const dayPattern = /^\d{4}-\d{2}-\d{2}$/;
 const longestTripDays = 366;
@@ -151,36 +168,118 @@ function stopBetween(
   };
 }
 
+function isPause(stop: TripStop): boolean {
+  return (
+    !stop.charged &&
+    stop.endAt.getTime() - stop.startAt.getTime() < shortestStopMs
+  );
+}
+
+function joinStops(first: TripStop, second: TripStop): TripStop {
+  return {
+    startAt: first.startAt,
+    endAt: second.endAt,
+    durationMin: minutesBetween(first.startAt, second.endAt),
+    place:
+      first.charges.length || !second.charges.length
+        ? first.place
+        : second.place,
+    charged: first.charged || second.charged,
+    charges: [...first.charges, ...second.charges],
+  };
+}
+
+function legOf(drives: Drive[]): TripLeg {
+  const first = drives[0];
+  const last = drives[drives.length - 1];
+  const totals = tripTotals(drives, []);
+  const longest = drives.reduce((longer, drive) =>
+    (drive.distanceKm ?? 0) > (longer.distanceKm ?? 0) ? drive : longer,
+  );
+  return {
+    driveId: longest.id,
+    startAt: first.startAt,
+    endAt: last.endAt,
+    durationMin: minutesBetween(first.startAt, last.endAt),
+    from: first.from,
+    to: last.to,
+    distanceKm: totals.distanceKm,
+    consumptionWhPerKm: totals.consumptionWhPerKm,
+    drives,
+  };
+}
+
+type Run = { stopBefore: TripStop | null; drives: Drive[] };
+
+function runsOf(
+  rows: { drive: Drive; chargedBefore: boolean }[],
+  charges: Charge[],
+): Run[] {
+  const runs: Run[] = [];
+  rows.forEach(({ drive, chargedBefore }, index) => {
+    const run = runs[runs.length - 1];
+    if (index === 0 || !run) {
+      runs.push({ stopBefore: null, drives: [drive] });
+      return;
+    }
+    const stop = stopBetween(
+      rows[index - 1].drive,
+      drive,
+      chargedBefore,
+      charges,
+    );
+    if (isPause(stop)) run.drives.push(drive);
+    else runs.push({ stopBefore: stop, drives: [drive] });
+  });
+  return runs;
+}
+
+function tripOf(id: number, runs: Run[]): Trip | null {
+  const legs: TripLeg[] = [];
+  const stops: TripStop[] = [];
+  let waited: TripStop | null = null;
+  for (const run of runs) {
+    if (run.stopBefore) {
+      waited = waited ? joinStops(waited, run.stopBefore) : run.stopBefore;
+    }
+    const leg = legOf(run.drives);
+    if (leg.distanceKm < shortestLegKm) continue;
+    if (legs.length > 0 && waited) stops.push(waited);
+    legs.push(leg);
+    waited = null;
+  }
+  if (legs.length === 0) return null;
+  const last = legs[legs.length - 1];
+  return {
+    id,
+    startAt: legs[0].startAt,
+    endAt: last.endAt,
+    from: legs[0].from,
+    to: last.to,
+    drives: legs.flatMap((leg) => leg.drives),
+    legs,
+    stops,
+  };
+}
+
 export function buildTrips(
   legs: TripLegRow[],
   drives: Drive[],
   charges: Charge[],
 ): Trip[] {
   const driveOf = new Map(drives.map((drive) => [drive.id, drive]));
-  const trips = new Map<number, Trip>();
+  const rowsOf = new Map<number, { drive: Drive; chargedBefore: boolean }[]>();
   for (const leg of legs) {
     const drive = driveOf.get(leg.driveId);
     if (!drive) continue;
-    const trip = trips.get(leg.tripId);
-    if (!trip) {
-      trips.set(leg.tripId, {
-        id: leg.tripId,
-        startAt: drive.startAt,
-        endAt: drive.endAt,
-        from: drive.from,
-        to: drive.to,
-        drives: [drive],
-        stops: [],
-      });
-      continue;
-    }
-    const before = trip.drives[trip.drives.length - 1];
-    trip.stops.push(stopBetween(before, drive, leg.chargedBefore, charges));
-    trip.drives.push(drive);
-    trip.endAt = drive.endAt;
-    trip.to = drive.to;
+    const rows = rowsOf.get(leg.tripId) ?? [];
+    rows.push({ drive, chargedBefore: leg.chargedBefore });
+    rowsOf.set(leg.tripId, rows);
   }
-  return [...trips.values()];
+  return [...rowsOf].flatMap(([id, rows]) => {
+    const trip = tripOf(id, runsOf(rows, charges));
+    return trip ? [trip] : [];
+  });
 }
 
 function tripCharges(trip: Trip): Charge[] {
@@ -196,6 +295,7 @@ export function tripSummary(trip: Trip): TripSummary {
   const totals = tripTotals(trip.drives, tripCharges(trip));
   return {
     ...totals,
+    legs: trip.legs.length,
     totalMin: minutesBetween(trip.startAt, trip.endAt),
     stoppedMin: trip.stops.reduce((sum, stop) => sum + stop.durationMin, 0),
     stops: trip.stops.length,
@@ -235,10 +335,10 @@ export function tripDestination(trip: Trip): {
 }
 
 export function tripSteps(trip: Trip): TripStep[] {
-  return trip.drives.flatMap((drive, index): TripStep[] => {
+  return trip.legs.flatMap((leg, index): TripStep[] => {
     const stop = trip.stops[index];
     return [
-      { kind: "drive", at: drive.startAt, drive },
+      { kind: "leg", at: leg.startAt, leg },
       ...(stop ? [{ kind: "stop" as const, at: stop.startAt, stop }] : []),
     ];
   });

@@ -16,8 +16,10 @@ TeslaMate ends a drive each time the car parks. A journey with a break and a cha
 4. The id of a trip is the id of its first drive. The id of any drive of the trip finds the same trip.
 5. A date range selects the trips that start in it. A trip that starts before the range stays out, with all its drives. A trip that starts in the range stays whole, with the drives after the end of the range.
 6. The grouping runs in SQL, in one pass over the drives from 7 days before the selection to 7 days after it. A trip cannot cross a stop above 2 hours, so no trip reaches that far. The page then loads the drives and the charges of the selected trips, and pure code joins them into trips with stops. `tripLegsQuery()` takes the `sql` tag as a parameter, so that a PGlite test can run it.
-7. A round trip starts and ends at the same place. Its title names the place of its longest stop.
-8. A trip of one drive links to the drive page. A trip of two or more drives has its own page.
+7. TeslaMate also ends a drive when the driver shifts to Park for a moment, and when TeslaMate restarts on the road. A stop under 2 minutes without a charge is a pause. The page joins the drives around a pause into one leg, and it does not count the pause as a stop.
+8. A leg under 50 m is no movement. The page leaves it out and joins the stops around it into one stop. A trip starts and ends at a leg with movement, and a trip without such a leg does not show.
+9. A round trip starts and ends at the same place. Its title names the place of its longest stop.
+10. A trip of one drive links to the drive page. A trip of two or more drives has its own page. A leg of several drives links to its longest drive.
 
 ## Alternatives
 
@@ -26,6 +28,8 @@ TeslaMate ends a drive each time the car parks. A journey with a break and a cha
 3. Limits in Settings. No user asked for other limits, and teslamate-mcp uses the same defaults.
 
 ## Consequences
+
+Points 7 and 8 run in the pure code of the page, after the grouping. The grouping in SQL keeps the rule of teslamate-mcp, so both projects still put a drive in the same trip. The pages show fewer legs and stops than `get_trip_details` for the same trip.
 
 The totals of a range count whole trips, so they can differ from the CSV export of the same range by the drives of a trip that crosses an edge of the range.
 

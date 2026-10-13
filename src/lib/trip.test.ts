@@ -220,12 +220,135 @@ describe("buildTrips", () => {
   });
 });
 
+function rows(...driveIds: number[]): TripLegRow[] {
+  return driveIds.map((driveId) => ({
+    driveId,
+    tripId: driveIds[0],
+    chargedBefore: false,
+  }));
+}
+
+function still(id: number, start: Date, end: Date, place: string): Drive {
+  return { ...leg(id, start, end, place, place, [50, 50]), distanceKm: 0.02 };
+}
+
+describe("buildTrips with pauses and drives without movement", () => {
+  test("joins the drives around a pause under 2 minutes into one leg", () => {
+    const [night] = buildTrips(
+      rows(1, 2, 3),
+      [
+        {
+          ...leg(
+            1,
+            at(3, 15),
+            at(5, 4),
+            "Fuel Station",
+            "Unknown place",
+            [80, 30],
+          ),
+          distanceKm: 218,
+        },
+        {
+          ...leg(2, at(5, 4), at(5, 5), "Unknown place", "Motorway", [30, 30]),
+          distanceKm: 2,
+        },
+        {
+          ...leg(3, at(5, 6), at(5, 23), "Motorway", "Workshop", [30, 25]),
+          distanceKm: 23,
+        },
+      ],
+      [],
+    );
+    expect(night.stops).toEqual([]);
+    expect(night.drives.map((item) => item.id)).toEqual([1, 2, 3]);
+    expect(night.legs).toHaveLength(1);
+    expect(night.legs[0]).toMatchObject({
+      driveId: 1,
+      startAt: at(3, 15),
+      endAt: at(5, 23),
+      durationMin: 128,
+      from: "Fuel Station",
+      to: "Workshop",
+      distanceKm: 243,
+    });
+  });
+
+  test("keeps a stop of 2 minutes, and a shorter stop with a charge", () => {
+    const drives = [
+      leg(1, at(9), at(9, 30), "Home", "Gate", [80, 70]),
+      leg(2, at(9, 32), at(10), "Gate", "Charger", [70, 60]),
+      leg(3, at(10, 1), at(10, 30), "Charger", "Office", [62, 55]),
+    ];
+    const [trip] = buildTrips(
+      [
+        { driveId: 1, tripId: 1, chargedBefore: false },
+        { driveId: 2, tripId: 1, chargedBefore: false },
+        { driveId: 3, tripId: 1, chargedBefore: true },
+      ],
+      drives,
+      [],
+    );
+    expect(trip.legs.map((item) => item.driveId)).toEqual([1, 2, 3]);
+    expect(trip.stops.map((stop) => [stop.durationMin, stop.charged])).toEqual([
+      [2, false],
+      [1, true],
+    ]);
+  });
+
+  test("leaves out a drive without movement and joins the stops around it", () => {
+    const [trip] = buildTrips(
+      rows(1, 2, 3),
+      [
+        leg(1, at(9), at(9, 30), "Home", "Market", [80, 70]),
+        still(2, at(9, 40), at(9, 41), "Market"),
+        leg(3, at(9, 55), at(10, 20), "Market", "Home", [70, 60]),
+      ],
+      [],
+    );
+    expect(trip.drives.map((item) => item.id)).toEqual([1, 3]);
+    expect(trip.stops).toEqual([
+      {
+        startAt: at(9, 30),
+        endAt: at(9, 55),
+        durationMin: 25,
+        place: "Market",
+        charged: false,
+        charges: [],
+      },
+    ]);
+  });
+
+  test("starts and ends the trip at a drive with movement", () => {
+    const [trip] = buildTrips(
+      rows(1, 2, 3, 4),
+      [
+        still(1, at(8, 40), at(8, 41), "Home"),
+        leg(2, at(9), at(9, 30), "Home", "Market", [80, 70]),
+        leg(3, at(9, 45), at(10, 10), "Market", "Office", [70, 60]),
+        still(4, at(10, 20), at(10, 21), "Office"),
+      ],
+      [],
+    );
+    expect(trip.id).toBe(1);
+    expect([trip.startAt, trip.endAt]).toEqual([at(9), at(10, 10)]);
+    expect(trip.drives.map((item) => item.id)).toEqual([2, 3]);
+    expect(trip.stops).toHaveLength(1);
+  });
+
+  test("gives no trip without movement", () => {
+    expect(
+      buildTrips(rows(1), [still(1, at(9), at(9, 1), "Home")], []),
+    ).toEqual([]);
+  });
+});
+
 describe("tripSummary", () => {
   test("splits the time into driving and stops", () => {
     const [road] = roadTrips();
     const summary = tripSummary(road);
     expect(summary).toMatchObject({
       drives: 3,
+      legs: 3,
       charges: 1,
       distanceKm: 300,
       drivingMin: 230,
@@ -313,7 +436,7 @@ describe("tripSteps", () => {
     const [road] = roadTrips();
     expect(
       tripSteps(road).map((step) =>
-        step.kind === "drive" ? step.drive.id : step.stop.place,
+        step.kind === "leg" ? step.leg.driveId : step.stop.place,
       ),
     ).toEqual([101, "Bolu Rest Area", 102, "Supercharger Bolu", 103]);
   });

@@ -311,7 +311,7 @@ function ItemRow({
     <TripRow
       href={
         trip.drives.length === 1
-          ? `${base}/drives/${trip.id}`
+          ? `${base}/drives/${trip.drives[0].id}`
           : `${base}/drives/trip/${trip.id}`
       }
       clock={f.clock(item.at)}

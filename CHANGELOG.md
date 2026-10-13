@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Added
+
+- A page for each trip at `/cars/{car}/drives/trip/{tripId}`: the route of all legs on one map with the stops, the total, driving, and stopped time, the consumption, the battery at the start and at the end, the energy and the cost of the charges on the way, the average speed, and the list of legs and stops.
+
 ### Changed
 
 - The address names the car, such as `/cars/red-rocket/drives`, instead of its TeslaMate id. An id link, such as `/cars/2`, still opens the same car, and the browser then shows the name in the address. The API keeps the id. [Decision 0016](docs/decisions/0016-car-names-in-urls.md) explains the rules for the name.
@@ -12,6 +16,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - The AC and DC label looks the same on every page.
 - Battery, Stats, and a charge page: the chart titles name their unit, like the other charts.
 - Every control shows a clear 2 px focus ring when you move with the keyboard.
+- Trips at `/cars/{car}/drives/trip`: the list now shows trips, not single drives. A trip joins the drives of one journey: a stop of up to 30 minutes keeps the trip together, and so does a stop of up to 2 hours with a charge in it. This is the rule of the trip tools in teslamate-mcp. A charge during a stop belongs to its trip, and the other charges stay in the list. The newest day comes first. [Decision 0017](docs/decisions/0017-trips-from-drives.md) explains the rule.
 
 ### Fixed
 
@@ -92,7 +97,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ### Added
 
-- Trip view at `/cars/{carId}/drives/trip`: a date range with presets, the totals for distance, driving and charging time, energy, and cost, every route on one map with the charge stops, and a list of drives and charges. CSV buttons for the range.
+- Trip view at `/cars/{car}/drives/trip`: a date range with presets, the totals for distance, driving and charging time, energy, and cost, every route on one map with the charge stops, and a list of drives and charges. CSV buttons for the range.
 - Charging insights at `/cars/{carId}/charging/insights`: sessions, energy, cost per kWh, and cost per 100 km for a period, AC and DC compared, the curves of the last six DC sessions, a heatmap of charge starts, and the top charging places.
 - Stats: consumption by speed band, with the share of driving time in each band, in km/h or mph.
 - Slow-leak warning: when one tire loses at least 0.1 bar against the median of the other three over the last 14 days, the Overview tire card and the Stats tire panel show a warning.

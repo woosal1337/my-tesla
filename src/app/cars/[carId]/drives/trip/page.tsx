@@ -2,30 +2,35 @@ import { BatteryCharging, Route } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
-import { DayHeading, rowLinkClass } from "@/components/day-list";
+import { DayHeading } from "@/components/day-list";
 import { DownloadLink } from "@/components/download-link";
-import { MapsOff, TripMap, type TripStop } from "@/components/maps";
+import { MapsOff, TripMap, type TripMarker } from "@/components/maps";
 import { Metric } from "@/components/metric";
 import { PageTransition } from "@/components/page-transition";
+import { TripRow } from "@/components/trip-row";
 import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
 import type { Formatter } from "@/lib/format";
 import { mapThemeOf } from "@/lib/preferences";
-import { exportCharges, exportDrives, tripRoutes } from "@/lib/queries";
+import { tripRoutes } from "@/lib/queries";
 import {
+  stopsText,
+  tripDestination,
   tripItems,
   tripPresets,
   tripRange,
+  tripSummary,
   tripTotals,
   type TripItem,
 } from "@/lib/trip";
+import { tripsInRange } from "@/lib/trip-data";
 import { cn } from "@/lib/utils";
 import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
 
-export const metadata: Metadata = { title: "Trip" };
+export const metadata: Metadata = { title: "Trips" };
 
 function single(value: string | string[] | undefined): string | null {
   return typeof value === "string" ? value : null;
@@ -34,7 +39,7 @@ function single(value: string | string[] | undefined): string | null {
 const fieldClass =
   "h-10 rounded bg-card px-3 text-sm text-foreground transition-tesla [color-scheme:inherit] hover:bg-accent";
 
-export default async function TripPage({
+export default async function TripsPage({
   params,
   searchParams,
 }: PageProps<"/cars/[carId]/drives/trip">) {
@@ -57,25 +62,23 @@ export default async function TripPage({
     range === "invalid" ? tripRange(null, null, f.timeZone, now) : range;
   const shown = defaults === "invalid" ? null : defaults;
 
-  const [drives, charges] =
+  const { trips, drives, charges } =
     range === "invalid"
-      ? [[], []]
-      : await Promise.all([
-          exportDrives(car, range),
-          exportCharges(car.id, range),
-        ]);
+      ? { trips: [], drives: [], charges: [] }
+      : await tripsInRange(car, range);
   const ascending = [...drives].reverse();
   const routes = await tripRoutes(
     car.id,
     ascending.map((drive) => drive.id),
   );
   const totals = tripTotals(drives, charges);
-  const items = tripItems(drives, charges);
-  const stops: TripStop[] = charges.flatMap((charge) =>
+  const items = tripItems(trips, charges);
+  const markers: TripMarker[] = charges.flatMap((charge) =>
     charge.latitude !== null && charge.longitude !== null
       ? [
           {
             key: String(charge.id),
+            kind: "charge",
             label: charge.place,
             detail: `+${f.energy(charge.energyAddedKwh)}`,
             latitude: charge.latitude,
@@ -92,7 +95,7 @@ export default async function TripPage({
         <BackLink href={`${base}/drives`} label="Drives" />
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-[40px] leading-[1.2] font-medium">Trip</h1>
+            <h1 className="text-[40px] leading-[1.2] font-medium">Trips</h1>
             {shown && (
               <p className="mt-2 text-sm text-muted-foreground tabular">
                 {f.date(shown.start)} to{" "}
@@ -227,8 +230,8 @@ export default async function TripPage({
             <Metric label="Charging cost" value={f.cost(totals.cost)} />
             <Metric
               label="Records"
-              value={`${totals.drives} drives`}
-              detail={`${totals.charges} ${totals.charges === 1 ? "charge" : "charges"}`}
+              value={`${trips.length} ${trips.length === 1 ? "trip" : "trips"}`}
+              detail={`${totals.drives} drives · ${totals.charges} ${totals.charges === 1 ? "charge" : "charges"}`}
             />
           </dl>
 
@@ -239,7 +242,7 @@ export default async function TripPage({
                   const route = routes.get(drive.id);
                   return route ? [route] : [];
                 })}
-                stops={stops}
+                markers={markers}
                 theme={mapThemeOf(preferences)}
               />
             ) : (
@@ -256,7 +259,7 @@ export default async function TripPage({
                   <ul className="space-y-1">
                     {group.items.map((item) => (
                       <li key={`${item.kind}-${tripItemId(item)}`}>
-                        <TripRow item={item} base={base} f={f} />
+                        <ItemRow item={item} base={base} f={f} />
                       </li>
                     ))}
                   </ul>
@@ -270,10 +273,10 @@ export default async function TripPage({
 }
 
 function tripItemId(item: TripItem): number {
-  return item.kind === "drive" ? item.drive.id : item.charge.id;
+  return item.kind === "trip" ? item.trip.id : item.charge.id;
 }
 
-function TripRow({
+function ItemRow({
   item,
   base,
   f,
@@ -282,40 +285,40 @@ function TripRow({
   base: string;
   f: Formatter;
 }) {
-  const isDrive = item.kind === "drive";
-  const Icon = isDrive ? Route : BatteryCharging;
-  const href = isDrive
-    ? `${base}/drives/${item.drive.id}`
-    : `${base}/charging/${item.charge.id}`;
-  const title = isDrive
-    ? `${item.drive.from} → ${item.drive.to}`
-    : item.charge.place;
-  const detail = isDrive
-    ? `${f.distance(item.drive.distanceKm)} · ${f.duration(item.drive.durationMin)} · ${f.efficiency(item.drive.efficiencyWhPerKm)}`
-    : `+${f.energy(item.charge.energyAddedKwh)} · ${f.duration(item.charge.durationMin)}${item.charge.cost === null ? "" : ` · ${f.cost(item.charge.cost)}`}`;
+  if (item.kind === "charge") {
+    const { charge } = item;
+    return (
+      <TripRow
+        href={`${base}/charging/${charge.id}`}
+        clock={f.clock(item.at)}
+        icon={BatteryCharging}
+        tone="charge"
+        title={charge.place}
+        detail={`+${f.energy(charge.energyAddedKwh)} · ${f.duration(charge.durationMin)}${charge.cost === null ? "" : ` · ${f.cost(charge.cost)}`}`}
+      />
+    );
+  }
+  const { trip } = item;
+  const summary = tripSummary(trip);
+  const destination = tripDestination(trip);
+  const details = [
+    destination.roundTrip ? "Round trip" : null,
+    f.distance(summary.distanceKm),
+    f.duration(summary.totalMin),
+    stopsText(summary),
+  ].filter((text) => text !== null);
   return (
-    <Link
-      href={href}
-      transitionTypes={["tab-forward"]}
-      className={cn("grid grid-cols-[4rem_auto_1fr]", rowLinkClass)}
-    >
-      <span className="text-sm font-medium tabular">{f.clock(item.at)}</span>
-      <span
-        className={cn(
-          "grid size-8 place-items-center rounded-full",
-          isDrive
-            ? "bg-primary text-primary-foreground"
-            : "bg-charge text-primary-foreground",
-        )}
-      >
-        <Icon aria-hidden className="size-4" />
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate font-medium">{title}</span>
-        <span className="block truncate text-sm text-muted-foreground tabular">
-          {detail}
-        </span>
-      </span>
-    </Link>
+    <TripRow
+      href={
+        trip.drives.length === 1
+          ? `${base}/drives/${trip.id}`
+          : `${base}/drives/trip/${trip.id}`
+      }
+      clock={f.clock(item.at)}
+      icon={Route}
+      tone="drive"
+      title={`${trip.from} → ${destination.place}`}
+      detail={details.join(" · ")}
+    />
   );
 }

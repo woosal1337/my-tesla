@@ -240,31 +240,40 @@ export function PlacesMap({
   );
 }
 
-export type TripStop = {
+export type TripMarker = {
   key: string;
+  kind: "start" | "end" | "stop" | "charge";
   label: string;
   detail: string;
   latitude: number;
   longitude: number;
 };
 
+function TripDot({ kind }: { kind: TripMarker["kind"] }) {
+  if (kind === "start" || kind === "end") return <EndPoint kind={kind} />;
+  if (kind === "charge") return <PlaceDot kind="charge" size={14} />;
+  return (
+    <span className="block size-3 rounded-full border-2 border-primary bg-background" />
+  );
+}
+
 export function TripMap({
   routes,
-  stops,
+  markers,
   theme,
 }: {
   routes: LngLat[][];
-  stops: TripStop[];
+  markers: TripMarker[];
   theme?: MapTheme;
 }) {
   const bounds = routeBounds([
     ...routes.flat(),
-    ...stops.map((stop): LngLat => [stop.longitude, stop.latitude]),
+    ...markers.map((marker): LngLat => [marker.longitude, marker.latitude]),
   ]);
   if (!bounds) {
     return (
       <div className="grid h-full place-items-center text-sm text-subtle">
-        No route in this range.
+        No route to show.
       </div>
     );
   }
@@ -286,18 +295,18 @@ export function TripMap({
           interactive={false}
         />
       ))}
-      {stops.map((stop) => (
+      {markers.map((marker) => (
         <MapMarker
-          key={stop.key}
-          longitude={stop.longitude}
-          latitude={stop.latitude}
+          key={marker.key}
+          longitude={marker.longitude}
+          latitude={marker.latitude}
         >
           <MarkerContent>
-            <PlaceDot kind="charge" size={14} />
+            <TripDot kind={marker.kind} />
           </MarkerContent>
           <MarkerTooltip>
-            <span className="font-medium">{stop.label}</span>
-            <span className="opacity-70"> · {stop.detail}</span>
+            <span className="font-medium">{marker.label}</span>
+            <span className="opacity-70"> · {marker.detail}</span>
           </MarkerTooltip>
         </MapMarker>
       ))}

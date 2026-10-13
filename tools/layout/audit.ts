@@ -93,10 +93,19 @@ async function openPage(browser: Browser, width: number, preferences: object) {
   return { context, page: await context.newPage() };
 }
 
+function dayBefore(days: number): string {
+  return new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+}
+
 async function pagesToCheck(browser: Browser): Promise<string[]> {
   const { context, page } = await openPage(browser, 1280, settings[0]);
   const car = (await firstLink(page, "/", /^\/cars\/\d+$/)) ?? "/cars/1";
   const drive = await firstLink(page, `${car}/drives`, /\/drives\/\d+$/);
+  const trip = await firstLink(
+    page,
+    `${car}/drives/trip?from=${dayBefore(60)}`,
+    /\/drives\/trip\/\d+$/,
+  );
   const charge = await firstLink(page, `${car}/charging`, /\/charging\/\d+$/);
   await context.close();
   return [
@@ -104,6 +113,7 @@ async function pagesToCheck(browser: Browser): Promise<string[]> {
     `${car}/drives`,
     drive,
     `${car}/drives/trip`,
+    trip,
     `${car}/charging`,
     charge,
     `${car}/charging/insights`,

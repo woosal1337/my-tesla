@@ -256,13 +256,15 @@ const exportLimit = 100_000;
 
 async function queryDrives(
   car: Car,
-  options: { limit: number; driveId?: number; range?: DateRange | null },
+  options: { limit: number; driveIds?: number[]; range?: DateRange | null },
 ): Promise<Drive[]> {
   await connection();
   const sql = database();
   const [kind, style] = await Promise.all([getRangeKind(), getPlaceStyle()]);
-  const onlyDrive =
-    options.driveId === undefined ? sql`` : sql`and d.id = ${options.driveId}`;
+  const onlyDrives =
+    options.driveIds === undefined
+      ? sql``
+      : sql`and d.id = any(${options.driveIds}::int[])`;
   const inRange = options.range
     ? sql`and d.start_date >= (${options.range.start.toISOString()}::timestamptz at time zone 'UTC') and d.start_date < (${options.range.end.toISOString()}::timestamptz at time zone 'UTC')`
     : sql``;
@@ -298,7 +300,7 @@ async function queryDrives(
     left join geofences eg on eg.id = d.end_geofence_id
     left join positions sp on sp.id = d.start_position_id
     left join positions ep on ep.id = d.end_position_id
-    where d.car_id = ${car.id} and d.end_date is not null ${onlyDrive} ${inRange}
+    where d.car_id = ${car.id} and d.end_date is not null ${onlyDrives} ${inRange}
     order by d.start_date desc
     limit ${options.limit}
   `;
@@ -371,6 +373,14 @@ export function exportDrives(
   return queryDrives(car, { limit: exportLimit, range });
 }
 
+export async function drivesById(
+  car: Car,
+  driveIds: number[],
+): Promise<Drive[]> {
+  if (driveIds.length === 0) return [];
+  return queryDrives(car, { limit: exportLimit, driveIds });
+}
+
 export type DrivePositionRow = DrivePoint & { lng: number; lat: number };
 
 export async function drivePositions(
@@ -397,7 +407,7 @@ export async function findDriveRecord(
   car: Car,
   driveId: number,
 ): Promise<Drive | null> {
-  const [drive] = await queryDrives(car, { limit: 1, driveId });
+  const [drive] = await queryDrives(car, { limit: 1, driveIds: [driveId] });
   return drive ?? null;
 }
 

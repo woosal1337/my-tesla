@@ -77,7 +77,7 @@ export default async function DrivesPage({
                 className="inline-flex h-9 items-center gap-2 rounded bg-card px-3 text-sm font-medium transition-tesla hover:bg-accent"
               >
                 <MapIcon aria-hidden className="size-4" />
-                Trip
+                Trips
               </Link>
               <DownloadLink
                 href={`/api/cars/${car.id}/drives.csv`}

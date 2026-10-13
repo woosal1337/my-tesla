@@ -2,11 +2,15 @@ import { describe, expect, test } from "bun:test";
 import type { Charge, Drive } from "./queries";
 import {
   buildTrips,
+  newestFirst,
   stopsText,
   tripDestination,
   tripItems,
+  tripOrigin,
+  tripPath,
   tripPresets,
   tripRange,
+  tripSegments,
   tripSteps,
   tripSummary,
   tripTotals,
@@ -439,6 +443,63 @@ describe("tripSteps", () => {
         step.kind === "leg" ? step.leg.driveId : step.stop.place,
       ),
     ).toEqual([101, "Bolu Rest Area", 102, "Supercharger Bolu", 103]);
+  });
+});
+
+describe("tripPath", () => {
+  test("opens the drive page for a trip of one drive", () => {
+    const [road, evening] = roadTrips();
+    expect(tripPath(evening)).toBe("/drives/104");
+    expect(tripPath(road)).toBe("/drives/trip/101");
+  });
+});
+
+describe("tripOrigin", () => {
+  test("names the start, and a round trip", () => {
+    const [road] = roadTrips();
+    const [errands] = buildTrips(
+      [
+        { driveId: 1, tripId: 1, chargedBefore: false },
+        { driveId: 2, tripId: 1, chargedBefore: false },
+      ],
+      [
+        leg(1, at(9), at(9, 10), "Home", "Market", [80, 79]),
+        leg(2, at(9, 40), at(9, 55), "Market", "Home", [79, 77]),
+      ],
+      [],
+    );
+    expect(tripOrigin(road)).toBe("from Istanbul");
+    expect(tripOrigin(errands)).toBe("round trip from Home");
+  });
+});
+
+describe("newestFirst", () => {
+  test("puts the latest start first and keeps the input", () => {
+    const trips = roadTrips();
+    expect(newestFirst(trips).map((trip) => trip.id)).toEqual([104, 101]);
+    expect(trips.map((trip) => trip.id)).toEqual([101, 104]);
+  });
+});
+
+describe("tripSegments", () => {
+  test("splits the trip time into drives, stops, and charging stops", () => {
+    const [road] = roadTrips();
+    const segments = tripSegments(road);
+    expect(segments.map((segment) => segment.kind)).toEqual([
+      "drive",
+      "stop",
+      "drive",
+      "charge",
+      "drive",
+    ]);
+    expect(segments.map((segment) => segment.share * 320)).toEqual([
+      90, 20, 60, 70, 80,
+    ]);
+  });
+
+  test("gives no segments for a trip without a stop", () => {
+    const [, evening] = roadTrips();
+    expect(tripSegments(evening)).toEqual([]);
   });
 });
 

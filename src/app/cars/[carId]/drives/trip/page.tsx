@@ -18,6 +18,7 @@ import {
   stopsText,
   tripDestination,
   tripItems,
+  tripPath,
   tripPresets,
   tripRange,
   tripSummary,
@@ -30,7 +31,7 @@ import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export const instant = false;
 
-export const metadata: Metadata = { title: "Trips" };
+export const metadata: Metadata = { title: "Report" };
 
 function single(value: string | string[] | undefined): string | null {
   return typeof value === "string" ? value : null;
@@ -39,7 +40,7 @@ function single(value: string | string[] | undefined): string | null {
 const fieldClass =
   "h-10 rounded bg-card px-3 text-sm text-foreground transition-tesla [color-scheme:inherit] hover:bg-accent";
 
-export default async function TripsPage({
+export default async function ReportPage({
   params,
   searchParams,
 }: PageProps<"/cars/[carId]/drives/trip">) {
@@ -95,7 +96,7 @@ export default async function TripsPage({
         <BackLink href={`${base}/drives`} label="Drives" />
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-[40px] leading-[1.2] font-medium">Trips</h1>
+            <h1 className="text-[40px] leading-[1.2] font-medium">Report</h1>
             {shown && (
               <p className="mt-2 text-sm text-muted-foreground tabular">
                 {f.date(shown.start)} to{" "}
@@ -309,11 +310,7 @@ function ItemRow({
   ].filter((text) => text !== null);
   return (
     <TripRow
-      href={
-        trip.drives.length === 1
-          ? `${base}/drives/${trip.drives[0].id}`
-          : `${base}/drives/trip/${trip.id}`
-      }
+      href={`${base}${tripPath(trip)}`}
       clock={f.clock(item.at)}
       icon={Route}
       tone="drive"

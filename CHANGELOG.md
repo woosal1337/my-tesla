@@ -10,12 +10,6 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ### Changed
 
-- The address names the car, such as `/cars/red-rocket/drives`, instead of its TeslaMate id. An id link, such as `/cars/2`, still opens the same car, and the browser then shows the name in the address. The API keeps the id. [Decision 0016](docs/decisions/0016-car-names-in-urls.md) explains the rules for the name.
-- Drives, Charging, and Trip: the day heading stays under the header while you scroll a long list, and it lines up with the rows. On a phone, the rows use less side space, so a place name shows more of its letters.
-- Drives and Charging: a car without a record shows "No drives yet" or "No charges yet", with a short explanation.
-- The AC and DC label looks the same on every page.
-- Battery, Stats, and a charge page: the chart titles name their unit, like the other charts.
-- Every control shows a clear 2 px focus ring when you move with the keyboard.
 - Report at `/cars/{car}/drives/trip`, before called Trip: the list now shows trips, not single drives. A trip joins the drives of one journey: a stop of up to 30 minutes keeps the trip together, and so does a stop of up to 2 hours with a charge in it. This is the rule of the trip tools in teslamate-mcp. A stop under 2 minutes is a pause: the drives around it show as one leg, and a drive under 50 m does not show. A charge during a stop belongs to its trip, and the other charges stay in the list. The newest day comes first. [Decision 0017](docs/decisions/0017-trips-from-drives.md) explains the rule.
 - Drives lists the trips of the last 50 drives, not the single drives. A row shows where the trip ends and starts, the stops, the distance, and the consumption. Under a trip with stops, a bar shows the drives, the stops, and the charging stops in time order. A trip of one drive opens the drive page. Any other trip opens its trip page, and the trip page goes back to Drives. [Decision 0019](docs/decisions/0019-drives-list-trips.md) explains the choice.
 
@@ -23,6 +17,20 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 - Overview: many cars showed no car image. The image now shows for a 2017-2023 Model 3, for the wheel names of a 2024 Model 3 such as `Photon18` and `Helix19`, for a 2020-2024 Model Y in Quicksilver, Stealth Grey, Ultra Red, or Midnight Cherry Red, for the Model Y wheels `Apollo19`, `Apollo19MetallicShadow`, and `Photon18`, for the colors `BlackDiamond`, Glacier Blue, and Marine Blue, and for a wheel name with an ending such as `Pinwheel18CapKit`. A car with an unknown wheel shows its usual wheels when the color fits one generation.
 - Drives, a drive page, the drives CSV, and Report: a drive that TeslaMate left open was missing. This happens when TeslaMate restarts during a drive. The app now fills such a drive from its positions, so a trip no longer splits at it. The drive page shows a note. [Decision 0018](docs/decisions/0018-drives-left-open.md) explains the rule.
+
+## [1.8.0] - 2026-10-13
+
+### Changed
+
+- The address names the car, such as `/cars/red-rocket/drives`, instead of its TeslaMate id. An id link, such as `/cars/2`, still opens the same car, and the browser then shows the name in the address. The API keeps the id. [Decision 0016](docs/decisions/0016-car-names-in-urls.md) explains the rules for the name.
+- Drives, Charging, and Trip: the day heading stays under the header while you scroll a long list, and it lines up with the rows. On a phone, the rows use less side space, so a place name shows more of its letters.
+- Drives and Charging: a car without a record shows "No drives yet" or "No charges yet", with a short explanation.
+- The AC and DC label looks the same on every page.
+- Battery, Stats, and a charge page: the chart titles name their unit, like the other charts.
+- Every control shows a clear 2 px focus ring when you move with the keyboard.
+
+### Fixed
+
 - Drives and Charging: the summary under the title and the levels of a charge broke inside a value on a phone, such as "1,105" and "km" on two lines. A line now breaks only between values.
 - Charging insights: "1 sessions" now reads "1 session".
 - Battery: the headers of the idle drain table sat 16 px right of their numbers.
@@ -147,7 +155,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/woosal1337/my-tesla/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/woosal1337/my-tesla/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/woosal1337/my-tesla/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/woosal1337/my-tesla/compare/v1.5.3...v1.6.0

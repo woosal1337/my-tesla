@@ -31,6 +31,7 @@ The read-only role keeps its access to new tables, because of the `ALTER DEFAULT
 
 | Dashboard | TeslaMate |
 |---|---|
+| 1.8.0 | 4.3.0 |
 | 1.7.0 | 4.3.0 |
 | 1.6.1 | 4.3.0 |
 | 1.6.0 | 4.3.0 |

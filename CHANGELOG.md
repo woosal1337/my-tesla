@@ -4,6 +4,11 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- A phone signed out from the web forgets its data like a phone signed out in the app: the stored car list and Settings, and the alert choices, which before turned the alerts on again at the next pairing, even with another server.
+- A shared drive route or export no longer stays on the phone. Each share deleted none of the files before it, so every route ever shared stayed in the cache. The app now keeps only the last export, and signing out deletes it.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

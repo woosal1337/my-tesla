@@ -8,6 +8,15 @@ const exportTypes: Record<string, string> = {
   gpx: "application/gpx+xml",
 };
 
+function exportsFolder(): Directory {
+  return new Directory(Paths.cache, "exports");
+}
+
+export function forgetExports(): void {
+  const folder = exportsFolder();
+  if (folder.exists) folder.delete();
+}
+
 export async function shareExport(
   connection: Connection,
   path: string,
@@ -19,7 +28,8 @@ export async function shareExport(
   if (!(await Sharing.isAvailableAsync())) {
     throw new ApiError("This phone cannot share files.");
   }
-  const folder = new Directory(Paths.cache, "exports");
+  forgetExports();
+  const folder = exportsFolder();
   folder.create({ idempotent: true });
   const file = await File.downloadFileAsync(
     `${connection.url}${path}`,

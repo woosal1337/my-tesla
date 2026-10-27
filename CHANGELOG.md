@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- Two writes at the same moment to the Settings file or the push device file no longer undo each other, for example when a phone registers its alerts while the server removes a dead phone. The server had three copies of the file code, each with its own write queue but the same temporary file, and two copies of the database pool. They now share one queue and one pool, and each write uses its own temporary file.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

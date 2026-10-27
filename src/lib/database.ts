@@ -3,8 +3,7 @@ import postgres from "postgres";
 import { readDatabaseConfig } from "./database-config";
 import { isDemoMode } from "./demo/mode";
 import { createSql, type Row } from "./sql-template";
-
-let client: postgres.Sql | undefined;
+import { processWide } from "./sqlite";
 
 function demoClient(): postgres.Sql {
   const sql = createSql(async (text, params) => {
@@ -16,13 +15,10 @@ function demoClient(): postgres.Sql {
 }
 
 export function database(): postgres.Sql {
-  if (!client) {
-    if (isDemoMode(process.env)) {
-      client = demoClient();
-      return client;
-    }
+  return processWide("database", () => {
+    if (isDemoMode(process.env)) return demoClient();
     const config = readDatabaseConfig(process.env);
-    client = postgres(config.url, {
+    return postgres(config.url, {
       max: config.poolMax,
       connection: {
         application_name: "my-tesla",
@@ -31,6 +27,5 @@ export function database(): postgres.Sql {
         jit: "off",
       },
     });
-  }
-  return client;
+  });
 }

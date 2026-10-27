@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- Pairing the mobile app keeps waiting for Allow on the web when one check fails, for example while the phone locks or a proxy restarts. Only a denied or expired pairing ends it, and the checks wait for each other on a slow network.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

@@ -4,7 +4,7 @@ import * as Device from "expo-device";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import { ApiError, request } from "@/api/client";
+import { ApiError, request, SignedOutError } from "@/api/client";
 import { carList, pairClaim, pairStatus } from "@/api/responses";
 import { rememberCar } from "@/car/car-provider";
 import { Button } from "@/components/button";
@@ -159,6 +159,7 @@ export default function ConnectScreen() {
   useEffect(() => {
     if (!waiting) return;
     let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const check = async () => {
       try {
         const status = pairStatus(
@@ -167,24 +168,24 @@ export default function ConnectScreen() {
             "/api/app/pair/status",
           ),
         );
-        if (stopped || status?.status !== "active") return;
-        stopped = true;
-        if (waiting.carId !== null) await rememberCar(waiting.carId);
-        await save({ url: waiting.url, token: waiting.token });
+        if (!stopped && status?.status === "active") {
+          stopped = true;
+          if (waiting.carId !== null) await rememberCar(waiting.carId);
+          await save({ url: waiting.url, token: waiting.token });
+        }
       } catch (error) {
-        if (stopped) return;
-        stopped = true;
-        setWaiting(null);
-        setProblem(
-          error instanceof Error ? error.message : "The pairing ended.",
-        );
+        if (!stopped && error instanceof SignedOutError) {
+          stopped = true;
+          setWaiting(null);
+          setProblem(error.message);
+        }
       }
+      if (!stopped) timer = setTimeout(check, pollMs);
     };
     check();
-    const timer = setInterval(check, pollMs);
     return () => {
       stopped = true;
-      clearInterval(timer);
+      clearTimeout(timer);
     };
   }, [waiting, save]);
 

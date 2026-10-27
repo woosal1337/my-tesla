@@ -36,6 +36,28 @@ describe("days", () => {
     expect(window.end.getTime() - window.start.getTime()).toBe(23 * 3_600_000);
   });
 
+  test.each([
+    [
+      "America/Santiago",
+      "2026-09-06",
+      "2026-09-06T04:00:00.000Z",
+      "2026-09-07T03:00:00.000Z",
+    ],
+    [
+      "America/Havana",
+      "2026-03-08",
+      "2026-03-08T05:00:00.000Z",
+      "2026-03-09T04:00:00.000Z",
+    ],
+  ])(
+    "starts %s on %s at its first instant when midnight is skipped",
+    (timeZone, day, start, end) => {
+      const window = dayWindow(day, timeZone);
+      expect(window.start.toISOString()).toBe(start);
+      expect(window.end.toISOString()).toBe(end);
+    },
+  );
+
   test("reads only real dates and shifts across month ends", () => {
     expect(parseDayKey("2026-10-01")).toBe("2026-10-01");
     expect(parseDayKey("2026-02-30")).toBeNull();

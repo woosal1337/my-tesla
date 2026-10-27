@@ -103,9 +103,12 @@ export function createFormatter(settings: FormatSettings, timeZone: string) {
 
   function day(date: Date, now: Date): string {
     const parts = localParts(date, timeZone);
-    if (sameDay(parts, localParts(now, timeZone))) return "Today";
-    const yesterday = new Date(now.getTime() - 86_400_000);
-    if (sameDay(parts, localParts(yesterday, timeZone))) return "Yesterday";
+    const today = localParts(now, timeZone);
+    if (sameDay(parts, today)) return "Today";
+    const yesterday = Date.UTC(today.year, today.month - 1, today.day - 1);
+    if (sameDay(parts, localParts(new Date(yesterday), "UTC"))) {
+      return "Yesterday";
+    }
     return dayText(parts, style);
   }
 

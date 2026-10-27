@@ -122,6 +122,14 @@ describe("time formats", () => {
     );
   });
 
+  test("names yesterday after a short day", () => {
+    const berlin = formatter({}, "Europe/Berlin");
+    const afterMidnight = new Date("2026-03-29T22:30:00Z");
+    expect(berlin.day(new Date("2026-03-29T10:00:00Z"), afterMidnight)).toBe(
+      "Yesterday",
+    );
+  });
+
   test("follows the date order", () => {
     const at = new Date("2026-09-27T12:00:00Z");
     expect(formatter({ dateOrder: "month-day" }).day(at, now)).toBe(

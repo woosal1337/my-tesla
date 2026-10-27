@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- Timeline keeps a late drive on its own day where the clock skips midnight for daylight saving time, as in Chile and Cuba. A drive at 23:30 on the evening before the change showed on the timeline of the next day. Lists also name the day before "Yesterday" in the first hour after a 23-hour day, where they showed its date.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

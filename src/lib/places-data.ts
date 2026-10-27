@@ -11,7 +11,7 @@ import {
 } from "./frequent-routes-sql";
 import { drivenPointLimit, drivenRoads, type LngLat } from "./route";
 import { placeLabel } from "./vehicle";
-import { getPlaceStyle, getRangeKind } from "./viewer";
+import { getEfficiencyRangeKind, getPlaceStyle } from "./viewer";
 import { visitedAreas } from "./visited-areas";
 import { visitedAreasQuery } from "./visited-areas-sql";
 import { sinceOf, untilOf } from "./time-bounds";
@@ -189,7 +189,10 @@ export const frequentRoutes = cache(
     timeZone: string,
   ): Promise<FrequentRoute[]> => {
     await connection();
-    const [style, kind] = await Promise.all([getPlaceStyle(), getRangeKind()]);
+    const [style, kind] = await Promise.all([
+      getPlaceStyle(),
+      getEfficiencyRangeKind(),
+    ]);
     const rows = await frequentRoutesQuery(database(), {
       carId,
       since: from ?? new Date(0),

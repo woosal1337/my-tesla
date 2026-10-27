@@ -33,9 +33,10 @@ async function registerDevice(
   chosen: string[],
   ask: boolean,
 ): Promise<void> {
-  const token = await pushToken(ask);
+  const asking = ask && chosen.length > 0;
+  const token = await pushToken(asking);
   if (!token) {
-    if (!ask) return;
+    if (!asking) return;
     throw new PushSetupError(
       "Allow notifications for My Tesla in the phone settings.",
     );

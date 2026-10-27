@@ -14,6 +14,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - Pairing the mobile app keeps waiting for Allow on the web when one check fails, for example while the phone locks or a proxy restarts. Only a denied or expired pairing ends it, and the checks wait for each other on a slow network.
 - A phone signed out from the web forgets its data like a phone signed out in the app: the stored car list and Settings, and the alert choices, which before turned the alerts on again at the next pairing, even with another server.
 - A shared drive route or export no longer stays on the phone. Each share deleted none of the files before it, so every route ever shared stayed in the cache. The app now keeps only the last export, and signing out deletes it.
+- Turning the last alert off in the mobile app works without notification permission. Before, the switch asked for a push token first and failed, so it stayed on.
 
 ## [2.3.0] - 2026-11-17
 

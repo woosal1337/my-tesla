@@ -48,6 +48,8 @@ Open Settings from the tab bar. Each change saves at once, and a preview shows t
 
 The defaults come from the TeslaMate settings page: distance, temperature, tire pressure, preferred range, and theme. A saved value replaces a default. "Reset to defaults" removes your saved values.
 
+The range setting changes the range values on the screen. Energy and consumption always use the preferred range of TeslaMate, because TeslaMate derives the car efficiency from that range. With the other range, energy would be off by the gap between rated and ideal range.
+
 ## Charging cost
 
 TeslaMate records a cost only for a charge in a geofence with a price. For the other charges, set a price in the app:

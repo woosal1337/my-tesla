@@ -14,7 +14,7 @@ import {
   dataYearsQuery,
   type BiggestChargeRow,
 } from "./year-review-sql";
-import { getPlaceStyle, getRangeKind } from "./viewer";
+import { getEfficiencyRangeKind, getPlaceStyle } from "./viewer";
 import { sinceOf, untilOf } from "./time-bounds";
 
 export type BucketUnit = "day" | "week" | "month";
@@ -110,7 +110,7 @@ export const statsBuckets = cache(
     const until = untilOf(to);
     const shift = unit === "week" && weekStartsSunday ? 1 : 0;
     const [kind, { relation: sessions }] = await Promise.all([
-      getRangeKind(),
+      getEfficiencyRangeKind(),
       chargeSessions(carId),
     ]);
     const used = usedEnergy(kind);
@@ -206,7 +206,7 @@ export const driveTotals = cache(
     to: Date | null = null,
   ): Promise<DriveTotals> => {
     await connection();
-    const used = usedEnergy(await getRangeKind());
+    const used = usedEnergy(await getEfficiencyRangeKind());
     const [row] = await database()<DriveTotals[]>`
       select
         count(*)::int as drives,
@@ -253,7 +253,7 @@ export const periodChargeTotals = cache(
 export const efficiencyPoints = cache(
   async (carId: number, from: Date | null): Promise<EfficiencyPoint[]> => {
     await connection();
-    const kind = await getRangeKind();
+    const kind = await getEfficiencyRangeKind();
     const used = usedEnergy(kind);
     return database()<EfficiencyPoint[]>`
       select

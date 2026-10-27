@@ -112,6 +112,10 @@ export async function getRangeKind(): Promise<"rated" | "ideal"> {
   return (await getPreferences()).range;
 }
 
+export async function getEfficiencyRangeKind(): Promise<"rated" | "ideal"> {
+  return (await baseline()).range;
+}
+
 export async function getChargePrices(): Promise<ChargePrices> {
   const { chargePrice, fastChargePrice } = await getPreferences();
   return { perKwh: chargePrice, fastPerKwh: fastChargePrice };

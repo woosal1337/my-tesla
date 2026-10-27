@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- Energy and consumption follow the preferred range of TeslaMate, also when the range setting of the app differs. TeslaMate derives the car efficiency from its preferred range, so energy from the other range was off by the gap between rated and ideal range on drives, trips, Stats, frequent routes, and the parked drain. The range values on the screen still follow the setting.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

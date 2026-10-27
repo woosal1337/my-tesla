@@ -16,7 +16,7 @@ import {
   type DrivePoint,
 } from "./drive-series";
 import { driveEfficiency, placeLabel, type RecordedState } from "./vehicle";
-import { getPlaceStyle, getRangeKind } from "./viewer";
+import { getEfficiencyRangeKind, getPlaceStyle, getRangeKind } from "./viewer";
 
 export type Car = {
   id: number;
@@ -287,7 +287,10 @@ async function queryDrives(
 ): Promise<Drive[]> {
   await connection();
   const sql = database();
-  const [kind, style] = await Promise.all([getRangeKind(), getPlaceStyle()]);
+  const [kind, style] = await Promise.all([
+    getEfficiencyRangeKind(),
+    getPlaceStyle(),
+  ]);
   const onlyDrives =
     options.driveIds === undefined
       ? sql``

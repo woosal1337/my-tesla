@@ -4,6 +4,11 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- A drives or charges CSV with only `from` exports everything since that day. The missing end became a date that PostgreSQL refuses, so the export failed with an error.
+- The cost bars of Stats and of the year in review leave out sessions that added no energy, as the cost total above them does. A plug-in with a fee and no energy counted in the bars and not in the total, so the two disagreed.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

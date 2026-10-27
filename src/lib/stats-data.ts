@@ -178,6 +178,7 @@ export const statsBuckets = cache(
           sum(cost) as cost
         from ${sessions} cp
         where car_id = ${carId}
+          and charge_energy_added > 0.01
           and start_date >= (${since}::timestamptz at time zone 'UTC')
           and start_date < (${until}::timestamptz at time zone 'UTC')
         group by 1

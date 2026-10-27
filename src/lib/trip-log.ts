@@ -3,6 +3,7 @@ import { dayWindow } from "./insights";
 import { localParts } from "./date-format";
 import type { Formatter } from "./format";
 import type { Charge, Drive } from "./queries";
+import { untilOf } from "./time-bounds";
 
 export type ExportRange = { start: Date; end: Date } | null;
 
@@ -28,7 +29,7 @@ export function exportRange(
     return "invalid";
   }
   const start = from ? dayWindow(from, timeZone).start : new Date(0);
-  const end = to ? dayWindow(to, timeZone).end : new Date(8.64e15);
+  const end = to ? dayWindow(to, timeZone).end : new Date(untilOf(null));
   return start < end ? { start, end } : "invalid";
 }
 

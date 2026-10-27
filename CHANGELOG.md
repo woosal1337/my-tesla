@@ -4,6 +4,12 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- Turning the last alert off in the mobile app works without notification permission. Before, the switch asked for a push token first and failed, so it stayed on.
+- A tapped alert chooses its car once. Before, after a sign-out and a new pairing in the same run of the app, the old tap chose its car again over the car from the QR code.
+- The mobile app stops opening the live stream again every 5 s when a login proxy, such as Cloudflare Access, answers it with a login page.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

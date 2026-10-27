@@ -33,9 +33,10 @@ async function registerDevice(
   chosen: string[],
   ask: boolean,
 ): Promise<void> {
-  const token = await pushToken(ask);
+  const asking = ask && chosen.length > 0;
+  const token = await pushToken(asking);
   if (!token) {
-    if (!ask) return;
+    if (!asking) return;
     throw new PushSetupError(
       "Allow notifications for My Tesla in the phone settings.",
     );
@@ -124,6 +125,7 @@ export function useAlertRouting(): void {
     const request = response?.notification.request;
     if (!request || handled.current === request.identifier) return;
     handled.current = request.identifier;
+    Notifications.clearLastNotificationResponse();
     const { carId, url } = request.content.data ?? {};
     if (typeof carId === "number") choose(carId);
     const route = alertRoute(url);

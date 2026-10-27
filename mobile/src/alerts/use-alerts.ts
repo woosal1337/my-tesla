@@ -131,6 +131,7 @@ export function useAlertRouting(): void {
     const request = response?.notification.request;
     if (!request || handled.current === request.identifier) return;
     handled.current = request.identifier;
+    Notifications.clearLastNotificationResponse();
     const { carId, url } = request.content.data ?? {};
     if (typeof carId === "number") choose(carId);
     const route = alertRoute(url);

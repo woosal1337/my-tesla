@@ -15,6 +15,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - A phone signed out from the web forgets its data like a phone signed out in the app: the stored car list and Settings, and the alert choices, which before turned the alerts on again at the next pairing, even with another server.
 - A shared drive route or export no longer stays on the phone. Each share deleted none of the files before it, so every route ever shared stayed in the cache. The app now keeps only the last export, and signing out deletes it.
 - Turning the last alert off in the mobile app works without notification permission. Before, the switch asked for a push token first and failed, so it stayed on.
+- A tapped alert chooses its car once. Before, after a sign-out and a new pairing in the same run of the app, the old tap chose its car again over the car from the QR code.
 
 ## [2.3.0] - 2026-11-17
 

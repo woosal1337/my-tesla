@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     overflow: "hidden",
   },
-  start: { width: 64 },
+  start: { width: 76 },
   middle: { flex: 1, minWidth: 0 },
   end: { alignItems: "flex-end", maxWidth: "35%" },
   tabular: { fontVariant: ["tabular-nums"] },

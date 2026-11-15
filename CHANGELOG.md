@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- A duration of 10 hours or more and a 12-hour clock stay on one line in the rows of Drives, Charging, and the Report. The time column is now 76 pt wide.
+
 ## [2.2.2] - 2026-10-24
 
 ### Fixed

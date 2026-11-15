@@ -39,7 +39,7 @@ function ChargeListRow({ row }: { row: ChargeRow }) {
       start={<RowTime clock={row.clock} caption={row.duration} />}
       title={
         <View style={styles.title}>
-          <Text variant="strong" numberOfLines={1} style={styles.place}>
+          <Text variant="strong" style={styles.place}>
             {row.place}
           </Text>
           <ChargerBadge fast={row.fast} />

@@ -34,7 +34,7 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
         ) : null}
         <View style={styles.title}>
           {row.badge ? <ChargerBadge fast={row.badge === "DC"} /> : null}
-          <Text variant="strong" numberOfLines={1} style={styles.titleText}>
+          <Text variant="strong" style={styles.titleText}>
             {row.title}
           </Text>
         </View>
@@ -61,11 +61,7 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
             />
           </View>
         ) : null}
-        {row.detail ? (
-          <Text variant="caption" numberOfLines={2}>
-            {row.detail}
-          </Text>
-        ) : null}
+        {row.detail ? <Text variant="caption">{row.detail}</Text> : null}
         {row.note ? <Text variant="caption">{row.note}</Text> : null}
       </View>
     </>

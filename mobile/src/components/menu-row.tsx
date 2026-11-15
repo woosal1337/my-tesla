@@ -39,14 +39,8 @@ export function MenuRow({
         <Icon name={icon} color={palette.foreground} size={22} />
       </View>
       <View style={styles.text}>
-        <Text variant="menu" numberOfLines={1}>
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text variant="label" numberOfLines={1}>
-            {subtitle}
-          </Text>
-        ) : null}
+        <Text variant="menu">{title}</Text>
+        {subtitle ? <Text variant="label">{subtitle}</Text> : null}
       </View>
       {chevron ? (
         <Icon name={icons.chevron} color={palette.subtle} size={14} />

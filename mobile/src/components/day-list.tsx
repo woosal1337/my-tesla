@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { Screen } from "./screen";
 import { SectionHeading } from "./section-heading";
+import { summaryLine } from "./summary-line";
 import { Text } from "./text";
 
 export function DayList<Row extends { key: string }>({
@@ -21,7 +22,7 @@ export function DayList<Row extends { key: string }>({
 }) {
   const lead = [
     <Text key="summary" variant="label" style={styles.summary}>
-      {summary.join(" · ")}
+      {summaryLine(summary)}
     </Text>,
     ...(actions
       ? [

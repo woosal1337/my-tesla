@@ -41,17 +41,11 @@ export function ListRow({
       ) : null}
       <View style={styles.middle}>
         {typeof title === "string" ? (
-          <Text variant="strong" numberOfLines={1}>
-            {title}
-          </Text>
+          <Text variant="strong">{title}</Text>
         ) : (
           title
         )}
-        {subtitle ? (
-          <Text variant="label" numberOfLines={1}>
-            {subtitle}
-          </Text>
-        ) : null}
+        {subtitle ? <Text variant="label">{subtitle}</Text> : null}
         {accessory}
       </View>
       {end ? <View style={styles.end}>{end}</View> : null}

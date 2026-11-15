@@ -1,29 +1,43 @@
-import type { ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { Fragment, type ReactNode } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 import { Screen } from "./screen";
 import { SectionHeading } from "./section-heading";
+import { headerCoversScreen } from "./sticky-geometry";
+import { StickyHeading } from "./sticky-heading";
 import { summaryLine } from "./summary-line";
 import { Text } from "./text";
 
 export function DayList<Row extends { key: string }>({
   summary,
   actions,
+  before,
   sections,
   renderRow,
+  after,
+  largeTitle,
+  dimmed,
   refreshing,
   onRefresh,
 }: {
-  summary: string[];
+  summary?: string[];
   actions?: ReactNode;
+  before?: ReactNode;
   sections: { title: string; rows: Row[] }[];
   renderRow: (row: Row) => ReactNode;
+  after?: ReactNode;
+  largeTitle: boolean;
+  dimmed?: boolean;
   refreshing: boolean;
   onRefresh: () => void;
 }) {
   const lead = [
-    <Text key="summary" variant="label" style={styles.summary}>
-      {summaryLine(summary)}
-    </Text>,
+    ...(summary
+      ? [
+          <Text key="summary" variant="label" style={styles.summary}>
+            {summaryLine(summary)}
+          </Text>,
+        ]
+      : []),
     ...(actions
       ? [
           <View key="actions" style={styles.rows}>
@@ -31,6 +45,7 @@ export function DayList<Row extends { key: string }>({
           </View>,
         ]
       : []),
+    ...(before ? [<Fragment key="before">{before}</Fragment>] : []),
   ];
   const children = [
     ...lead,
@@ -42,12 +57,19 @@ export function DayList<Row extends { key: string }>({
         ))}
       </View>,
     ]),
+    ...(after ? [<Fragment key="after">{after}</Fragment>] : []),
   ];
   return (
     <Screen
       refreshing={refreshing}
       onRefresh={onRefresh}
+      dimmed={dimmed}
       stickyHeaderIndices={sections.map((_, index) => lead.length + index * 2)}
+      StickyHeaderComponent={
+        headerCoversScreen(Platform.OS, Platform.Version, largeTitle)
+          ? StickyHeading
+          : undefined
+      }
     >
       {children}
     </Screen>

@@ -102,6 +102,7 @@ export default function ChargingScreen() {
       }
       sections={charges.data.sections}
       renderRow={(row) => <ChargeListRow row={row} />}
+      largeTitle
       refreshing={refresh.refreshing}
       onRefresh={refresh.onRefresh}
     />

@@ -8,6 +8,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 - A duration of 10 hours or more and a 12-hour clock stay on one line in the rows of Drives, Charging, and the Report. The time column is now 76 pt wide.
 - Long place names and summaries show in full in the rows of Drives, the Timeline, the Overview menu, Charging, and the record lists of Insights. The text wraps onto more lines. The summary line of Drives and Charging breaks only between its parts.
+- The day heading of Drives, Charging, and the Report stays below the navigation bar while the list scrolls. Before, it stuck behind the bar and the status bar. The day headings of the Report now stick too.
 
 ## [2.2.2] - 2026-10-24
 

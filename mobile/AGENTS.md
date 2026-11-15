@@ -66,7 +66,7 @@ mobile/src/
 5. Change a server setting with `useSettingChange()`. It shows the new value at once, puts the old one back when the server refuses, and refetches the other screens, because their units change.
 6. Pull to refresh uses `useRefresh(query)`. Never pass `isRefetching` to a `RefreshControl`.
 7. Render a query through `<QueryView query={…}>{(data) => …}</QueryView>`. It shows the breathing T-mark of the web while it loads. It shows the error with a retry button when there is no data, and a notice above the old data when a refresh fails.
-8. A list with sticky day headings renders through `DayList`, because the sticky indices must count the direct children of the ScrollView.
+8. A list with sticky day headings renders through `DayList`: Drives, Charging, and the Report. The sticky indices must count the direct children of the ScrollView. Where the navigation bar covers the list, `DayList` gives the ScrollView `StickyHeading`, so the pinned heading stays below the bar.
 9. Every answer from outside the app is untrusted: server JSON, notification data, and stored values. Check its shape before use.
 
 ## Components
@@ -76,11 +76,12 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | Component | Use |
 |---|---|
 | `Text` | All text. Variants: `body`, `label`, `caption`, `strong`, `value`, `heading`, `title`, `display`, `hero`. Pass `tone` for a palette color or `color` for a computed one. `hero`, `display`, and `title` stop growing at 1.2 times the font scale. |
-| `Screen` | The scroll container of every screen. It sets the insets for the transparent header and the tab bar, and the refresh control. A screen without a native header, such as the Overview, passes `withoutHeader`, so Android keeps it below the status bar. |
+| `Screen` | The scroll container of every screen. It sets the insets for the transparent header and the tab bar, and the refresh control. A screen without a native header, such as the Overview, passes `withoutHeader`, so Android keeps it below the status bar. `dimmed` fades the content while the next filter loads. `StickyHeaderComponent` goes to the ScrollView. |
 | `Panel` | A card: a muted title, an optional note on the right, and children. A `Button` inside a panel gets the page background. |
 | `Stat`, `StatGrid` | An `AppStat` from the server: a label, a value with its tone, and a detail. A value with a note opens the explanation on press. |
 | `ListRow`, `RowTime` | A row of a list. Always pass `label`, the text that a screen reader says, with the units written out by the server text. Pass `selected` for the chosen row of a choice list. The start column is 76 pt wide for `RowTime`. Pass `startWidth` only for an icon. The title and the subtitle wrap. Never set a line limit on a place name or a summary. Keep `numberOfLines={1}` only for a short value in `end`. |
-| `DayList` | A list grouped by day with sticky headings, and optional `actions` under the summary. The summary line breaks only between its parts (`summaryLine`). |
+| `DayList` | A list grouped by day with sticky headings. It takes an optional summary, `actions` under the summary, `before` the first day, and `after` the last day. Pass `largeTitle` when the screen has a large title. The summary line breaks only between its parts (`summaryLine`). |
+| `StickyHeading` | The sticky wrapper of a day heading where the navigation bar covers the list. It pins the heading at the lower edge of the bar with the animated header height. `headerCoversScreen()` and `stickyRange()` in `sticky-geometry.ts` hold its logic. |
 | `MenuRow`, `LinkRow` | A row with an icon, a title, and a summary that wraps when it is long, the row of the Overview menu and of the sidebar. `LinkRow` is the same row with a chevron, for another screen of the same tab, such as Timeline from Drives |
 | `CarTitle`, `CarStage`, `QuickActions` | The head of the Overview: the car name with the chevron that switches the car, the battery glyph with the state; the car on its glow with the callouts from the server; and the row of icon buttons under it. Read [decision 0025](../docs/decisions/0025-the-tesla-app-layout.md). |
 | `InsightBody`, `PeriodControl` | The hero, the hero blocks, and the sections of an insight page, for Insights, Charging insights, and the year in review |

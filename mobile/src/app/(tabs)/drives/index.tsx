@@ -56,6 +56,7 @@ export default function DrivesScreen() {
       actions={<DrivesLinks />}
       sections={drives.data.sections}
       renderRow={(row) => <DriveListRow row={row} stack="drives" />}
+      largeTitle
       refreshing={refresh.refreshing}
       onRefresh={refresh.onRefresh}
     />

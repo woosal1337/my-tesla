@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Added
+
+- The day headings of Drives, Charging, and the Report show the total of the day, on the web and in the mobile app: the trip count and the distance, and the energy added, for example "Wed 21 Oct · 4 trips · 64 km". `GET /api/app/cars/{carId}/drives`, `charges`, and `report` give `total` for each day. The app needs this server version for the total, and shows only the date with an older server.
+
 ### Fixed
 
 - A duration of 10 hours or more and a 12-hour clock stay on one line in the rows of Drives, Charging, and the Report. The time column is now 76 pt wide.

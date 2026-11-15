@@ -87,12 +87,12 @@ The [mobile app](mobile.md) reads its screens from `/api/app/cars/{carId}/…`. 
 | Endpoint | Screen |
 |---|---|
 | `overview` | The Overview: the car with its callouts (battery and range, security or last seen, charging or odometer), the menu rows with their summaries, the battery, stats, the Live card, the lock and Sentry Mode history, Today, tires, location, the last drive and charge |
-| `drives`, `drives/{driveId}`, `trips/{tripId}` | The trip list, a drive with its charts, and a trip with its legs and stops |
-| `charges`, `charges/{chargeId}` | The charge list, and a charge with its figures, cost breakdown, and charts |
+| `drives`, `drives/{driveId}`, `trips/{tripId}` | The trip list by day, each day with its trip count and distance, a drive with its charts, and a trip with its legs and stops |
+| `charges`, `charges/{chargeId}` | The charge list by day, each day with the energy added, and a charge with its figures, cost breakdown, and charts |
 | `battery`, `stats`, `places`, `charging` | The Battery, Stats, Places, and Charging insights pages in panels. Add `?period=` with `7d`, `30d`, `90d`, `1y`, or `all`. Without it, the user's default period applies. |
 | `year` | The year in review. Add `?year=2026`; without it, the current year in the user's time zone, or the newest year with data. `years` lists the years that have a drive or a charge. |
 | `timeline` | One day: the totals, the hour-by-hour strip, and each drive, charge, and stop. Add `?day=YYYY-MM-DD`; without it, today. `previous` and `next` give the days around it, and `next` is `null` on today. |
-| `report` | A date range: the totals, the routes and the charges on a map, the trips and charges by day, and the CSV exports. Add `?from=` and `?to=` as `YYYY-MM-DD`, up to 366 days; without them, the last 7 days. `presets` lists the usual ranges. |
+| `report` | A date range: the totals, the routes and the charges on a map, the trips and charges by day with the total of each day, and the CSV exports. Add `?from=` and `?to=` as `YYYY-MM-DD`, up to 366 days; without them, the last 7 days. `presets` lists the usual ranges. |
 
 `/api/app/settings` reads and changes the Settings of the person who asks, the same Settings as the web page. `GET` gives the groups, the choices, and a preview. `PUT` with `{ "key": "distance", "value": "mi" }` changes one setting and answers with the new page. A price takes a text such as `"4,857"`, and an Overview card takes `"overview.tires"` with `true` or `false`. The web-only settings, such as the theme and the tabs, stay on the web. In demo mode the Settings live in a cookie, as in the browser.
 
@@ -105,6 +105,8 @@ The app signs in through these endpoints, which need no session:
 | `/api/app/me` | `GET`, `DELETE` with the phone token | The signed-in account, and sign-out of the phone |
 
 With maps on in Settings, the answers hold the positions for the maps of the app: the car on the Overview, the route of a drive, the legs of a trip with its start, stops, and end, the place of a charge, the places of the Places page with their weight, every road driven, and the routes of a report. With maps off, these fields are `null`, and the map panels say so. The map theme is a setting of `/api/app/settings`.
+
+The lists of `drives`, `charges`, and `report` give their days in `sections`. Each day gives `title`, the date, and `total`, the parts of the day total in the units of the person, for example `["4 trips", "64 km"]` or `["+18.9 kWh"]`. The total of a report day counts only its rows, so a charge inside a trip does not add to the energy part. A server before this change omits `total`, and the app then shows only the date.
 
 A drive gives `gpxPath`, and a report gives `exports`, each the path of an export of the section above. The app downloads them with its phone token and opens the share sheet of the phone.
 

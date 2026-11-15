@@ -1,4 +1,5 @@
 import { assessConsumption, ratedWhPerKm } from "../assessment";
+import { itemsDayTotal } from "../day-total";
 import type { Formatter } from "../format";
 import type { Car, Charge, Drive } from "../queries";
 import type { LngLat } from "../route";
@@ -127,6 +128,7 @@ export function reportPage(
       .groupByDay(items, (item) => item.at, now)
       .map((group) => ({
         title: group.label,
+        total: itemsDayTotal(group.items, f),
         rows: group.items.map((item) =>
           item.kind === "trip"
             ? tripRow(item.trip, rated, f)

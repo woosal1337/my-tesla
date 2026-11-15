@@ -100,6 +100,9 @@ describe("reportPage", () => {
     });
     expect(page.routes).toHaveLength(1);
     expect(page.markers).toMatchObject([{ kind: "charge", label: "Home" }]);
+    expect(page.sections.map((section) => section.total)).toEqual([
+      ["1 trip", "40 km", `+${f.energy(20)}`],
+    ]);
     const rows = page.sections.flatMap((section) => section.rows);
     expect(rows.map((row) => row.target)).toEqual([
       { kind: "charge", id: 77 },

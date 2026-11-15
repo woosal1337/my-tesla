@@ -86,7 +86,7 @@ Checked on 2026-10-01 on the demo server, with miles, °F, psi, kPa, km/kWh, the
 
 Checked on 2026-10-13 against the Checklist Design checklists for a data table, a table, an empty state, settings, and a tab bar, on the demo at 1440 and 390 px, in dark and light.
 
-1. **Day lists.** Drives, Charging, and Trip group their rows by day. The day heading sticks under the header and lines up with the row content. `DayHeading` and `rowLinkClass` in `src/components/day-list.tsx` hold the shared style.
+1. **Day lists.** Drives, Charging, and Trip group their rows by day. The day heading sticks under the header and lines up with the row content. `DayHeading` and `rowLinkClass` in `src/components/day-list.tsx` hold the shared style. A day heading shows the date and the total of the day through `DotList`, for example "Wed 21 Oct · 4 trips · 64 km", from `src/lib/day-total.ts`, the same module as the app. The date stays first and the parts stay short ([Apple HIG: lists and tables](https://developer.apple.com/design/human-interface-guidelines/lists-and-tables), [Apple HIG: writing](https://developer.apple.com/design/human-interface-guidelines/writing), [WCAG 2.2 Understanding 2.4.6 Headings and Labels](https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html), read on 2026-11-16).
 2. **Whole values.** A line with several values uses `DotList`, which keeps each value on one line and breaks only between values.
 3. **Focus.** Every control shows a 2 px ring in the ring color on keyboard focus. A list row draws the ring inside its edge, so the sticky day heading does not cover it.
 4. **Tables.** A header cell has the same padding as the cells under it, so a right-aligned header ends where its numbers end.

@@ -18,6 +18,7 @@ import {
 } from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
+import { tripsDayTotal } from "@/lib/day-total";
 import {
   stopsText,
   tripDestination,
@@ -111,7 +112,13 @@ export default async function DrivesPage({
             .groupByDay(trips, ({ trip }) => trip.startAt, now)
             .map((group) => (
               <section key={group.label}>
-                <DayHeading>{group.label}</DayHeading>
+                <DayHeading
+                  title={group.label}
+                  total={tripsDayTotal(
+                    group.items.map(({ summary }) => summary),
+                    f,
+                  )}
+                />
                 <ul className="space-y-1">
                   {group.items.map(({ trip, summary }) => (
                     <li key={trip.id}>

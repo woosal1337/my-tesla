@@ -1,6 +1,7 @@
 import { assessChargingEfficiency, assessVoltage } from "../assessment";
 import type { ChargeSession, CurvePoint } from "../charge-data";
 import { chargeFigures, powerByLevel } from "../charge-figures";
+import { chargesDayTotal } from "../day-total";
 import type { Formatter } from "../format";
 import type { Charge } from "../queries";
 import { ongoingText } from "../vehicle";
@@ -46,6 +47,7 @@ export function chargeList(
       .groupByDay(charges, (charge) => charge.startAt, now)
       .map((group) => ({
         title: group.label,
+        total: chargesDayTotal(group.items, f),
         rows: group.items.map((charge) => ({
           key: `charge-${charge.id}`,
           id: charge.id,

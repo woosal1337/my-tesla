@@ -92,6 +92,7 @@ describe("driveList", () => {
     const list = driveList(trips, car, f, now);
     expect(list.summary).toEqual(["2 recent trips", "360 km"]);
     expect(list.sections).toHaveLength(1);
+    expect(list.sections[0]!.total).toEqual(["2 trips", "360 km"]);
     const [errandRow, roadRow] = list.sections[0]!.rows;
     expect(errandRow?.target).toEqual({ kind: "drive", id: 13 });
     expect(roadRow).toMatchObject({

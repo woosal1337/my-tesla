@@ -1,10 +1,11 @@
+import type { DaySection } from "@contract";
 import { Fragment, type ReactNode } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { Screen } from "./screen";
 import { SectionHeading } from "./section-heading";
 import { headerCoversScreen } from "./sticky-geometry";
 import { StickyHeading } from "./sticky-heading";
-import { summaryLine } from "./summary-line";
+import { headingLine, summaryLine } from "./summary-line";
 import { Text } from "./text";
 
 export function DayList<Row extends { key: string }>({
@@ -22,7 +23,7 @@ export function DayList<Row extends { key: string }>({
   summary?: string[];
   actions?: ReactNode;
   before?: ReactNode;
-  sections: { title: string; rows: Row[] }[];
+  sections: DaySection<Row>[];
   renderRow: (row: Row) => ReactNode;
   after?: ReactNode;
   largeTitle: boolean;
@@ -50,7 +51,10 @@ export function DayList<Row extends { key: string }>({
   const children = [
     ...lead,
     ...sections.flatMap((section) => [
-      <SectionHeading key={`heading-${section.title}`} title={section.title} />,
+      <SectionHeading
+        key={`heading-${section.title}`}
+        title={headingLine(section)}
+      />,
       <View key={`rows-${section.title}`} style={styles.rows}>
         {section.rows.map((row) => (
           <View key={row.key}>{renderRow(row)}</View>

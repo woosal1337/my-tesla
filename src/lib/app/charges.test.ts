@@ -83,6 +83,7 @@ describe("chargeList", () => {
       "16.5 kWh added",
       "160.20 spent",
     ]);
+    expect(list.sections[0]!.total).toEqual(["+16.5 kWh"]);
     const [ongoing, done] = list.sections[0]!.rows;
     expect(ongoing).toMatchObject({ duration: "Now", energy: null });
     expect(done).toMatchObject({

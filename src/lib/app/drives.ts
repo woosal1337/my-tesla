@@ -1,4 +1,5 @@
 import { assessConsumption, ratedWhPerKm } from "../assessment";
+import { tripsDayTotal } from "../day-total";
 import type { DriveEnergy, DrivePoint } from "../drive-series";
 import type { Formatter } from "../format";
 import { tripMarkers } from "../map-points";
@@ -90,6 +91,10 @@ export function driveList(
       .groupByDay(summaries, ({ trip }) => trip.startAt, now)
       .map((group) => ({
         title: group.label,
+        total: tripsDayTotal(
+          group.items.map(({ summary }) => summary),
+          f,
+        ),
         rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
       })),
   };

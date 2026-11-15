@@ -11,6 +11,7 @@ import { TripRow } from "@/components/trip-row";
 import { assessConsumption, ratedWhPerKm } from "@/lib/assessment";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
+import { itemsDayTotal } from "@/lib/day-total";
 import type { Formatter } from "@/lib/format";
 import type { TripMarker } from "@/lib/map-points";
 import { mapThemeOf } from "@/lib/preferences";
@@ -257,7 +258,10 @@ export default async function ReportPage({
               .groupByDay(items, (item) => item.at, now)
               .map((group) => (
                 <section key={group.label}>
-                  <DayHeading>{group.label}</DayHeading>
+                  <DayHeading
+                    title={group.label}
+                    total={itemsDayTotal(group.items, f)}
+                  />
                   <ul className="space-y-1">
                     {group.items.map((item) => (
                       <li key={`${item.kind}-${tripItemId(item)}`}>

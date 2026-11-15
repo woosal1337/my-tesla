@@ -91,9 +91,11 @@ export type DriveRow = {
   consumption: AppValue;
 };
 
+export type DaySection<Row> = { title: string; total?: string[]; rows: Row[] };
+
 export type DriveList = {
   summary: string[];
-  sections: { title: string; rows: DriveRow[] }[];
+  sections: DaySection<DriveRow>[];
 };
 
 export type DriveDetail = {
@@ -141,7 +143,7 @@ export type ChargeRow = {
 
 export type ChargeList = {
   summary: string[];
-  sections: { title: string; rows: ChargeRow[] }[];
+  sections: DaySection<ChargeRow>[];
 };
 
 export type ChargeDetail = {
@@ -263,7 +265,7 @@ export type ReportPage = {
   stats: AppStat[];
   routes: LngLat[][] | null;
   markers: MapMarker[];
-  sections: { title: string; rows: DriveRow[] }[];
+  sections: DaySection<DriveRow>[];
   notice: string | null;
   exports: AppExport[];
 };

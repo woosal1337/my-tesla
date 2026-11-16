@@ -37,6 +37,7 @@ import {
   efficiencyBands,
   efficiencyScatter,
   pressureRows,
+  softwareTitle,
   updateDays,
 } from "@/lib/stats-figures";
 import { odometerRows } from "@/lib/trends";
@@ -548,7 +549,7 @@ export default async function StatsPage({
               </p>
             ))}
           </Panel>
-          <Panel title="Software">
+          <Panel title={softwareTitle}>
             {updates.length ? (
               <ol className="relative space-y-5 before:absolute before:top-2 before:bottom-2 before:left-[3px] before:w-px before:bg-border">
                 {updateDays(updates, now).map(({ update, days }, index) => {

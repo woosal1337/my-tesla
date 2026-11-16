@@ -5,6 +5,7 @@ import { chargeSessions } from "./charge-sessions";
 import { database } from "./database";
 import { rangeColumn, type RangeKind } from "./range-columns";
 import type { SpeedBandRow } from "./speed-bands";
+import { softwareUpdateLimit } from "./stats-figures";
 import { slowLeaks, type SlowLeak } from "./tire-leak";
 import type { OdometerPoint } from "./trends";
 import { odometerTrendQuery } from "./trends-sql";
@@ -338,7 +339,7 @@ export const softwareUpdates = cache(
       from updates
       where car_id = ${carId}
       order by start_date desc
-      limit 12
+      limit ${softwareUpdateLimit}
     `;
   },
 );

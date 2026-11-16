@@ -9,6 +9,7 @@ import {
   chargeHistory,
   chargeLegs,
   chargeTime,
+  chargeTimeTitle,
   type LevelTime,
 } from "../charge-time";
 import type { Formatter } from "../format";
@@ -211,19 +212,15 @@ export function chargingInsightsPage(
                 )
               : { kind: "note", text: "No DC fast charge in this period." },
           ]),
-          panel(
-            "Charging time",
-            [
-              ...chargeTimeBlocks("DC fast charging", true, input, f),
-              ...chargeTimeBlocks("AC charging", false, input, f),
-              input.levelTimes.length > 0 && {
-                kind: "note",
-                role: "caption",
-                text: "The time that past charges spent at each battery percent. The slow time fits a cold battery or a busy charger.",
-              },
-            ],
-            "Charges of the last 2 years",
-          ),
+          panel(chargeTimeTitle, [
+            ...chargeTimeBlocks("DC fast charging", true, input, f),
+            ...chargeTimeBlocks("AC charging", false, input, f),
+            input.levelTimes.length > 0 && {
+              kind: "note",
+              role: "caption",
+              text: "The time that past charges spent at each battery percent. The slow time fits a cold battery or a busy charger.",
+            },
+          ]),
           panel(
             "When the car charges",
             [heatmap(input.starts, sundayFirst, f, "charges")],

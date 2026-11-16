@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { chargeTimeTitle } from "../charge-time";
 import { createFormatter } from "../format";
 import { defaultPreferences } from "../preferences";
 import {
@@ -104,9 +105,12 @@ describe("chargingInsightsPage", () => {
       false,
       f,
     );
-    const blocks =
-      page.sections[0]?.panels.find((item) => item.title === "Charging time")
-        ?.blocks ?? [];
+    const panels = page.sections[0]?.panels ?? [];
+    const chargingTime = panels.find((item) => item.title === chargeTimeTitle);
+    expect(chargingTime?.title).toBe("Charging time, last 2 years");
+    expect(chargingTime?.note).toBeNull();
+    expect(panels.some((item) => item.title === "Charging time")).toBe(false);
+    const blocks = chargingTime?.blocks ?? [];
     expect(
       blocks.map((block) =>
         block.kind === "note" ? [block.role, block.text] : block.kind,

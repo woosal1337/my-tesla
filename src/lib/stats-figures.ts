@@ -11,6 +11,10 @@ import type {
 const dayMs = 86_400_000;
 const shortestScatterKm = 3;
 
+export const softwareUpdateLimit = 12;
+
+export const softwareTitle = `Software, last ${softwareUpdateLimit} updates`;
+
 function round1(value: number | null): number | null {
   return value === null ? null : Math.round(value * 10) / 10;
 }

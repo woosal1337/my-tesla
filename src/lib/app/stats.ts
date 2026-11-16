@@ -18,6 +18,7 @@ import {
   efficiencyBands,
   efficiencyScatter,
   pressureRows,
+  softwareTitle,
   statsTotals,
   updateDays,
 } from "../stats-figures";
@@ -419,7 +420,7 @@ export function statsPage(
               text: leakWarning(leak, (bar) => f.pressure(bar)),
             })),
           ]),
-          panel("Software", [
+          panel(softwareTitle, [
             input.updates.length > 0 && {
               kind: "records",
               rows: updateDays(input.updates, now).map(

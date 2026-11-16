@@ -135,6 +135,34 @@ describe("statsPage", () => {
       ],
     });
   });
+
+  test("names the update count in the Software title, because the panel ignores the period", () => {
+    const page = statsPage(
+      {
+        ...emptyStats,
+        updates: [
+          {
+            version: "2026.32.5",
+            startAt: new Date("2026-09-01T02:00:00Z"),
+            endAt: new Date("2026-09-01T02:30:00Z"),
+          },
+        ],
+      },
+      car,
+      defaultPreferences,
+      "7d",
+      f,
+      now,
+    );
+    const titles = page.sections.flatMap((section) =>
+      section.panels.map((panel) => panel.title),
+    );
+    expect(titles).toContain("Software, last 12 updates");
+    expect(titles).not.toContain("Software");
+    expect(blocksOf(page, "Software, last 12 updates")[0]?.kind).toBe(
+      "records",
+    );
+  });
 });
 
 describe("placesPage", () => {

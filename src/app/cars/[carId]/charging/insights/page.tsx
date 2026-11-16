@@ -26,6 +26,7 @@ import {
   chargeHistory,
   chargeLegs,
   chargeTime,
+  chargeTimeTitle,
   type ChargeLeg,
   type LevelTime,
 } from "@/lib/charge-time";
@@ -244,14 +245,7 @@ export default async function ChargingInsightsPage({
                 <PanelNote>No DC fast charge in this period.</PanelNote>
               )}
             </Panel>
-            <Panel
-              title="Charging time"
-              action={
-                <span className="text-xs text-subtle">
-                  Charges of the last 2 years
-                </span>
-              }
-            >
+            <Panel title={chargeTimeTitle}>
               {levelTimes.length ? (
                 <>
                   <div className="grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">

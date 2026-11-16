@@ -15,7 +15,7 @@ The `mobile/` folder holds the My Tesla app for iOS and Android. It is an Expo p
 
 The server formats every value with the Settings of the person who signs in: units, number style, date and clock format, currency, time zone, place names, and the Overview cards. Change them in the Settings tab or on the web. Both change the same Settings. The phone keeps the car list, the last Settings, and the theme, so the Settings tab opens at once and without a network. Read [API](api.md#app-api).
 
-Every list refreshes when you pull it down. With the MQTT feed, the Overview and a charge refresh within a few seconds of a change in the car, through the change stream of the web, and every 30 s while they are on screen. A value in green, amber, or red explains itself when you press it.
+Every list refreshes when you pull it down. When a refresh fails, the screen keeps the old values and shows a notice above them. With the MQTT feed, the Overview and a charge refresh within a few seconds of a change in the car, through the change stream of the web, and every 30 s while they are on screen. A value in green, amber, or red explains itself when you press it.
 
 ## Tools
 

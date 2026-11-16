@@ -9,6 +9,7 @@ import { headingLine, summaryLine } from "./summary-line";
 import { Text } from "./text";
 
 export function DayList<Row extends { key: string }>({
+  notice,
   summary,
   actions,
   before,
@@ -19,6 +20,7 @@ export function DayList<Row extends { key: string }>({
   refreshing,
   onRefresh,
 }: {
+  notice?: ReactNode;
   summary?: string[];
   actions?: ReactNode;
   before?: ReactNode;
@@ -30,6 +32,7 @@ export function DayList<Row extends { key: string }>({
   onRefresh: () => void;
 }) {
   const lead = [
+    ...(notice ? [<Fragment key="notice">{notice}</Fragment>] : []),
     ...(summary
       ? [
           <Text key="summary" variant="label" style={styles.summary}>

@@ -27,6 +27,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ### Fixed
 
+- Drives and Charging in the mobile app show a notice above the list when a refresh fails, and keep the old rows. Before, a failed refresh showed nothing. This works with any server.
 - The maps of the mobile app no longer show a black box while they load. Each map shows the card color with the breathing T-mark until its tiles load, and then fades in. A map that does not load says so. This applies to Location, a charge, a drive, a trip, the Report routes, and Places, with any server.
 - The explanation of the battery health uses the digits of the value, on the web and in the mobile app, for example "keeps 99.4%" and "About 99.6% at 4,120 km". Before, it said "99%" and "About 100%" next to "99.4%". A health within 1 point under the average now says "At average". The app needs this server version, and needs no update.
 - Place names show above the route line of a drive, a trip, and the Report, on the web and in the mobile app. Before, the line covered the names of the cities on its way. The map of every road driven in the app does the same. The web keeps that map as it was.

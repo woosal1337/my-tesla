@@ -43,15 +43,20 @@ export default function DrivesScreen() {
   if (drives.data.sections.length === 0) {
     return (
       <Screen refreshing={refresh.refreshing} onRefresh={refresh.onRefresh}>
-        <EmptyState
-          title="No drives yet"
-          text="A drive shows here after the car drives. TeslaMate records only from the moment you sign in."
-        />
+        <QueryView query={drives}>
+          {() => (
+            <EmptyState
+              title="No drives yet"
+              text="A drive shows here after the car drives. TeslaMate records only from the moment you sign in."
+            />
+          )}
+        </QueryView>
       </Screen>
     );
   }
   return (
     <DayList
+      notice={<QueryView query={drives}>{() => null}</QueryView>}
       summary={[car.name, ...drives.data.summary]}
       actions={<DrivesLinks />}
       sections={drives.data.sections}

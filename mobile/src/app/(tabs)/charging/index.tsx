@@ -24,15 +24,20 @@ export default function ChargingScreen() {
   if (charges.data.sections.length === 0) {
     return (
       <Screen refreshing={refresh.refreshing} onRefresh={refresh.onRefresh}>
-        <EmptyState
-          title="No charges yet"
-          text="A charge shows here after the car charges. TeslaMate records only from the moment you sign in."
-        />
+        <QueryView query={charges}>
+          {() => (
+            <EmptyState
+              title="No charges yet"
+              text="A charge shows here after the car charges. TeslaMate records only from the moment you sign in."
+            />
+          )}
+        </QueryView>
       </Screen>
     );
   }
   return (
     <DayList
+      notice={<QueryView query={charges}>{() => null}</QueryView>}
       summary={[car.name, ...charges.data.summary]}
       actions={
         <LinkRow

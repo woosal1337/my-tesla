@@ -34,6 +34,13 @@ export function DriveScreen({ driveId }: { driveId: string }) {
             ) : null}
             <Text variant="label">{detail.subtitle}</Text>
             {detail.notice ? <Notice text={detail.notice} /> : null}
+            <ExportButton
+              item={{
+                label: "GPX",
+                path: detail.gpxPath,
+                file: `drive-${driveId.replace(/\D/g, "")}.gpx`,
+              }}
+            />
             <View style={styles.stats}>
               <StatGrid stats={detail.stats} />
             </View>
@@ -42,13 +49,6 @@ export function DriveScreen({ driveId }: { driveId: string }) {
                 <Chart chart={chart} />
               </Panel>
             ))}
-            <ExportButton
-              item={{
-                label: "GPX",
-                path: detail.gpxPath,
-                file: `drive-${driveId.replace(/\D/g, "")}.gpx`,
-              }}
-            />
           </>
         )}
       </QueryView>

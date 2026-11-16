@@ -14,7 +14,6 @@ export function DayList<Row extends { key: string }>({
   before,
   sections,
   renderRow,
-  after,
   largeTitle,
   dimmed,
   refreshing,
@@ -25,7 +24,6 @@ export function DayList<Row extends { key: string }>({
   before?: ReactNode;
   sections: DaySection<Row>[];
   renderRow: (row: Row) => ReactNode;
-  after?: ReactNode;
   largeTitle: boolean;
   dimmed?: boolean;
   refreshing: boolean;
@@ -61,7 +59,6 @@ export function DayList<Row extends { key: string }>({
         ))}
       </View>,
     ]),
-    ...(after ? [<Fragment key="after">{after}</Fragment>] : []),
   ];
   return (
     <Screen

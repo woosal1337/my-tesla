@@ -72,6 +72,7 @@ mobile/src/
 ## Components
 
 Use these components. Do not style a screen with raw colors or new text sizes.
+Put an action of a screen above its long content, never after the last row.
 
 | Component | Use |
 |---|---|
@@ -80,16 +81,16 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | `Panel` | A card: a muted title, an optional note on the right, and children. A `Button` inside a panel gets the page background. A server builder gives a panel that does not follow the period of its page a title that names its own range, for example "Charging time, last 2 years". |
 | `Stat`, `StatGrid` | An `AppStat` from the server: a label, a value with its tone, and a detail. A value with a note opens the explanation on press. |
 | `ListRow`, `RowTime` | A row of a list. Always pass `label`, the text that a screen reader says, with the units written out by the server text. Pass `selected` for the chosen row of a choice list. The start column is 76 pt wide for `RowTime`. Pass `startWidth` only for an icon. The title and the subtitle wrap. Never set a line limit on a place name or a summary. Keep `numberOfLines={1}` only for a short value in `end`. The `end` column is at most 35% of the row. Put a text that can be wider, such as the time range of a Timeline row, as a caption above the title. |
-| `DayList` | A list grouped by day with sticky headings. It takes an optional summary, `actions` under the summary, `before` the first day, and `after` the last day. Pass `largeTitle` when the screen has a large title. The summary line breaks only between its parts (`summaryLine`). A heading shows the day and the `total` of the server through `headingLine()`, and shows only the day when the server sends no `total`. |
+| `DayList` | A list grouped by day with sticky headings. It takes an optional summary, `actions` under the summary, and `before` the first day. Pass `largeTitle` when the screen has a large title. The summary line breaks only between its parts (`summaryLine`). A heading shows the day and the `total` of the server through `headingLine()`, and shows only the day when the server sends no `total`. |
 | `StickyHeading` | The sticky wrapper of a day heading where the navigation bar covers the list. It pins the heading at the lower edge of the bar with the animated header height. `headerCoversScreen()` and `stickyRange()` in `sticky-geometry.ts` hold its logic. |
 | `MenuRow`, `LinkRow` | A row with an icon, a title, and a summary that wraps when it is long, the row of the Overview menu and of the sidebar. `LinkRow` is the same row with a chevron, for another screen of the same tab, such as Timeline from Drives |
 | `CarTitle`, `CarStage`, `QuickActions` | The head of the Overview: the car name with the chevron that switches the car, the state, and the switcher rows with the battery and the state of each other car; the car on its glow with the callouts from the server; and the row of icon buttons under it. `carSlot()` in `car-frame.ts` places the image from `car.imageFrame`, so the car spans the stage. Read [decision 0025](../docs/decisions/0025-the-tesla-app-layout.md) and [decision 0028](../docs/decisions/0028-the-car-fills-the-stage.md). |
 | `InsightBody`, `PeriodControl` | The hero, the hero blocks, and the sections of an insight page, for Insights, Charging insights, and the year in review |
 | `DriveListRow` | A trip row of a drive list, for Drives and the Report. A Report row with `charge` draws as `ChargeListRow`. |
 | `ChargeListRow` | A charge row with the AC or DC badge, the levels, the level bar, the energy, and the cost, for Charging and the Report. It takes the tab stack, so the charge opens in the same tab. |
-| `ExportButton` | Downloads an export of the server with the phone token and opens the share sheet. `src/api/export-file.ts` checks the path and the file name. |
+| `ExportButton` | Downloads an export of the server with the phone token and opens the share sheet. `src/api/export-file.ts` checks the path and the file name. Pass `disabled` while the screen shows the data of an earlier filter. |
 | `SegmentedControl` | Two to five choices that switch a view or a filter. `size="compact"` for a filter inside a section. |
-| `Button` | The primary button is the only blue control on a screen. Use `kind="secondary"` for every other action. |
+| `Button` | The primary button is the only blue control on a screen. Use `kind="secondary"` for every other action. A button that is off and not busy has 38% opacity, a pressed button 60%, and a busy button full opacity with its spinner. |
 | `SwitchRow`, `Field` | An on and off setting with an optional detail, and a labelled text field |
 | `Icon`, `icons` | A symbol with a name for each platform: an SF Symbol and a Material Symbol. The types reject a wrong name. Add new icons to `icons.ts`. |
 | `Chart` | An `AppChart` from the server. It draws areas, lines, and bars on one or two axes, and a scrubbing tooltip. It shows the `caption` of the server above the legend, and draws each line in the `dash` style of its series. When a series has a pattern, the legend shows a line sample for each series instead of the dot. The tick labels stop growing at 1.2 times the font scale. |
@@ -100,6 +101,7 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | `EmptyState`, `Problem` | A list without records, and an error with a retry button |
 | `TeslaMark`, `LaunchSplash` | The T-mark of the web, drawn at launch or breathing while a screen loads. `src/theme/mark.ts` copies the path of `src/lib/logo.ts`, and a test fails when they differ. |
 | `DayStepper` | One row with the date as a heading, "Today" when the day is not today, and a 44 pt chevron for the day before and the day after. The buttons move under the date when the row is too narrow, and the date stops growing at 2 times the font scale. A `null` handler disables the chevron or hides "Today". `useSwipe()` in `src/hooks/use-swipe.ts` gives the same steps to a horizontal swipe, and `swipeStep()` holds its rule. |
+| `StepButton` | A 44 pt chevron with a label for a screen reader, for the day stepper and the older and newer charge. A `null` handler turns it off: no fill and the `subtle` icon. |
 | `TripStrip`, `LevelBar`, `ChargerBadge`, `DayStrip`, `Battery`, `LivePanel` | The small parts of the dashboard, drawn the same way as on the web. `DayStrip` draws the key of the server (`legend`) under the hours, and draws no key when an older server sends none. Offline time is amber (`palette.warning`). |
 
 A new shared component:

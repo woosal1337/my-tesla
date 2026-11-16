@@ -63,6 +63,18 @@ export default function ReportScreen() {
                     </Text>
                   ) : null}
                   <StatGrid stats={page.stats} />
+                  {page.exports.length ? (
+                    <View style={styles.exports}>
+                      {page.exports.map((item) => (
+                        <View key={item.path} style={styles.export}>
+                          <ExportButton
+                            item={item}
+                            disabled={report.isPlaceholderData}
+                          />
+                        </View>
+                      ))}
+                    </View>
+                  ) : null}
                   {page.routes && page.routes.length ? (
                     <MapSection title="Routes">
                       <RouteMap
@@ -78,15 +90,6 @@ export default function ReportScreen() {
           }
           sections={page.sections}
           renderRow={(row) => <DriveListRow row={row} stack="drives" />}
-          after={
-            page.exports.length ? (
-              <View style={styles.group}>
-                {page.exports.map((item) => (
-                  <ExportButton key={item.path} item={item} />
-                ))}
-              </View>
-            ) : null
-          }
           largeTitle={false}
           dimmed={report.isPlaceholderData}
           refreshing={refresh.refreshing}
@@ -103,4 +106,6 @@ export default function ReportScreen() {
 
 const styles = StyleSheet.create({
   group: { gap: space.lg },
+  exports: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
+  export: { flexGrow: 1, flexShrink: 1, gap: space.sm },
 });

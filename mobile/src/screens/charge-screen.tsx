@@ -3,15 +3,16 @@ import { StyleSheet, View } from "react-native";
 import { useLiveChanges } from "@/api/live";
 import { useCharge } from "@/api/queries";
 import { useCar } from "@/car/car-provider";
-import { Button } from "@/components/button";
 import { Chart } from "@/components/chart";
 import { ChargerBadge } from "@/components/charger-badge";
+import { icons } from "@/components/icons";
 import { LocationMap, MapSection } from "@/components/map";
 import { Notice } from "@/components/notice";
 import { Panel } from "@/components/panel";
 import { QueryView } from "@/components/query-view";
 import { Screen } from "@/components/screen";
 import { StatGrid } from "@/components/stat";
+import { StepButton } from "@/components/step-button";
 import { LevelBar } from "@/components/strips";
 import { Text } from "@/components/text";
 import { chargeLeftText } from "@/format";
@@ -39,9 +40,25 @@ export function ChargeScreen({ chargeId }: { chargeId: string }) {
           const next = detail.nextId;
           return (
             <>
-              <View style={styles.kind}>
-                <ChargerBadge fast={detail.fast} />
-                <Text variant="label">{detail.kind}</Text>
+              <View style={styles.head}>
+                <View style={styles.kind}>
+                  <ChargerBadge fast={detail.fast} />
+                  <Text variant="label" style={styles.kindText}>
+                    {detail.kind}
+                  </Text>
+                </View>
+                <View style={styles.steps}>
+                  <StepButton
+                    icon={icons.chevronLeft}
+                    label="Older charge"
+                    onPress={previous === null ? null : () => step(previous)}
+                  />
+                  <StepButton
+                    icon={icons.chevron}
+                    label="Newer charge"
+                    onPress={next === null ? null : () => step(next)}
+                  />
+                </View>
               </View>
               <Text variant="label">{detail.subtitle}</Text>
               {left ? (
@@ -93,24 +110,6 @@ export function ChargeScreen({ chargeId }: { chargeId: string }) {
                   />
                 </MapSection>
               ) : null}
-              <View style={styles.steps}>
-                <View style={styles.step}>
-                  <Button
-                    label="Older"
-                    kind="secondary"
-                    disabled={previous === null}
-                    onPress={() => previous !== null && step(previous)}
-                  />
-                </View>
-                <View style={styles.step}>
-                  <Button
-                    label="Newer"
-                    kind="secondary"
-                    disabled={next === null}
-                    onPress={() => next !== null && step(next)}
-                  />
-                </View>
-              </View>
             </>
           );
         }}
@@ -120,7 +119,22 @@ export function ChargeScreen({ chargeId }: { chargeId: string }) {
 }
 
 const styles = StyleSheet.create({
-  kind: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  head: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    columnGap: space.md,
+    rowGap: space.sm,
+  },
+  kind: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  kindText: { flexShrink: 1 },
+  steps: { flexDirection: "row", gap: space.sm, marginLeft: "auto" },
   hero: { marginTop: space.lg },
   levels: {
     marginTop: space.sm,
@@ -129,6 +143,4 @@ const styles = StyleSheet.create({
   },
   tabular: { fontVariant: ["tabular-nums"] },
   stats: { marginVertical: space.lg },
-  steps: { flexDirection: "row", gap: space.md },
-  step: { flex: 1 },
 });

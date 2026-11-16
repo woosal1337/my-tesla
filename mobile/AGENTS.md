@@ -95,7 +95,7 @@ Put an action of a screen above its long content, never after the last row.
 | `Icon`, `icons` | A symbol with a name for each platform: an SF Symbol and a Material Symbol. The types reject a wrong name. Add new icons to `icons.ts`. |
 | `Chart` | An `AppChart` from the server. It draws areas, lines, and bars on one or two axes, and a scrubbing tooltip. It shows the `caption` of the server above the legend, and draws each line in the `dash` style of its series. When a series has a pattern, the legend shows a line sample for each series instead of the dot. The tick labels stop growing at 1.2 times the font scale. |
 | `Block` | One block of an insight panel: stats, chart, shares, table, records, heatmap, progress, notice, or note. It takes the tab stack, so a record opens its target in the same tab. A note without a `role` is an empty state, centered and gray. A `heading`, `body`, or `caption` note is content and stays left-aligned. |
-| `Records`, `Heatmap` | A ranked list with a bar, a badge, links, and a target, and the drive or charge starts by weekday and hour, with a key for the shades under the hours |
+| `Records`, `Heatmap` | A ranked list with a bar, a badge, links, and a target, and the drive or charge starts by weekday and hour, with a key for the shades under the hours. A link of a record is underlined caption text in the `secondaryForeground` tone, never blue, in a 48 pt box. |
 | `LocationMap`, `RouteMap`, `PlacesMap` | The maps of the web: the car, a route with its markers, and the places sized by visits, on the CARTO styles |
 | `Notice` | A warning line with an icon, for a server notice |
 | `EmptyState`, `Problem` | A list without records, and an error with a retry button |
@@ -126,7 +126,7 @@ The app follows the Tesla style of the web. `research/ui-stack.md` has the token
 
 ## Accessibility
 
-1. Touch targets: 48 pt for buttons and rows, 44 pt for icon buttons. Use `hitSlop` to reach the size, never a smaller control.
+1. Touch targets: 48 pt for buttons, rows, and text links, 44 pt for icon buttons. Give the control the size in its layout with `minHeight` and `minWidth`. `hitSlop` never reaches past the bounds of the parent view, so use it only where the parent has the room.
 2. Every pressable has `accessibilityRole` and `accessibilityLabel`. Selected, disabled, and busy states go in `accessibilityState`.
 3. Section and panel titles have `accessibilityRole="header"`.
 4. Group the parts of one value or one row into one element with `accessible`, so a screen reader reads it as one.

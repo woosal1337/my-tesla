@@ -91,14 +91,18 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
               key={link.label}
               accessibilityRole="link"
               accessibilityLabel={link.label}
-              hitSlop={12}
               onPress={() =>
                 router.push(targetHref(link.target, stack), {
                   withAnchor: true,
                 })
               }
+              style={({ pressed }) => [styles.link, pressed && styles.pressed]}
             >
-              <Text variant="caption" tone="primary">
+              <Text
+                variant="caption"
+                tone="secondaryForeground"
+                style={styles.linkText}
+              >
                 {link.label}
               </Text>
             </Pressable>
@@ -150,5 +154,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   fill: { height: "100%", borderRadius: 3 },
-  links: { flexDirection: "row", flexWrap: "wrap", gap: space.lg },
+  links: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: space.lg,
+    marginVertical: -space.sm,
+  },
+  link: { minHeight: 48, minWidth: 48, justifyContent: "center" },
+  linkText: { textDecorationLine: "underline" },
 });

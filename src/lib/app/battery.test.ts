@@ -125,12 +125,20 @@ describe("batteryPage", () => {
     const panels = page.sections.flatMap((section) => section.panels);
     const titled = (title: string) =>
       panels.find((item) => item.title === title);
-    expect(titled("Charging advice")?.blocks[0]).toMatchObject({
+    const advice = titled("Charging advice")?.blocks ?? [];
+    expect(advice[0]).toMatchObject({
       kind: "note",
+      role: "body",
       text: expect.stringContaining("LFP battery"),
     });
-    expect(titled("Charging advice")?.blocks[1]).toMatchObject({
+    expect(advice[1]).toMatchObject({
+      role: "body",
       text: "The last full charge was 2 days ago.",
+    });
+    expect(advice.at(-1)).toMatchObject({
+      kind: "note",
+      role: "caption",
+      text: expect.stringContaining("TeslaMate sets the battery type"),
     });
     expect(titled("Charge level (%)")?.blocks[0]?.kind).toBe("chart");
     const levels = titled("Charge start and end levels")?.blocks[0];
@@ -145,6 +153,11 @@ describe("batteryPage", () => {
         { label: "Asleep", share: 0.75 },
         { label: "Offline", share: 0 },
       ],
+    });
+    expect(titled("Time in each state")?.blocks[1]).toEqual({
+      kind: "note",
+      role: "caption",
+      text: "Online includes driving and charging.",
     });
     expect(
       titled("Projected range (km)")?.blocks.map((block) =>

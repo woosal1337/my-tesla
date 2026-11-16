@@ -171,6 +171,8 @@ export type PeriodId = "7d" | "30d" | "90d" | "1y" | "all";
 
 export type ShareColor = "primary" | "charge";
 
+export type NoteRole = "heading" | "body" | "caption";
+
 export type AppRecord = {
   key: string;
   rank: number | null;
@@ -213,7 +215,7 @@ export type AppBlock =
   | { kind: "progress"; share: number; start: string; end: string }
   | { kind: "map"; places: MapPlace[] }
   | { kind: "routes"; routes: LngLat[][] }
-  | { kind: "note"; text: string };
+  | { kind: "note"; text: string; role?: NoteRole };
 
 export type AppPanel = {
   title: string;

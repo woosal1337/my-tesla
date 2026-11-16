@@ -197,9 +197,28 @@ describe("placesPage", () => {
     expect(blocksOf(page, "Areas")[0]).toMatchObject({
       kind: "stats",
       stats: [
-        { label: "Countries", value: { text: "1" } },
-        { label: "States", value: { text: "1" } },
-        { label: "Cities", value: { text: "2" } },
+        { label: "Countries", value: { text: "1" }, detail: "United States" },
+        { label: "States", value: { text: "1" }, detail: "Arizona" },
+        { label: "Cities", value: { text: "2" }, detail: null },
+      ],
+    });
+    const visitedTitles = (shown: InsightPage) =>
+      shown.sections
+        .find((section) => section.title === "Visited")
+        ?.panels.map((panel) => panel.title);
+    expect(visitedTitles(page)).toEqual([
+      "Areas",
+      "Top cities",
+      "Every road driven",
+    ]);
+    const none = placesPage(input, defaultPreferences, "30d", f, now, true);
+    expect(visitedTitles(none)).toEqual(["Areas", "Every road driven"]);
+    expect(blocksOf(none, "Areas")[0]).toMatchObject({
+      kind: "stats",
+      stats: [
+        { label: "Countries", value: { text: "0" }, detail: null },
+        { label: "States", value: { text: "0" }, detail: null },
+        { label: "Cities", value: { text: "0" }, detail: null },
       ],
     });
     expect(blocksOf(page, "Top cities")[0]).toMatchObject({

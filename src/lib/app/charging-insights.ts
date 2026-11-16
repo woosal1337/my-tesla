@@ -85,6 +85,7 @@ function chargeTimeBlocks(
   return [
     {
       kind: "note",
+      role: "heading",
       text: `${label}: ${plural(history.sessions, "charge", "charges")}, ${history.from}% to ${history.to}%`,
     },
     {
@@ -213,6 +214,7 @@ export function chargingInsightsPage(
               ...chargeTimeBlocks("AC charging", false, input, f),
               input.levelTimes.length > 0 && {
                 kind: "note",
+                role: "caption",
                 text: "The time that past charges spent at each battery percent. The slow time fits a cold battery or a busy charger.",
               },
             ],

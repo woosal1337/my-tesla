@@ -80,11 +80,18 @@ export function visitedRecords(
   );
 }
 
-function areaPanel(title: string, areas: VisitedArea[]): AppPanel {
+function areaStat(label: string, areas: VisitedArea[]) {
+  return appStat(label, String(areas.length), {
+    detail: areas.length === 1 ? areas[0]!.name : null,
+  });
+}
+
+function areaPanel(title: string, areas: VisitedArea[]): AppPanel | null {
+  if (areas.length < 2) return null;
   const shown = areas.slice(0, shownAreas);
   const most = Math.max(1, ...shown.map((area) => area.places));
   return panel(title, [
-    shown.length > 0 && {
+    {
       kind: "records",
       rows: shown.map((area, index) =>
         record({
@@ -224,9 +231,9 @@ export function placesPage(
             {
               kind: "stats",
               stats: [
-                appStat("Countries", String(input.areas.countries.length)),
-                appStat("States", String(input.areas.states.length)),
-                appStat("Cities", String(input.areas.cities.length)),
+                areaStat("Countries", input.areas.countries),
+                areaStat("States", input.areas.states),
+                areaStat("Cities", input.areas.cities),
               ],
             },
           ]),
@@ -245,7 +252,7 @@ export function placesPage(
             ],
             "All records",
           ),
-        ],
+        ].filter((item): item is AppPanel => item !== null),
       },
       {
         title: "Saved places",

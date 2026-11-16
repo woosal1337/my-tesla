@@ -85,6 +85,49 @@ describe("chargingInsightsPage", () => {
     expect(page.sections).toEqual([]);
   });
 
+  test("heads each charge time table and explains the times below them", () => {
+    const steps = (fast: boolean, from: number, to: number, sessions: number) =>
+      Array.from({ length: to - from }, (_, index) => ({
+        fast,
+        level: from + index,
+        sessions,
+        typicalS: 60,
+        slowS: 90,
+      }));
+    const page = chargingInsightsPage(
+      {
+        ...input,
+        curves: [],
+        levelTimes: [...steps(true, 10, 90, 4), ...steps(false, 20, 100, 3)],
+      },
+      "30d",
+      false,
+      f,
+    );
+    const blocks =
+      page.sections[0]?.panels.find((item) => item.title === "Charging time")
+        ?.blocks ?? [];
+    expect(
+      blocks.map((block) =>
+        block.kind === "note" ? [block.role, block.text] : block.kind,
+      ),
+    ).toEqual([
+      ["heading", "DC fast charging: 4 charges, 10% to 90%"],
+      "table",
+      ["heading", "AC charging: 3 charges, 20% to 100%"],
+      "table",
+      [
+        "caption",
+        "The time that past charges spent at each battery percent. The slow time fits a cold battery or a busy charger.",
+      ],
+    ]);
+    expect(
+      page.sections[0]?.panels.find(
+        (item) => item.title === "DC charging curves (kW)",
+      )?.blocks,
+    ).toEqual([{ kind: "note", text: "No DC fast charge in this period." }]);
+  });
+
   test("names two curves of one day by their start time and dashes the later curves", () => {
     const curve = (id: number, startAt: string) => ({
       id,

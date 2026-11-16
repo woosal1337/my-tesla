@@ -306,10 +306,13 @@ export function batteryPage(
             charges.length ? `${charges.length} charges` : null,
           ),
           panel("Charging advice", [
-            { kind: "note", text: advice.advice },
-            advice.detail ? { kind: "note", text: advice.detail } : null,
+            { kind: "note", role: "body", text: advice.advice },
+            advice.detail
+              ? { kind: "note", role: "body", text: advice.detail }
+              : null,
             {
               kind: "note",
+              role: "caption",
               text: "TeslaMate sets the battery type in its car settings, under LFP battery.",
             },
           ]),
@@ -360,6 +363,7 @@ export function batteryPage(
                   },
                   {
                     kind: "note",
+                    role: "caption",
                     text: "Online includes driving and charging.",
                   },
                 ]

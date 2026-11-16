@@ -136,6 +136,31 @@ function Progress({
   );
 }
 
+function Note({ block }: { block: Extract<AppBlock, { kind: "note" }> }) {
+  switch (block.role) {
+    case "heading":
+      return (
+        <Text
+          variant="strong"
+          accessibilityRole="header"
+          style={styles.noteHeading}
+        >
+          {block.text}
+        </Text>
+      );
+    case "body":
+      return <Text variant="body">{block.text}</Text>;
+    case "caption":
+      return <Text variant="label">{block.text}</Text>;
+    default:
+      return (
+        <Text variant="label" tone="subtle" style={styles.emptyNote}>
+          {block.text}
+        </Text>
+      );
+  }
+}
+
 export function Block({ block, stack }: { block: AppBlock; stack: TabStack }) {
   switch (block.kind) {
     case "stats":
@@ -166,11 +191,7 @@ export function Block({ block, stack }: { block: AppBlock; stack: TabStack }) {
         />
       );
     case "note":
-      return (
-        <Text variant="label" tone="subtle" style={styles.note}>
-          {block.text}
-        </Text>
-      );
+      return <Note block={block} />;
   }
 }
 
@@ -200,5 +221,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   tabular: { fontVariant: ["tabular-nums"] },
-  note: { paddingVertical: space.xl, textAlign: "center" },
+  emptyNote: { paddingVertical: space.xl, textAlign: "center" },
+  noteHeading: { marginTop: space.sm, marginBottom: -space.sm },
 });

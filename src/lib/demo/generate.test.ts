@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { driveEnergy } from "../drive-series";
+import { createFormatter } from "../format";
+import { defaultPreferences } from "../preferences";
 import { generateDemo } from "./generate";
 
 const end = new Date("2026-10-01T09:30:00Z");
@@ -44,6 +47,32 @@ describe("generateDemo", () => {
           if (typeof value === "number")
             expect(Number.isFinite(value)).toBe(true);
         }
+      }
+    }
+  });
+
+  test("gives each drive with regen a recovered energy that shows above zero", () => {
+    const f = createFormatter(defaultPreferences, "America/Phoenix");
+    for (const other of [
+      data,
+      generateDemo({
+        seed: 7,
+        end: new Date("2026-10-01T19:05:00Z"),
+        days: 60,
+      }),
+    ]) {
+      const byDrive = Map.groupBy(other.positions, (row) => row.drive_id);
+      for (const drive of other.drives.filter((row) => row.power_min < 0)) {
+        const { recoveredKwh } = driveEnergy(
+          (byDrive.get(drive.id) ?? []).map((row) => ({
+            at: row.date.getTime(),
+            speedKmh: row.speed,
+            powerKw: row.power,
+            elevationM: row.elevation,
+            battery: row.battery_level,
+          })),
+        );
+        expect(f.energyFine(recoveredKwh)).not.toMatch(/^0(\.0)? /);
       }
     }
   });

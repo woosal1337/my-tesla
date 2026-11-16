@@ -133,9 +133,11 @@ export default async function DrivePage({
         </Stat>
         <Stat
           label="Energy recovered"
-          detail={hasSeries ? `${f.energy(energy.usedKwh)} used` : undefined}
+          detail={
+            hasSeries ? `${f.energyFine(energy.usedKwh)} used` : undefined
+          }
         >
-          {hasSeries ? f.energy(energy.recoveredKwh) : "—"}
+          {hasSeries ? f.energyFine(energy.recoveredKwh) : "—"}
         </Stat>
         <Stat
           label="Climb"

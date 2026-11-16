@@ -93,6 +93,7 @@ Checked on 2026-10-13 against the Checklist Design checklists for a data table, 
 4. **Tables.** A header cell has the same padding as the cells under it, so a right-aligned header ends where its numbers end.
 5. **Charger badge.** `ChargerBadge` draws the AC or DC label on every page.
 6. **Open.** The lists show the last 50 drives and charges without paging. The subtle text color is under 4.5:1 on the cards. Reset to defaults has no confirmation. Each needs a product decision.
+7. **Energy units.** Since 2026-11-16, the "Energy recovered" stat of a drive shows an energy below 0.1 kWh in Wh, for example "45 Wh" above "2.5 kWh used", on the web and in the app. Every list and every total keeps kWh. [NIST SP 811 section 7.9](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-7-rules-and-style-conventions-expressing-values) asks for a prefix that keeps the number between 0.1 and 1000, and for one prefix in a table of values of one kind (read on 2026-11-16). `energyFine()` in `src/lib/format.ts` holds the rule ([decision 0031](../docs/decisions/0031-small-energy-in-watt-hours.md)).
 
 ## Sign-in forms and the calendar panel
 

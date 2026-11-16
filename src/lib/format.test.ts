@@ -45,6 +45,23 @@ describe("metric units", () => {
     expect(metric.cost(4.5)).toBe("4.50");
     expect(metric.energy(Number.NaN)).toBe("—");
   });
+
+  test.each([
+    [0.0454, "45 Wh"],
+    [0.002, "2 Wh"],
+    [0, "0.0 kWh"],
+    [0.1, "0.1 kWh"],
+    [2.53, "2.5 kWh"],
+    [1250, "1,250 kWh"],
+    [Number.NaN, "—"],
+    [null, "—"],
+  ])("energyFine(%p)", (value, expected) => {
+    expect(metric.energyFine(value)).toBe(expected);
+  });
+
+  test("keeps energy in kWh for a small value", () => {
+    expect(metric.energy(0.0454)).toBe("0.0 kWh");
+  });
 });
 
 describe("imperial and other units", () => {

@@ -24,8 +24,8 @@ describe("driveEnergy", () => {
       point(2, -20),
       point(3, -20),
     ]);
-    expect(energy.usedKwh).toBeCloseTo(1 / 3, 6);
-    expect(energy.recoveredKwh).toBeCloseTo(1 / 3, 6);
+    expect(energy.usedKwh).toBeCloseTo(5 / 12, 6);
+    expect(energy.recoveredKwh).toBeCloseTo(5 / 12, 6);
   });
 
   test("averages the power between two points", () => {
@@ -33,6 +33,13 @@ describe("driveEnergy", () => {
       0.25,
       6,
     );
+  });
+
+  test("counts the regen of one negative sample between two positive samples", () => {
+    const energy = driveEnergy([point(0, 10), point(1, -4), point(2, 10)]);
+    expect(energy.recoveredKwh).toBeCloseTo(2 / 105, 6);
+    expect(energy.usedKwh).toBeCloseTo(5 / 42, 6);
+    expect(energy.usedKwh - energy.recoveredKwh).toBeCloseTo(0.1, 6);
   });
 
   test("skips long gaps and missing power", () => {

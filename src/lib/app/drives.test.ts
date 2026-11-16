@@ -181,6 +181,21 @@ describe("driveDetail", () => {
   test("leaves out the route when maps are hidden", () => {
     expect(driveDetail(found, car, f, now, false).route).toBeNull();
   });
+
+  test("shows a small recovered energy in watt-hours", () => {
+    const recovered = (energy: { usedKwh: number; recoveredKwh: number }) =>
+      driveDetail({ ...found, energy }, car, f, now, true).stats.find(
+        (stat) => stat.label === "Energy recovered",
+      );
+    expect(recovered({ usedKwh: 2.53, recoveredKwh: 0.045 })).toMatchObject({
+      value: { text: "45 Wh" },
+      detail: "2.5 kWh used",
+    });
+    expect(recovered(found.energy)).toMatchObject({
+      value: { text: "1.4 kWh" },
+      detail: "18.2 kWh used",
+    });
+  });
 });
 
 describe("tripDetail", () => {

@@ -210,8 +210,8 @@ export function driveDetail(
       ),
       appStat(
         "Energy recovered",
-        hasSeries ? f.energy(energy.recoveredKwh) : "—",
-        { detail: hasSeries ? `${f.energy(energy.usedKwh)} used` : null },
+        hasSeries ? f.energyFine(energy.recoveredKwh) : "—",
+        { detail: hasSeries ? `${f.energyFine(energy.usedKwh)} used` : null },
       ),
       appStat("Climb", f.elevation(drive.ascentM), {
         detail:

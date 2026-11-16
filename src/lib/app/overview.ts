@@ -1,4 +1,4 @@
-import { assessBatteryLevel, assessTirePressure } from "../assessment";
+import { assessBatteryLevel, assessTire } from "../assessment";
 import type { Formatter } from "../format";
 import { historyText } from "../history/changes";
 import type { HistoryEvent } from "../history/store";
@@ -118,8 +118,13 @@ function lastChargeRecord(
   };
 }
 
-function tireValue(bar: number, f: Formatter): AppValue {
-  return appValue(f.pressure(bar), assessTirePressure(bar, f));
+function tireValue(
+  tire: SlowLeak["tire"],
+  bar: number,
+  leaks: SlowLeak[],
+  f: Formatter,
+): AppValue {
+  return appValue(f.pressure(bar), assessTire(tire, bar, leaks, f));
 }
 
 export function overviewPage(
@@ -384,10 +389,15 @@ export function overviewPage(
     tires:
       hasData && show.tires && tires
         ? {
-            frontLeft: tireValue(tires.frontLeft, f),
-            frontRight: tireValue(tires.frontRight, f),
-            rearLeft: tireValue(tires.rearLeft, f),
-            rearRight: tireValue(tires.rearRight, f),
+            frontLeft: tireValue("frontLeft", tires.frontLeft, input.leaks, f),
+            frontRight: tireValue(
+              "frontRight",
+              tires.frontRight,
+              input.leaks,
+              f,
+            ),
+            rearLeft: tireValue("rearLeft", tires.rearLeft, input.leaks, f),
+            rearRight: tireValue("rearRight", tires.rearRight, input.leaks, f),
             warnings: input.leaks.map((leak) =>
               leakWarning(leak, (bar) => f.pressure(bar)),
             ),

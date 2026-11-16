@@ -2,7 +2,7 @@
 
 Date: 2026-10-07
 
-Status: Accepted. It replaces the "no advice colors" rule in the UI research for values with a known reference.
+Status: Accepted. It replaces the "no advice colors" rule in the UI research for values with a known reference. Since [decision 0029](0029-warning-tone-for-a-value.md), a value with a warning of its own gets an amber tone.
 
 ## Context
 

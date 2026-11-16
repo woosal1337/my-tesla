@@ -69,7 +69,7 @@ export function TireCard({
 }: {
   tires: CarSnapshot["tires"];
   format: (bar: number) => string;
-  assess?: (bar: number) => Assessment | null;
+  assess?: (tire: TireKey, bar: number) => Assessment | null;
   warnings?: string[];
 }) {
   const tire = (key: TireKey, label: string, side: "left" | "right") =>
@@ -78,7 +78,7 @@ export function TireCard({
         label={label}
         value={format(tires[key])}
         side={side}
-        assessment={assess(tires[key])}
+        assessment={assess(key, tires[key])}
       />
     );
   return (

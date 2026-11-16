@@ -1,4 +1,4 @@
-export type AppTone = "good" | "bad";
+export type AppTone = "good" | "bad" | "warning";
 
 export type AppValue = {
   text: string;

@@ -1,6 +1,7 @@
 import type { Formatter } from "./format";
+import { leakTrend, type SlowLeak } from "./tire-leak";
 
-export type Tone = "good" | "typical" | "bad";
+export type Tone = "good" | "typical" | "warning" | "bad";
 
 export type Assessment = {
   tone: Tone;
@@ -12,6 +13,7 @@ export type Assessment = {
 export const toneClass: Record<Tone, string> = {
   good: "text-good",
   typical: "",
+  warning: "text-warning",
   bad: "text-bad",
 };
 
@@ -290,6 +292,21 @@ export function assessTirePressure(
     expected,
     meaning: `${f.pressure(bar)} is ${side}. A correct pressure saves energy and tire wear.`,
   };
+}
+
+export function assessTire(
+  tire: SlowLeak["tire"],
+  bar: number | null,
+  leaks: SlowLeak[],
+  f: Formatter,
+): Assessment | null {
+  const pressure = assessTirePressure(bar, f);
+  const leak = leaks.find((item) => item.tire === tire);
+  if (!pressure || !leak) return pressure;
+  const meaning = `${pressure.meaning} The tire is ${leakTrend(leak, (value) => f.pressure(value))}`;
+  return pressure.tone === "bad"
+    ? { ...pressure, meaning }
+    : { ...pressure, tone: "warning", verdict: "Possible slow leak", meaning };
 }
 
 export function assessBatteryLevel(

@@ -7,6 +7,7 @@ import {
   assessConsumption,
   assessIdleLoss,
   assessIdlePower,
+  assessTire,
   assessTirePressure,
   assessVoltage,
   assessmentTitle,
@@ -116,6 +117,41 @@ describe("assessTirePressure", () => {
     expect(assessTirePressure(2.5, f)?.tone).toBe("bad");
     expect(assessTirePressure(3.3, f)?.meaning).toContain("over");
     expect(assessTirePressure(2.9, psi)?.expected).toContain("42 psi");
+  });
+});
+
+describe("assessTire", () => {
+  const leaks = [{ tire: "rearLeft" as const, dropBar: 0.1, days: 13 }];
+
+  test("keeps the pressure tone without a leak on the tire", () => {
+    expect(assessTire("rearLeft", 2.9, [], f)).toEqual(
+      assessTirePressure(2.9, f),
+    );
+    expect(assessTire("frontLeft", 2.9, leaks, f)).toEqual(
+      assessTirePressure(2.9, f),
+    );
+    expect(assessTire("rearLeft", null, leaks, f)).toBeNull();
+  });
+
+  test("gives a tire with a slow leak the warning tone", () => {
+    for (const bar of [2.9, 2.7]) {
+      const tire = assessTire("rearLeft", bar, leaks, f);
+      expect(tire?.tone).toBe("warning");
+      expect(tire?.verdict).toBe("Possible slow leak");
+    }
+    expect(assessTire("rearLeft", 2.9, leaks, f)?.meaning).toBe(
+      "2.9 bar is close to the recommended value. The tire is down 0.1 bar against the other tires in 13 days. Check it for a slow leak.",
+    );
+    expect(assessTire("rearLeft", 2.9, leaks, psi)?.meaning).toContain(
+      "down 1 psi",
+    );
+  });
+
+  test("keeps a bad pressure red and adds the leak", () => {
+    const tire = assessTire("rearLeft", 2.5, leaks, f);
+    expect(tire?.tone).toBe("bad");
+    expect(tire?.verdict).toBe("Check the pressure");
+    expect(tire?.meaning).toContain("Check it for a slow leak.");
   });
 });
 

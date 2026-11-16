@@ -180,8 +180,37 @@ describe("overviewPage", () => {
       "2026.20.300",
     ]);
     expect(page.tires?.rearLeft.tone).toBe("bad");
+    expect(page.tires?.rearLeft.note).toContain("slow leak");
     expect(page.tires?.warnings[0]).toContain("Rear left tire");
     expect(page.location?.lastSeen).toBe("Last seen today at 17:55");
+  });
+
+  test("gives a tire with a slow leak the warning tone", () => {
+    const page = overviewPage(
+      {
+        ...input,
+        snapshot: {
+          ...snapshot,
+          tires: {
+            frontLeft: 2.9,
+            frontRight: 2.9,
+            rearLeft: 2.8,
+            rearRight: 2.9,
+          },
+        },
+        leaks: [{ tire: "rearLeft", dropBar: 0.1, days: 13 }],
+      },
+      f,
+      now,
+    );
+    expect(page.tires?.rearLeft.text).toBe("2.8 bar");
+    expect(page.tires?.rearLeft.tone).toBe("warning");
+    expect(page.tires?.rearLeft.note).toContain("Possible slow leak");
+    expect(page.tires?.rearLeft.note).toContain(
+      "down 0.1 bar against the other tires in 13 days",
+    );
+    expect(page.tires?.frontLeft.tone).toBe("good");
+    expect(page.tires?.warnings).toHaveLength(1);
   });
 
   test("draws the callouts and the menu from the snapshot", () => {

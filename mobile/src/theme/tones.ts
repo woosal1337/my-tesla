@@ -4,6 +4,7 @@ import type { Palette } from "./palette";
 export function toneColor(palette: Palette, tone: AppTone | null): string {
   if (tone === "good") return palette.good;
   if (tone === "bad") return palette.bad;
+  if (tone === "warning") return palette.warning;
   return palette.foreground;
 }
 

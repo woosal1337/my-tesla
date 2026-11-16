@@ -6,6 +6,7 @@ Some values on the dashboard have a color and a tooltip.
 |---|---|
 | Green | Better than usual |
 | Default | A usual value |
+| Amber | A warning about the value |
 | Red | Worse than usual, or a problem |
 
 Move the pointer over a value with a dotted underline, or tap it on a phone. The tooltip gives your value, what it means, and the expected value. A value without a dotted underline has no rule.
@@ -31,6 +32,7 @@ Notes:
 3. Most Model 3 and Model Y wheels need 2.9 bar cold. Some wheels need another value. The label in the door frame gives the value for your wheels.
 4. The charge levels and the charge limit have no color. An LFP battery and an NMC battery need different charge limits, and TeslaMate does not record which one the car has.
 5. Distances, durations, speeds, temperatures, costs, and places have no color.
+6. A tire with a slow-leak warning shows amber, unless its pressure is already red. The leak test compares each tire with the median of the other three in the last 14 days, and it warns from a drop of 0.1 bar. [Decision 0029](decisions/0029-warning-tone-for-a-value.md) explains the amber tone.
 
 ## Sources
 

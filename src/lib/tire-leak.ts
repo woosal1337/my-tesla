@@ -71,9 +71,16 @@ export function slowLeaks(
   return leaks;
 }
 
+export function leakTrend(
+  leak: SlowLeak,
+  pressure: (bar: number) => string,
+): string {
+  return `down ${pressure(leak.dropBar)} against the other tires in ${leak.days} days. Check it for a slow leak.`;
+}
+
 export function leakWarning(
   leak: SlowLeak,
   pressure: (bar: number) => string,
 ): string {
-  return `${tireLabels[leak.tire]} tire: down ${pressure(leak.dropBar)} against the other tires in ${leak.days} days. Check it for a slow leak.`;
+  return `${tireLabels[leak.tire]} tire: ${leakTrend(leak, pressure)}`;
 }

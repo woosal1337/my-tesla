@@ -14,6 +14,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ### Fixed
 
+- A tire with a slow-leak warning shows in the amber warning tone on the Overview, on the web and in the mobile app. Before, it showed in green next to the warning. A tire with a red pressure stays red. The explanation of the tire gives the leak. The app needs this server version, and an older app shows the value in the default color.
 - A duration of 10 hours or more and a 12-hour clock stay on one line in the rows of Drives, Charging, and the Report. The time column is now 76 pt wide.
 - Long place names and summaries show in full in the rows of Drives, the Timeline, the Overview menu, Charging, and the record lists of Insights. The text wraps onto more lines. The summary line of Drives and Charging breaks only between its parts.
 - The day heading of Drives, Charging, and the Report stays below the navigation bar while the list scrolls. Before, it stuck behind the bar and the status bar. The day headings of the Report now stick too.

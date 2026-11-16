@@ -118,7 +118,7 @@ The app follows the Tesla style of the web. `research/ui-stack.md` has the token
 5. Numbers that change or line up use `fontVariant: ["tabular-nums"]`.
 6. Spacing comes from `space` in `src/theme/tokens.ts`.
 7. Keep `StyleSheet.create` for layout, and pass palette colors inline: `[styles.card, { backgroundColor: palette.card }]`.
-8. A value tone is green for better than usual and red for worse, and the text always says the value. Never show meaning by color alone.
+8. A value tone is green for better than usual, red for worse, and amber for a warning about the value. The text always says the value. Never show meaning by color alone.
 
 ## Accessibility
 

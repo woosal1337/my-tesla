@@ -86,7 +86,7 @@ The [mobile app](mobile.md) reads its screens from `/api/app/cars/{carId}/…`. 
 
 | Endpoint | Screen |
 |---|---|
-| `overview` | The Overview: the car with its callouts (battery and range, security or last seen, charging or odometer), the menu rows with their summaries, the battery, stats, the Live card, the lock and Sentry Mode history, Today, tires, location, the last drive and charge |
+| `overview` | The Overview: the car with its callouts (battery and range, security or last seen, charging or odometer), `car.imageFrame` with the part of the image that the car fills (`left`, `top`, `width`, and `height` in fractions of the image width and height, `null` without an image), the menu rows with their summaries, the battery, stats, the Live card, the lock and Sentry Mode history, Today, tires, location, the last drive and charge |
 | `drives`, `drives/{driveId}`, `trips/{tripId}` | The trip list by day, each day with its trip count and distance, a drive with its charts, and a trip with its legs and stops |
 | `charges`, `charges/{chargeId}` | The charge list by day, each day with the energy added, and a charge with its figures, cost breakdown, and charts |
 | `battery`, `stats`, `places`, `charging` | The Battery, Stats, Places, and Charging insights pages in panels. Add `?period=` with `7d`, `30d`, `90d`, `1y`, or `all`. Without it, the user's default period applies. |

@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { carImageUrl, vinModelYear, type CarImageInput } from "./car-image";
+import {
+  carImage,
+  carImageUrl,
+  vinModelYear,
+  type CarImageInput,
+} from "./car-image";
 
 const rika: CarImageInput = {
   model: "Y",
@@ -438,5 +443,67 @@ describe("carImageUrl", () => {
     );
     expect(isNewBody(carImageUrl({ ...modelY, modelYear: 2026 }))).toBe(true);
     expect(isNewBody(carImageUrl({ ...modelY, modelYear: 2021 }))).toBe(false);
+  });
+});
+
+function generation(
+  model: string,
+  exteriorColor: string,
+  wheelType: string | null,
+  trimBadging: string | null,
+  modelYear: number,
+): CarImageInput {
+  return { model, exteriorColor, wheelType, trimBadging, modelYear };
+}
+
+const generations = {
+  legacyY: generation("Y", "PearlWhite", "Gemini19", "74D", 2022),
+  juniper: generation("Y", "StealthGrey", "Crossflow19", "74D", 2026),
+  legacy3: generation("3", "PearlWhite", "Pinwheel18CapKit", "50", 2021),
+  highland: generation("3", "StealthGrey", "Photon18", "50", 2024),
+  classicS: generation("S", "PearlWhite", "Slipstream19Silver", "100D", 2018),
+  refreshS: generation("S", "PearlWhite", "Tempest19", "100D", 2022),
+  newestS: generation("S", "FrostBlue", null, null, 2026),
+  classicX: generation("X", "PearlWhite", "AeroTurbine20", "100D", 2018),
+  refreshX: generation("X", "PearlWhite", "Cyberstream20", null, 2022),
+  newestX: generation("X", "FrostBlue", null, null, 2026),
+  cybertruck: generation("Cybertruck", "StainlessSteel", null, null, 2024),
+};
+
+describe("carImage", () => {
+  test("gives the URL of carImageUrl and the place of the 2025 Model Y", () => {
+    const image = carImage(rika);
+    expect(image?.url).toBe(carImageUrl(rika) ?? "");
+    expect(image?.frame).toEqual({
+      left: 0.227,
+      top: 0.275,
+      width: 0.558,
+      height: 0.422,
+    });
+  });
+
+  test("keeps the car of every generation inside the image", () => {
+    for (const [name, car] of Object.entries(generations)) {
+      const frame = carImage(car)?.frame;
+      expect(frame, name).toBeDefined();
+      if (!frame) continue;
+      const values = [frame.left, frame.top, frame.width, frame.height];
+      expect(values.every(Number.isFinite), name).toBe(true);
+      expect(frame.width, name).toBeGreaterThanOrEqual(0.4);
+      expect(frame.width, name).toBeLessThanOrEqual(0.75);
+      expect(frame.left + frame.width, name).toBeLessThanOrEqual(1);
+      expect(frame.top + frame.height, name).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test("measures each generation on its own", () => {
+    expect(carImage(generations.legacy3)?.frame).not.toEqual(
+      carImage(generations.classicX)?.frame,
+    );
+  });
+
+  test("gives no image for a car without a render", () => {
+    expect(carImage({ ...rika, model: "Roadster" })).toBeNull();
+    expect(carImage({ ...rika, exteriorColor: "Plaid" })).toBeNull();
   });
 });

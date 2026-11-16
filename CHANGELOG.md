@@ -13,6 +13,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - A duration of 10 hours or more and a 12-hour clock stay on one line in the rows of Drives, Charging, and the Report. The time column is now 76 pt wide.
 - Long place names and summaries show in full in the rows of Drives, the Timeline, the Overview menu, Charging, and the record lists of Insights. The text wraps onto more lines. The summary line of Drives and Charging breaks only between its parts.
 - The day heading of Drives, Charging, and the Report stays below the navigation bar while the list scrolls. Before, it stuck behind the bar and the status bar. The day headings of the Report now stick too.
+- The car on the Overview of the mobile app spans the width of the screen inside the margins. Before, it covered about half of it. `GET /api/app/cars/{carId}/overview` gives `car.imageFrame`, the part of the image that the car fills. With an older server, the app shows the whole image as before. The callouts keep the 20 pt screen margin and have no lines that point at nothing. Their labels have more contrast, and their values wrap at a large text size. The T-mark shows until the image loads, and the glow under the car shows in dark and in light. On an iPad, the car sits in the middle of the right pane.
 
 ## [2.2.2] - 2026-10-24
 

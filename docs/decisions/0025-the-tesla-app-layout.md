@@ -2,7 +2,7 @@
 
 Date: 2026-10-22
 
-Status: Accepted.
+Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image.
 
 ## Context
 

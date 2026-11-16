@@ -332,8 +332,21 @@ export type OverviewCallout = {
   tone: LiveTone;
 };
 
+export type CarImageFrame = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
 export type OverviewPage = {
-  car: { id: number; name: string; variant: string; image: string | null };
+  car: {
+    id: number;
+    name: string;
+    variant: string;
+    image: string | null;
+    imageFrame: CarImageFrame | null;
+  };
   activity: { label: string; tone: ActivityTone; updated: string };
   callouts: OverviewCallout[];
   menu: OverviewMenuRow[];

@@ -50,6 +50,31 @@ The values in the table come from cars that people pasted in issues ("car" in th
 8. Marine Blue (`PB02`) also renders on the Model 3 from 2024. Glacier Blue (`PB01`) does not.
 9. `MTY61` and `MTY68` both draw the Model Y Standard with the separate headlights and the Aperture wheel covers, and `MTY60` draws the light bar of the Premium. The table keeps `MTY61` for the badge `50`.
 
+## Where the car sits in the render
+
+The render is 1440 by 810 px, and the car covers only a part of it. `carImage()` returns the URL and the frame of the generation: the box that the car fills, in fractions of the image width and height. The app API sends the frame as `car.imageFrame`, and the app scales the image so that the car spans the stage. Read [decision 0028](../docs/decisions/0028-the-car-fills-the-stage.md).
+
+| Generation (profile in `car-image.ts`) | left | top | width | height |
+|---|---|---|---|---|
+| Model Y 2020 to 2025, `v1/compositor`, `STUD_3QTR` | 0.234 | 0.281 | 0.535 | 0.416 |
+| Model Y from 2025, `FRONT34` | 0.227 | 0.275 | 0.558 | 0.422 |
+| Model 3 2017 to 2023, `v1/compositor` | 0.144 | 0.294 | 0.688 | 0.446 |
+| Model 3 from 2024, `STUD_FRONT34` | 0.242 | 0.325 | 0.523 | 0.370 |
+| Model S 2012 to 2020, `v1/compositor` | 0.203 | 0.184 | 0.590 | 0.559 |
+| Model S 2021 to 2025 | 0.222 | 0.330 | 0.556 | 0.370 |
+| Model S from 2025 | 0.222 | 0.330 | 0.556 | 0.370 |
+| Model X 2016 to 2020, `v1/compositor` | 0.265 | 0.285 | 0.453 | 0.406 |
+| Model X 2021 to 2025 | 0.217 | 0.275 | 0.566 | 0.425 |
+| Model X from 2025 | 0.217 | 0.275 | 0.566 | 0.427 |
+| Cybertruck | 0.187 | 0.258 | 0.637 | 0.501 |
+
+Method: one render for each generation from `carImageUrl()` at `size=1440`, measured with sharp on 2026-11-16. The frame is the box of the pixels with an alpha above 80 of 255, so the soft ground shadow of some renders stays outside it. Two wheel and trim sets of the Model Y from 2025 differ by 0.003, so one frame for each generation is enough. A new generation needs a measured frame, and the `Profile` type makes it mandatory.
+
+Findings:
+
+1. The `crop` parameter is not usable for this. The configurator compositor crops and rescales the image, and `v1/compositor` ignores the same value. Tesla does not document the parameter.
+2. A larger render does not help. Both compositors stop at 1920 by 1080 for `size=2048`, and the configurator compositor then sends a PNG with a color palette. `size` stays at 1440.
+
 ## Known limits
 
 1. The wheel name and the color cannot tell some generations apart. Since TSLA-64 the model year from the tenth character of the VIN rules out a generation that was not built that year: the legacy Model 3 ends with 2023 and Highland starts with 2024, the legacy Model Y runs from 2020 to 2025 and Juniper starts with 2025, the Model S and Model X change in 2021 and 2025, and the Cybertruck starts with 2024. So a white Model 3 Performance of 2024 that reports `Performance20` and a Highland that reports `Pinwheel18CapKit` now show the new body. A year that two generations share, such as a 2025 Model Y, still follows the wheel name: a white 2025 Model Y Performance that reports `Uberturbine21` can show the older body. The VIN stays on the server; only the year reaches the image rule.

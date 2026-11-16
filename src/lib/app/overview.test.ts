@@ -42,9 +42,12 @@ const snapshot: CarSnapshot = {
   softwareVersion: "2026.20.300",
 };
 
+const imageFrame = { left: 0.227, top: 0.275, width: 0.558, height: 0.422 };
+
 const input: OverviewInput = {
   car,
   image: "https://example.com/car.png",
+  imageFrame,
   snapshot,
   lastDrive: null,
   lastCharge: null,
@@ -85,6 +88,7 @@ describe("overviewPage", () => {
       name: "Rika",
       variant: "Model Y SR · Stealth Grey",
       image: "https://example.com/car.png",
+      imageFrame,
     });
     expect(page.activity).toEqual({
       label: "Online",
@@ -194,6 +198,7 @@ describe("overviewPage", () => {
     );
     expect(page.tires).toBeNull();
     expect(page.car.image).toBeNull();
+    expect(page.car.imageFrame).toBeNull();
     expect(page.location).toBeNull();
   });
 

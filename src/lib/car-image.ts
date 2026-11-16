@@ -1,3 +1,5 @@
+import type { CarImageFrame } from "./app/contract";
+
 export type CarImageInput = {
   model: string | null;
   exteriorColor: string | null;
@@ -22,6 +24,7 @@ type Profile = {
   paints: string[];
   wheels: Record<string, WheelSpec>;
   usualWheel: WheelSpec;
+  frame: CarImageFrame;
 };
 
 const paintCodes: Record<string, string> = {
@@ -137,6 +140,7 @@ const profiles: Profile[] = [
       uberturbine21: { wheel: "$WY21P", trim: "$MTY12", interior: "$INPB0" },
     },
     usualWheel: gemini19,
+    frame: { left: 0.234, top: 0.281, width: 0.535, height: 0.416 },
   },
   {
     base: modernCompositor,
@@ -163,6 +167,7 @@ const profiles: Profile[] = [
       uberturbine21: arachnid21,
     },
     usualWheel: crossflow19,
+    frame: { left: 0.227, top: 0.275, width: 0.558, height: 0.422 },
   },
   {
     base: olderCompositor,
@@ -189,6 +194,7 @@ const profiles: Profile[] = [
       zerog20: { wheel: "$W33D" },
     },
     usualWheel: aero18,
+    frame: { left: 0.144, top: 0.294, width: 0.688, height: 0.446 },
   },
   {
     base: modernCompositor,
@@ -222,6 +228,7 @@ const profiles: Profile[] = [
       performance20: warp20,
     },
     usualWheel: photon18,
+    frame: { left: 0.242, top: 0.325, width: 0.523, height: 0.37 },
   },
   {
     base: olderCompositor,
@@ -261,6 +268,7 @@ const profiles: Profile[] = [
       twinturbine21: { wheel: "$WTTB" },
     },
     usualWheel: classicS.slipstream19,
+    frame: { left: 0.203, top: 0.184, width: 0.59, height: 0.559 },
   },
   {
     base: modernCompositor,
@@ -284,6 +292,7 @@ const profiles: Profile[] = [
       arachnid21: { ...tempest19, wheel: "$WS11" },
     },
     usualWheel: tempest19,
+    frame: { left: 0.222, top: 0.33, width: 0.556, height: 0.37 },
   },
   {
     base: modernCompositor,
@@ -294,6 +303,7 @@ const profiles: Profile[] = [
     paints: ["$PN01", "$PPSW", "$PX02", "$PB00", "$PR01", "$PN02"],
     wheels: {},
     usualWheel: { wheel: "$WS93", trim: "$MTS22", interior: "$IBE01" },
+    frame: { left: 0.222, top: 0.33, width: 0.556, height: 0.37 },
   },
   {
     base: olderCompositor,
@@ -321,6 +331,7 @@ const profiles: Profile[] = [
       onyx22black: classicX.onyx22,
     },
     usualWheel: classicX.aeroturbine20,
+    frame: { left: 0.265, top: 0.285, width: 0.453, height: 0.406 },
   },
   {
     base: modernCompositor,
@@ -334,6 +345,7 @@ const profiles: Profile[] = [
       newturbine22: { ...cyberstream20, wheel: "$WX20" },
     },
     usualWheel: cyberstream20,
+    frame: { left: 0.217, top: 0.275, width: 0.566, height: 0.425 },
   },
   {
     base: modernCompositor,
@@ -344,6 +356,7 @@ const profiles: Profile[] = [
     paints: ["$PN01", "$PPSW", "$PX02", "$PB00", "$PR01", "$PN02"],
     wheels: {},
     usualWheel: { wheel: "$WX02", trim: "$MTX22", interior: "$IBE01" },
+    frame: { left: 0.217, top: 0.275, width: 0.566, height: 0.427 },
   },
   {
     base: modernCompositor,
@@ -354,6 +367,7 @@ const profiles: Profile[] = [
     paints: ["$PDD"],
     wheels: {},
     usualWheel: { wheel: "$WH0B", trim: "$MTC03", interior: "$IG01" },
+    frame: { left: 0.187, top: 0.258, width: 0.637, height: 0.501 },
   },
 ];
 
@@ -405,7 +419,10 @@ function pick(
   return newest ? { profile: newest, spec: newest.usualWheel } : null;
 }
 
-export function carImageUrl(car: CarImageInput, size = 1440): string | null {
+export function carImage(
+  car: CarImageInput,
+  size = 1440,
+): { url: string; frame: CarImageFrame } | null {
   const model = modelCodes[car.model ?? ""];
   if (!model) return null;
   const paint = unpaintedBodies[model] ?? paintCodes[key(car.exteriorColor)];
@@ -429,7 +446,11 @@ export function carImageUrl(car: CarImageInput, size = 1440): string | null {
     params.set("crop", "0,0,0,0");
     params.set("overlay", "0");
   }
-  return `${profile.base}?${params}`;
+  return { url: `${profile.base}?${params}`, frame: profile.frame };
+}
+
+export function carImageUrl(car: CarImageInput, size = 1440): string | null {
+  return carImage(car, size)?.url ?? null;
 }
 
 const yearCodes = "ABCDEFGHJKLMNPRSTVWXY";

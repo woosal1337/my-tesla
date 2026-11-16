@@ -1,6 +1,6 @@
 import { overviewPage } from "@/lib/app/overview";
 import { appContext, appJson, appNotFound } from "@/lib/app/request";
-import { carImageUrl } from "@/lib/car-image";
+import { carImage } from "@/lib/car-image";
 import { lockHistory } from "@/lib/history/recorder";
 import { dayWindow, localDayKey } from "@/lib/insights";
 import { getLive } from "@/lib/live/live";
@@ -28,11 +28,13 @@ export async function GET(
       getLive(car.id),
       show.tires ? recentTireLeaks(car.id, f.timeZone) : Promise.resolve([]),
     ]);
+  const render = carImage(car);
   return appJson(
     overviewPage(
       {
         car,
-        image: carImageUrl(car),
+        image: render?.url ?? null,
+        imageFrame: render?.frame ?? null,
         snapshot,
         lastDrive: lastDrive ?? null,
         lastCharge: lastCharge ?? null,

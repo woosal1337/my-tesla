@@ -20,6 +20,7 @@ import {
 } from "../vehicle";
 import type {
   AppValue,
+  CarImageFrame,
   LiveIcon,
   OverviewCallout,
   OverviewMenuRow,
@@ -31,6 +32,7 @@ import { appStat, appValue } from "./values";
 export type OverviewInput = {
   car: Car;
   image: string | null;
+  imageFrame: CarImageFrame | null;
   snapshot: CarSnapshot;
   lastDrive: Drive | null;
   lastCharge: Charge | null;
@@ -258,6 +260,7 @@ export function overviewPage(
       name: car.name,
       variant: variantLine(car),
       image: show.render ? input.image : null,
+      imageFrame: show.render ? input.imageFrame : null,
     },
     activity: {
       label: activity.label,

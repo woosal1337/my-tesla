@@ -588,10 +588,25 @@ describe("overviewPage", () => {
     expect(menuSubtitle(unknown, "location")).toBe("Map and Open in Maps");
   });
 
-  test("keeps the place out of the menu when maps are off", () => {
-    const page = overviewPage({ ...input, lastDrive, showMaps: false }, f, now);
-    expect(page.location).toBeNull();
-    expect(menuSubtitle(page, "location")).toBe("Map and Open in Maps");
+  test("leaves out the Location row when the Location card or the maps are off", () => {
+    const hidden = [
+      overviewPage({ ...input, lastDrive, showMaps: false }, f, now),
+      overviewPage(
+        {
+          ...input,
+          lastDrive,
+          show: { ...defaultPreferences.overview, location: false },
+        },
+        f,
+        now,
+      ),
+    ];
+    for (const page of hidden) {
+      expect(page.location).toBeNull();
+      expect(page.menu.map((row) => row.key)).not.toContain("location");
+    }
+    const shown = overviewPage({ ...input, lastDrive }, f, now);
+    expect(shown.menu.map((row) => row.key)).toContain("location");
   });
 
   test("explains a car without records", () => {

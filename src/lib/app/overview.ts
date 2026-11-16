@@ -302,12 +302,12 @@ export function overviewPage(
       title: "Places",
       subtitle: placesSummary(input.visited, input.period),
     },
-    ...(hasData && hasPosition
+    ...(showLocation
       ? [
           {
             key: "location" as const,
             title: "Location",
-            subtitle: (showLocation && parked.place) || "Map and Open in Maps",
+            subtitle: parked.place || "Map and Open in Maps",
           },
         ]
       : []),

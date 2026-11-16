@@ -2,7 +2,7 @@
 
 Date: 2026-10-22
 
-Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)). Since 2026-11-16, the Settings of the app name each group after the screen that its switches change. Since 2026-11-16, the Places row gives the count of the visited places in the default period. Since 2026-11-16, point 7 says that a place name can show in more than one row.
+Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)). Since 2026-11-16, the Settings of the app name each group after the screen that its switches change. Since 2026-11-16, the Places row gives the count of the visited places in the default period. Since 2026-11-16, point 7 says that a place name can show in more than one row. Since 2026-11-16, the menu has the Location row only when the answer has `location` (point 4).
 
 ## Context
 
@@ -16,7 +16,7 @@ The Overview of the mobile app was the web Overview in cards: the car image, the
    - Left: the battery level and the range. The callout has the charge tone during a charge and the warning tone at 20% or less. The value is always text, so the tone never carries the meaning alone.
    - Top: the lock and Sentry Mode, only with the MQTT feed. Without the feed the stage has two callouts, because the title already gives the age of the data.
    - Right: the power and the limit of a charge. Without a power and a limit, the charge port ("Plugged in") with the feed, else the odometer. The word "Charging" is never a value next to the state "Charging".
-4. The menu rows open the other tabs and two new screens of the Overview stack (`/status` and `/location`): Status (the Live card, the lock history, Today, the tires, the car stats) and Location (the map and Open in Maps). The last drive and charge stay in the summaries of the Drives and Charging rows.
+4. The menu rows open the other tabs and two new screens of the Overview stack (`/status` and `/location`): Status (the Live card, the lock history, Today, the tires, the car stats) and Location (the map and Open in Maps). The last drive and charge stay in the summaries of the Drives and Charging rows. The server sends the Location row only with `location`. So the row and the quick action "Maps" hide together when the card "Location" or the maps are off, and no row opens an empty screen.
 5. `CarStage` draws one radial glow under the car with `react-native-svg`. It is the only gradient in the app, as an exception to the style rule, because the car render has no ground of its own.
 6. `MenuRow` is the shared row for the Overview menu, the sidebar, and the link rows of Drives, Charging, and Insights, so every tab uses the same row.
 7. Each value has one place. The space on a phone is small, so each value must earn its place.

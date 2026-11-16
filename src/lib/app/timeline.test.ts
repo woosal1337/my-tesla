@@ -89,6 +89,39 @@ describe("timelinePage", () => {
     expect(page.stats.map((stat) => stat.label)).toEqual(["Asleep"]);
   });
 
+  test("counts a day spent offline as offline time", () => {
+    const page = timelinePage(
+      {
+        states: [
+          { state: "offline", start: at("00:00"), end: at("17:39") },
+          {
+            state: "online",
+            start: at("17:39"),
+            end: new Date("2026-10-18T00:00:00Z"),
+          },
+        ],
+        drives: [
+          { ...records.drives[0], start: at("17:39"), end: at("17:57") },
+        ],
+        charges: [],
+      },
+      "2026-10-17",
+      "2026-10-18",
+      dayWindow("2026-10-17", "UTC"),
+      f,
+      now,
+      null,
+    );
+    expect(page.stats.at(-1)).toMatchObject({
+      label: "Offline",
+      value: { text: "74%" },
+      detail: "of the recorded time",
+    });
+    expect(page.stats.some((stat) => stat.label === "Asleep")).toBe(false);
+    expect(page.strip.segments[0]).toMatchObject({ kind: "offline", start: 0 });
+    expect(page.strip.segments[0]?.end).toBeCloseTo(1059 / 1440);
+  });
+
   test("has no next day on today", () => {
     const page = timelinePage(
       { states: [], drives: [], charges: [] },

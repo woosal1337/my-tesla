@@ -104,6 +104,11 @@ describe("generateDemo", () => {
     expect(data.states.at(-1)?.end_date).toBeNull();
   });
 
+  test("parks offline on some days and ends with the car not offline", () => {
+    expect(data.states.some((state) => state.state === "offline")).toBe(true);
+    expect(data.states.at(-1)?.state).not.toBe("offline");
+  });
+
   test("gives each drive its own positions and a real distance", () => {
     for (const drive of data.drives) {
       const points = data.positions.filter((row) => row.drive_id === drive.id);

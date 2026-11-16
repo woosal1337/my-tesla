@@ -21,8 +21,8 @@ export function timelinePage(
 ): TimelinePage {
   const view = timelineView(records, window, now, f);
   const quiet = isQuietDay(records);
-  const asleep = appStat("Asleep", `${view.asleepPercent}%`, {
-    detail: "of the recorded time",
+  const rest = appStat(view.rest.label, `${view.rest.percent}%`, {
+    detail: view.rest.detail,
   });
   return {
     day,
@@ -31,7 +31,7 @@ export function timelinePage(
     next: day < today ? shiftDayKey(day, 1) : null,
     stats: quiet
       ? view.segments.length
-        ? [asleep]
+        ? [rest]
         : []
       : [
           appStat(
@@ -43,7 +43,7 @@ export function timelinePage(
           appStat("Charged", `${f.number(view.chargedKwh, 1)} kWh`, {
             detail: plural(records.charges.length, "session", "sessions"),
           }),
-          asleep,
+          rest,
         ],
     strip: dayStrip({ ...records, ...window }, f, now),
     lastActive: quiet ? lastActiveDay(lastActivity, f, now) : null,

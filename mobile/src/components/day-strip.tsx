@@ -11,7 +11,7 @@ function dayColors(palette: Palette): Record<DayKind, string> {
     charge: palette.charge,
     online: palette.subtle,
     asleep: `${palette.subtle}59`,
-    offline: `${palette.subtle}26`,
+    offline: palette.warning,
   };
 }
 

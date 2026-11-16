@@ -107,6 +107,30 @@ function describe(item: TimelineItem, f: Formatter): TimelineRow {
   };
 }
 
+export type RestShare = { label: string; percent: number; detail: string };
+
+export function restShare(
+  asleepMs: number,
+  offlineMs: number,
+  coveredMs: number,
+): RestShare {
+  const share = (kind: "asleep" | "offline", ms: number) => ({
+    label: dayKindLabels[kind],
+    percent: coveredMs ? Math.round((ms / coveredMs) * 100) : 0,
+  });
+  const asleep = share("asleep", asleepMs);
+  const offline = share("offline", offlineMs);
+  const [shown, other] =
+    offlineMs > asleepMs ? [offline, asleep] : [asleep, offline];
+  return {
+    label: shown.label,
+    percent: shown.percent,
+    detail: other.percent
+      ? `of the recorded time · ${other.label.toLowerCase()} ${other.percent}%`
+      : "of the recorded time",
+  };
+}
+
 export function timelineView(
   records: {
     states: TimelineState[];
@@ -145,6 +169,6 @@ export function timelineView(
       0,
     ),
     drivingMin: sum("drive") / minuteMs,
-    asleepPercent: covered ? Math.round((sum("asleep") / covered) * 100) : 0,
+    rest: restShare(sum("asleep"), sum("offline"), covered),
   };
 }

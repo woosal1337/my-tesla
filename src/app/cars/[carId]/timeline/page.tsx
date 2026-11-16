@@ -162,7 +162,7 @@ export default async function TimelinePage({
     drivenKm: driven,
     chargedKwh: charged,
     drivingMin,
-    asleepPercent,
+    rest,
   } = timelineView(records, window, now, f);
   const quiet = isQuietDay(records);
   const lastActive = quiet
@@ -170,12 +170,12 @@ export default async function TimelinePage({
     : null;
   const base = carPath(car, "/timeline");
   const label = f.day(window.start, now);
-  const asleep = (
+  const restMetric = (
     <Metric
-      label="Asleep"
-      value={asleepPercent}
+      label={rest.label}
+      value={rest.percent}
       unit="%"
-      detail="of the recorded time"
+      detail={rest.detail}
     />
   );
 
@@ -232,7 +232,7 @@ export default async function TimelinePage({
       {quiet ? (
         segments.length > 0 && (
           <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
-            {asleep}
+            {restMetric}
           </dl>
         )
       ) : (
@@ -250,7 +250,7 @@ export default async function TimelinePage({
             unit="kWh"
             detail={`${records.charges.length} ${records.charges.length === 1 ? "session" : "sessions"}`}
           />
-          {asleep}
+          {restMetric}
         </dl>
       )}
 

@@ -100,7 +100,7 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | `EmptyState`, `Problem` | A list without records, and an error with a retry button |
 | `TeslaMark`, `LaunchSplash` | The T-mark of the web, drawn at launch or breathing while a screen loads. `src/theme/mark.ts` copies the path of `src/lib/logo.ts`, and a test fails when they differ. |
 | `DayStepper` | One row with the date as a heading, "Today" when the day is not today, and a 44 pt chevron for the day before and the day after. The buttons move under the date when the row is too narrow, and the date stops growing at 2 times the font scale. A `null` handler disables the chevron or hides "Today". `useSwipe()` in `src/hooks/use-swipe.ts` gives the same steps to a horizontal swipe, and `swipeStep()` holds its rule. |
-| `TripStrip`, `LevelBar`, `ChargerBadge`, `DayStrip`, `Battery`, `LivePanel` | The small parts of the dashboard, drawn the same way as on the web. `DayStrip` draws the key of the server (`legend`) under the hours, and draws no key when an older server sends none. |
+| `TripStrip`, `LevelBar`, `ChargerBadge`, `DayStrip`, `Battery`, `LivePanel` | The small parts of the dashboard, drawn the same way as on the web. `DayStrip` draws the key of the server (`legend`) under the hours, and draws no key when an older server sends none. Offline time is amber (`palette.warning`). |
 
 A new shared component:
 

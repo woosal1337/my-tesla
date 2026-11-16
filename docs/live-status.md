@@ -110,7 +110,7 @@ environment:
   MQTT_PASSWORD: <the mytesla password>
 ```
 
-If you set `MQTT_NAMESPACE` in TeslaMate, set the same value in My Tesla. Restart My Tesla. The Live card shows "Connected" in its header.
+If you set `MQTT_NAMESPACE` in TeslaMate, set the same value in My Tesla. Restart My Tesla. The Live card shows "Feed connected" in its header.
 
 ## Security
 
@@ -123,6 +123,6 @@ If you set `MQTT_NAMESPACE` in TeslaMate, set the same value in My Tesla. Restar
 | What you see | Cause and fix |
 |---|---|
 | No Live card | `MQTT_URL` is empty, or Settings, Overview, Live status is off. |
-| "Offline" in the card header | My Tesla cannot reach or log in to the broker. The server log shows a line that starts with `MQTT:`. Check the host, the user, and the password. |
+| "Feed offline" in the card header | My Tesla cannot reach or log in to the broker. The server log shows a line that starts with `MQTT:`. Check the host, the user, and the password. |
 | "No live values yet" | The broker has no values for this car. TeslaMate sends them when the car is online. Check that TeslaMate has `DISABLE_MQTT=false`. |
 | The page does not update by itself | A proxy holds back the event stream. Turn off response buffering for `/api/cars/*/live`. |

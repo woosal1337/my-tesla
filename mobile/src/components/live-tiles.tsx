@@ -21,7 +21,10 @@ export function LivePanel({
   const palette = usePalette();
   const now = useNow(countdownMs);
   return (
-    <Panel title="Live" note={live.connected ? "Connected" : "Offline"}>
+    <Panel
+      title="Live"
+      note={live.connected ? "Feed connected" : "Feed offline"}
+    >
       {live.empty ? (
         <Text variant="label" tone="subtle">
           {live.empty}

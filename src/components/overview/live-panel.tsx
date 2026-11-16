@@ -106,7 +106,7 @@ export function LivePanel({
               feed.connected ? "bg-charge" : "bg-subtle",
             )}
           />
-          {feed.connected ? "Connected" : "Offline"}
+          {feed.connected ? "Feed connected" : "Feed offline"}
         </p>
       </header>
       {feed.hasValues && tiles.length > 0 ? (

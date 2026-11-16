@@ -7,7 +7,7 @@ const tones: Record<TimelineSegment["kind"], string> = {
   charge: "bg-charge",
   online: "bg-subtle",
   asleep: "bg-subtle/35",
-  offline: "bg-subtle/15",
+  offline: "bg-warning",
 };
 
 export function DayStrip({

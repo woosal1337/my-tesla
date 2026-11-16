@@ -16,7 +16,8 @@ The generator makes:
 - weekday commutes and errands, and weekend trips,
 - a road trip with two Supercharger stops and a hotel night,
 - home charges, Supercharger sessions, and idle drain. The Flagstaff Supercharger has no geofence price, so its sessions show the price setting,
-- slow battery wear, two software updates, and a slow tire leak.
+- slow battery wear, two software updates, and a slow tire leak,
+- one day in seven with offline time while the car is parked, so the Timeline shows the offline color.
 
 The addresses carry the country code `us`, so the demo shows costs in US dollars.
 

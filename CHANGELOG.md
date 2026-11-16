@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-17
+
 ### Added
 
 - The day headings of Drives, Charging, and the Report show the total of the day, on the web and in the mobile app: the trip count and the distance, and the energy added, for example "Wed 21 Oct · 4 trips · 64 km". `GET /api/app/cars/{carId}/drives`, `charges`, and `report` give `total` for each day. The app needs this server version for the total, and shows only the date with an older server.
@@ -296,7 +298,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/woosal1337/my-tesla/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/woosal1337/my-tesla/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/woosal1337/my-tesla/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/woosal1337/my-tesla/compare/v2.1.0...v2.2.0

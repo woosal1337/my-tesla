@@ -71,16 +71,22 @@ export function Screen({
       >
         {children}
       </ScrollView>
-      {strip ? (
-        <View
-          pointerEvents="none"
-          style={[
-            styles.statusBar,
-            { height: top, backgroundColor: palette.background },
-          ]}
-        />
-      ) : null}
+      {strip ? <StatusBarStrip /> : null}
     </>
+  );
+}
+
+export function StatusBarStrip() {
+  const palette = usePalette();
+  const { top } = useSafeAreaInsets();
+  return (
+    <View
+      pointerEvents="none"
+      style={[
+        styles.statusBar,
+        { height: top, backgroundColor: palette.background },
+      ]}
+    />
   );
 }
 

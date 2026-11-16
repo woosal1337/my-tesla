@@ -3,6 +3,7 @@ import { Animated, StyleSheet } from "react-native";
 import { motion } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { useReducedMotion } from "@/theme/use-reduced-motion";
+import { launchMarkSize } from "./launch-frame";
 import { TeslaMark } from "./tesla-mark";
 
 const minimumVisibleMs = 1150;
@@ -36,7 +37,7 @@ export function LaunchSplash() {
         { backgroundColor: palette.background, opacity },
       ]}
     >
-      <TeslaMark size={56} kind="draw" />
+      <TeslaMark size={launchMarkSize} kind="draw" />
     </Animated.View>
   );
 }

@@ -3,18 +3,24 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Device from "expo-device";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
+import {
+  useSafeAreaFrame,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { ApiError, request } from "@/api/client";
 import { carList, pairClaim, pairStatus } from "@/api/responses";
 import { rememberCar } from "@/car/car-provider";
 import { Button } from "@/components/button";
+import { launchFrame, launchMarkSize } from "@/components/launch-frame";
 import { Panel } from "@/components/panel";
-import { Screen } from "@/components/screen";
+import { StatusBarStrip, screenPadding } from "@/components/screen";
 import { TeslaMark } from "@/components/tesla-mark";
 import { Text } from "@/components/text";
 import { useConnectionState } from "@/connection/connection-provider";
 import { pairingOf, pairingOfLink, type Pairing } from "@/connection/server";
 import { space } from "@/theme/tokens";
+import { usePalette } from "@/theme/use-palette";
 
 const demoUrl = "https://mytesla.chele.bi";
 const pollMs = 2_000;
@@ -204,65 +210,115 @@ export default function ConnectScreen() {
   };
 
   const busy = claim.isPending || demo.isPending;
+  const start = !waiting && !linked;
+  const palette = usePalette();
+  const { top, bottom } = useSafeAreaInsets();
+  const { height } = useSafeAreaFrame();
+  const frame = launchFrame(height, space.lg);
+  const problemText = problem ? (
+    <Text variant="label" tone="destructive" style={styles.centered}>
+      {problem}
+    </Text>
+  ) : null;
   return (
-    <Screen withoutHeader>
-      <View style={styles.heading}>
-        <Text variant="title" accessibilityRole="header">
-          My Tesla
-        </Text>
-        <Text variant="label">
-          Sign in to the My Tesla server that reads your TeslaMate data.
-        </Text>
-      </View>
-      {waiting ? (
-        <WaitingPanel waiting={waiting} onCancel={() => setWaiting(null)} />
-      ) : linked ? (
-        <LinkPanel
-          pairing={linked}
-          busy={claim.isPending}
-          onConnect={() => {
-            setProblem(null);
-            claimCode(linked);
-          }}
-          onCancel={() => setDoneCode(linked.code)}
-        />
-      ) : (
-        <>
-          <Button
-            label="Scan the code"
-            busy={claim.isPending}
-            disabled={busy}
-            onPress={scan}
-          />
-          <Text variant="caption">
-            On the web, open Settings, then Mobile app, and press Pair a phone.
-            The phone signs in as you after you allow it there.
-          </Text>
-        </>
-      )}
-      {problem ? (
-        <Text variant="label" tone="destructive">
-          {problem}
-        </Text>
-      ) : null}
-      {waiting || linked ? null : (
-        <Button
-          label="Open the demo"
-          kind="secondary"
-          busy={demo.isPending}
-          disabled={busy}
-          onPress={() => {
-            setProblem(null);
-            demo.mutate();
-          }}
-        />
-      )}
-    </Screen>
+    <View style={[styles.screen, { backgroundColor: palette.background }]}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="never"
+        alwaysBounceVertical={false}
+        contentContainerStyle={[
+          styles.content,
+          start ? styles.start : styles.panelState,
+          {
+            paddingTop: start ? frame.contentTop : top + space.xl,
+            paddingBottom: bottom + space.lg,
+          },
+        ]}
+      >
+        {start ? (
+          <>
+            <View
+              pointerEvents="none"
+              style={[styles.mark, { top: frame.markTop }]}
+            >
+              <TeslaMark size={launchMarkSize} kind="still" />
+            </View>
+            <View style={[styles.column, styles.heading]}>
+              <Text
+                variant="title"
+                accessibilityRole="header"
+                style={styles.centered}
+              >
+                My Tesla
+              </Text>
+              <Text variant="label" style={styles.centered}>
+                Sign in to the My Tesla server that reads your TeslaMate data.
+              </Text>
+            </View>
+            <View style={[styles.column, styles.actions]}>
+              {problemText}
+              <Button
+                label="Scan the code"
+                busy={claim.isPending}
+                disabled={busy}
+                onPress={scan}
+              />
+              <Button
+                label="Open the demo"
+                kind="secondary"
+                busy={demo.isPending}
+                disabled={busy}
+                onPress={() => {
+                  setProblem(null);
+                  demo.mutate();
+                }}
+              />
+              <Text variant="caption" style={styles.centered}>
+                To get the code, open Settings on the web, then Mobile app, and
+                press Pair a phone.
+              </Text>
+            </View>
+          </>
+        ) : (
+          <View style={[styles.column, styles.actions]}>
+            {waiting ? (
+              <WaitingPanel
+                waiting={waiting}
+                onCancel={() => setWaiting(null)}
+              />
+            ) : linked ? (
+              <LinkPanel
+                pairing={linked}
+                busy={claim.isPending}
+                onConnect={() => {
+                  setProblem(null);
+                  claimCode(linked);
+                }}
+                onCancel={() => setDoneCode(linked.code)}
+              />
+            ) : null}
+            {problemText}
+          </View>
+        )}
+      </ScrollView>
+      <StatusBarStrip />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: { gap: space.sm, marginTop: space.xxl, marginBottom: space.lg },
+  screen: { flex: 1 },
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: screenPadding,
+    gap: space.xl,
+  },
+  start: { justifyContent: "space-between" },
+  panelState: { justifyContent: "center" },
+  mark: { position: "absolute", left: 0, right: 0, alignItems: "center" },
+  column: { width: "100%", maxWidth: 480, alignSelf: "center" },
+  heading: { gap: space.sm },
+  actions: { gap: space.md },
+  centered: { textAlign: "center" },
   waiting: { alignItems: "center", gap: space.md, paddingVertical: space.md },
   check: { fontVariant: ["tabular-nums"], letterSpacing: 4 },
 });

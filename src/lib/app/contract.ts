@@ -94,9 +94,15 @@ export type DriveRow = {
   distance: string;
   consumption: AppValue;
   charge?: ChargeRow;
+  label?: string;
 };
 
-export type DaySection<Row> = { title: string; total?: string[]; rows: Row[] };
+export type DaySection<Row> = {
+  title: string;
+  total?: string[];
+  label?: string;
+  rows: Row[];
+};
 
 export type DriveList = {
   summary: string[];
@@ -120,6 +126,7 @@ export type TripStepRow = {
   title: string;
   detail: string;
   target: AppTarget | null;
+  label?: string;
 };
 
 export type TripDetail = {
@@ -144,6 +151,7 @@ export type ChargeRow = {
   levels: LevelRange | null;
   energy: string | null;
   cost: string | null;
+  label?: string;
 };
 
 export type ChargeList = {
@@ -256,6 +264,7 @@ export type TimelinePage = {
     title: string;
     detail: string;
     target: AppTarget | null;
+    label?: string;
   }[];
 };
 

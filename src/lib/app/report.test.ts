@@ -104,6 +104,9 @@ describe("reportPage", () => {
     expect(page.sections.map((section) => section.total)).toEqual([
       ["1 trip", "40 km", `+${f.energy(20)}`],
     ]);
+    expect(page.sections[0]?.label).toBe(
+      `${page.sections[0]?.title}, 1 trip, 40 kilometers, +20.0 kilowatt-hours`,
+    );
     const rows = page.sections.flatMap((section) => section.rows);
     expect(rows.map((row) => row.target)).toEqual([
       { kind: "charge", id: 77 },

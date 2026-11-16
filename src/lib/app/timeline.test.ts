@@ -58,6 +58,9 @@ describe("timelinePage", () => {
       title: "Drive to Office",
       target: { kind: "drive", id: 7 },
     });
+    expect(drive?.label).toBe(
+      "08:00 to 08:30, Drive to Office, 20 kilometers, 30 minutes, from Home",
+    );
     expect(page.rows.find((row) => row.kind === "charge")).toMatchObject({
       title: "Charged at Home",
       target: { kind: "charge", id: 9 },

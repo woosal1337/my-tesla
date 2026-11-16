@@ -13,6 +13,7 @@ import type {
   ChargeRow,
   LevelRange,
 } from "./contract";
+import { spokenLabel } from "./spoken";
 import { appStat, levelsText, statsWithValue } from "./values";
 
 export const unclosedNotice =
@@ -23,29 +24,43 @@ function levelsOf(start: number | null, end: number | null): LevelRange | null {
 }
 
 export function chargeRow(charge: Charge, f: Formatter): ChargeRow {
+  const clock = f.clock(charge.startAt);
+  const duration = charge.endAt ? f.duration(charge.durationMin) : "Now";
+  const detail = [
+    charge.startLevel !== null && charge.endLevel !== null
+      ? levelsText(charge.startLevel, charge.endLevel)
+      : charge.endAt
+        ? "—"
+        : null,
+    charge.maxPowerKw ? `up to ${Math.round(charge.maxPowerKw)} kW` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const energy =
+    charge.energyAddedKwh === null && !charge.endAt
+      ? null
+      : `+${f.energy(charge.energyAddedKwh)}`;
+  const cost = charge.cost === null ? null : f.cost(charge.cost);
   return {
     key: `charge-${charge.id}`,
     id: charge.id,
-    clock: f.clock(charge.startAt),
-    duration: charge.endAt ? f.duration(charge.durationMin) : "Now",
+    clock,
+    duration,
     place: charge.place,
     fast: charge.fastCharger,
-    detail: [
-      charge.startLevel !== null && charge.endLevel !== null
-        ? levelsText(charge.startLevel, charge.endLevel)
-        : charge.endAt
-          ? "—"
-          : null,
-      charge.maxPowerKw ? `up to ${Math.round(charge.maxPowerKw)} kW` : null,
-    ]
-      .filter(Boolean)
-      .join(" · "),
+    detail,
     levels: levelsOf(charge.startLevel, charge.endLevel),
-    energy:
-      charge.energyAddedKwh === null && !charge.endAt
-        ? null
-        : `+${f.energy(charge.energyAddedKwh)}`,
-    cost: charge.cost === null ? null : f.cost(charge.cost),
+    energy,
+    cost,
+    label: spokenLabel([
+      clock,
+      duration,
+      charge.place,
+      charge.fastCharger ? "DC" : "AC",
+      detail,
+      energy ?? ongoingText,
+      cost,
+    ]),
   };
 }
 
@@ -73,11 +88,15 @@ export function chargeList(
       : [],
     sections: f
       .groupByDay(charges, (charge) => charge.startAt, now)
-      .map((group) => ({
-        title: group.label,
-        total: chargesDayTotal(group.items, f),
-        rows: group.items.map((charge) => chargeRow(charge, f)),
-      })),
+      .map((group) => {
+        const total = chargesDayTotal(group.items, f);
+        return {
+          title: group.label,
+          total,
+          label: spokenLabel([group.label, ...total]),
+          rows: group.items.map((charge) => chargeRow(charge, f)),
+        };
+      }),
   };
 }
 

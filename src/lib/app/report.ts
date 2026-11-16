@@ -14,6 +14,7 @@ import { csvFileName } from "../trip-log";
 import type { DriveRow, MapMarker, ReportPage } from "./contract";
 import { chargeRow } from "./charges";
 import { tripRow } from "./drives";
+import { spokenLabel } from "./spoken";
 import { appStat, appValue, statsWithValue } from "./values";
 
 export type ReportInput = {
@@ -128,15 +129,19 @@ export function reportPage(
     markers: input.routes ? markers : [],
     sections: f
       .groupByDay(items, (item) => item.at, now)
-      .map((group) => ({
-        title: group.label,
-        total: itemsDayTotal(group.items, f),
-        rows: group.items.map((item) =>
-          item.kind === "trip"
-            ? tripRow(item.trip, rated, f)
-            : reportChargeRow(item.charge, f),
-        ),
-      })),
+      .map((group) => {
+        const total = itemsDayTotal(group.items, f);
+        return {
+          title: group.label,
+          total,
+          label: spokenLabel([group.label, ...total]),
+          rows: group.items.map((item) =>
+            item.kind === "trip"
+              ? tripRow(item.trip, rated, f)
+              : reportChargeRow(item.charge, f),
+          ),
+        };
+      }),
     notice: items.length ? null : "No drive and no charge in this range.",
     exports: items.length
       ? [

@@ -19,16 +19,20 @@ export function ChargeListRow({
   const energy = row.energy ?? "Ongoing…";
   return (
     <ListRow
-      label={[
-        row.clock,
-        row.place,
-        row.fast ? "DC" : "AC",
-        row.detail,
-        energy,
-        row.cost,
-      ]
-        .filter(Boolean)
-        .join(", ")}
+      label={
+        row.label ??
+        [
+          row.clock,
+          row.duration,
+          row.place,
+          row.fast ? "DC" : "AC",
+          row.detail,
+          energy,
+          row.cost,
+        ]
+          .filter(Boolean)
+          .join(", ")
+      }
       onPress={() =>
         router.push(targetHref({ kind: "charge", id: row.id }, stack))
       }

@@ -4,6 +4,7 @@ import type { DayRecords } from "../timeline-data";
 import { isQuietDay, lastActiveDay, timelineView } from "../timeline-view";
 import type { TimelinePage } from "./contract";
 import { dayStrip } from "./overview";
+import { spokenLabel } from "./spoken";
 import { appStat } from "./values";
 
 function plural(count: number, one: string, many: string): string {
@@ -54,6 +55,7 @@ export function timelinePage(
       title: row.title,
       detail: row.detail,
       target: row.target,
+      label: spokenLabel([row.time, row.title, row.detail]),
     })),
   };
 }

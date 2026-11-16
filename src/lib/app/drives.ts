@@ -26,6 +26,7 @@ import type {
   TripDetail,
   TripStepRow,
 } from "./contract";
+import { spokenLabel } from "./spoken";
 import { appStat, appValue, levelsText, statsWithValue } from "./values";
 
 export const leftOpenNotice =
@@ -47,24 +48,33 @@ export function tripRow(
   f: Formatter,
 ): DriveRow {
   const summary = tripSummary(trip);
+  const clock = f.clock(trip.startAt);
+  const duration = f.duration(summary.totalMin);
+  const title = tripDestination(trip).place;
+  const subtitle = dotted([tripOrigin(trip), stopsText(summary)]);
+  const distance = f.distance(summary.distanceKm);
+  const consumption = appValue(
+    f.efficiency(summary.consumptionWhPerKm),
+    assessConsumption(summary.consumptionWhPerKm, rated, f, summary.distanceKm),
+  );
   return {
     key: `trip-${trip.id}`,
     target: tripTarget(trip),
-    clock: f.clock(trip.startAt),
-    duration: f.duration(summary.totalMin),
-    title: tripDestination(trip).place,
-    subtitle: dotted([tripOrigin(trip), stopsText(summary)]),
+    clock,
+    duration,
+    title,
+    subtitle,
     segments: tripSegments(trip),
-    distance: f.distance(summary.distanceKm),
-    consumption: appValue(
-      f.efficiency(summary.consumptionWhPerKm),
-      assessConsumption(
-        summary.consumptionWhPerKm,
-        rated,
-        f,
-        summary.distanceKm,
-      ),
-    ),
+    distance,
+    consumption,
+    label: spokenLabel([
+      clock,
+      duration,
+      title,
+      subtitle,
+      distance,
+      consumption.text,
+    ]),
   };
 }
 
@@ -89,14 +99,18 @@ export function driveList(
       : [],
     sections: f
       .groupByDay(summaries, ({ trip }) => trip.startAt, now)
-      .map((group) => ({
-        title: group.label,
-        total: tripsDayTotal(
+      .map((group) => {
+        const total = tripsDayTotal(
           group.items.map(({ summary }) => summary),
           f,
-        ),
-        rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
-      })),
+        );
+        return {
+          title: group.label,
+          total,
+          label: spokenLabel([group.label, ...total]),
+          rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
+        };
+      }),
   };
 }
 
@@ -277,28 +291,35 @@ export function tripDetail(
     steps: tripSteps(trip).map((step): TripStepRow => {
       if (step.kind === "leg") {
         const { leg } = step;
+        const clock = f.clock(step.at);
+        const title = `${leg.from} → ${leg.to}`;
+        const detail = dotted([
+          f.distance(leg.distanceKm),
+          f.duration(leg.durationMin),
+          f.efficiency(leg.consumptionWhPerKm),
+        ]);
         return {
           key: `leg-${leg.driveId}`,
           kind: "drive",
-          clock: f.clock(step.at),
-          title: `${leg.from} → ${leg.to}`,
-          detail: dotted([
-            f.distance(leg.distanceKm),
-            f.duration(leg.durationMin),
-            f.efficiency(leg.consumptionWhPerKm),
-          ]),
+          clock,
+          title,
+          detail,
           target: { kind: "drive", id: leg.driveId },
+          label: spokenLabel([clock, title, detail]),
         };
       }
       const { stop } = step;
       const [charge] = stop.charges;
+      const clock = f.clock(step.at);
+      const detail = stopDetail(stop, f);
       return {
         key: `stop-${step.at.getTime()}`,
         kind: stop.charged ? "charge" : "stop",
-        clock: f.clock(step.at),
+        clock,
         title: stop.place,
-        detail: stopDetail(stop, f),
+        detail,
         target: charge ? { kind: "charge", id: charge.id } : null,
+        label: spokenLabel([clock, stop.place, detail]),
       };
     }),
     routes: showMaps

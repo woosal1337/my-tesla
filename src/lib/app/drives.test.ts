@@ -109,6 +109,14 @@ describe("driveList", () => {
     ]);
   });
 
+  test("gives each row and each day a label with full units", () => {
+    const [section] = driveList(trips, car, f, now).sections;
+    expect(section?.label).toBe("Today, 2 trips, 360 kilometers");
+    expect(section?.rows[1]?.label).toBe(
+      "09:00, 4 hours 30 minutes, Ankara, from Istanbul, 1 stop, 1 with a charge, 240 kilometers, 150 watt-hours per kilometer",
+    );
+  });
+
   test("colors a consumption above the usual range", () => {
     const thirsty = buildTrips(
       [{ driveId: 13, tripId: 13, chargedBefore: false }],
@@ -238,6 +246,11 @@ describe("tripDetail", () => {
       ["drive", { kind: "drive", id: 12 }],
     ]);
     expect(detail.routes).toHaveLength(2);
+    expect(detail.steps.map((step) => step.label)).toEqual([
+      "09:00, Istanbul to Bolu, 120 kilometers, 2 hours, 150 watt-hours per kilometer",
+      "11:00, Supercharger Bolu, Charging stop, 40 minutes, +30.0 kilowatt-hours, 30% to 75%, 312.00",
+      "11:40, Bolu to Ankara, 120 kilometers, 1 hour 50 minutes, 150 watt-hours per kilometer",
+    ]);
     expect(detail.markers?.map((marker) => marker.kind)).toEqual([
       "start",
       "charge",

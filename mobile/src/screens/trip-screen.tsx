@@ -74,7 +74,10 @@ export function TripScreen({ tripId }: { tripId: string }) {
                 return (
                   <ListRow
                     key={step.key}
-                    label={`${step.clock}, ${step.title}, ${step.detail}`}
+                    label={
+                      step.label ??
+                      `${step.clock}, ${step.title}, ${step.detail}`
+                    }
                     onPress={
                       target
                         ? () => router.push(targetHref(target, "drives"))

@@ -41,7 +41,7 @@ function TimelineRow({ row }: { row: TimelinePage["rows"][number] }) {
   const target = row.target;
   return (
     <ListRow
-      label={`${row.time}, ${row.title}, ${row.detail}`}
+      label={row.label ?? `${row.time}, ${row.title}, ${row.detail}`}
       onPress={
         target ? () => router.push(targetHref(target, "drives")) : undefined
       }

@@ -33,6 +33,7 @@ The mobile app reads `/api/app/cars/{carId}/…`. Each answer is formatted on th
 3. When a page computes a value inline that the app also needs, move the computation into a shared module and use it in both. Compare the page text before and after.
 4. Route handlers call `appContext()`, then the queries, then the builder, and answer with `appJson()`. Give the user's map setting to every location value.
 5. Describe each endpoint in `docs/api.md`.
+6. Give each list row and each day section a `label` for a screen reader with `spokenLabel()`.
 
 ## Mobile app
 

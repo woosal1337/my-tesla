@@ -96,6 +96,19 @@ describe("chargeList", () => {
     });
     expect(done).toEqual(chargeRow(charge, f));
   });
+
+  test("gives each row and each day a label with full units", () => {
+    const list = chargeList(
+      [{ ...charge, id: 8, endAt: null, energyAddedKwh: null }, charge],
+      f,
+      now,
+    );
+    expect(list.sections[0]!.label).toBe("Today, +16.5 kilowatt-hours");
+    expect(list.sections[0]!.rows.map((row) => row.label)).toEqual([
+      "09:00, Now, Home, AC, 52% to 80%, up to 11 kilowatts, Ongoing…, 80.10",
+      "09:00, 1 hour 30 minutes, Home, AC, 52% to 80%, up to 11 kilowatts, +16.5 kilowatt-hours, 80.10",
+    ]);
+  });
 });
 
 describe("chargeDetail", () => {

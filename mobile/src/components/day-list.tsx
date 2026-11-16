@@ -51,17 +51,21 @@ export function DayList<Row extends { key: string }>({
   ];
   const children = [
     ...lead,
-    ...sections.flatMap((section) => [
-      <SectionHeading
-        key={`heading-${section.title}`}
-        title={headingLine(section)}
-      />,
-      <View key={`rows-${section.title}`} style={styles.rows}>
-        {section.rows.map((row) => (
-          <View key={row.key}>{renderRow(row)}</View>
-        ))}
-      </View>,
-    ]),
+    ...sections.flatMap((section) => {
+      const title = headingLine(section);
+      return [
+        <SectionHeading
+          key={`heading-${section.title}`}
+          title={title}
+          label={section.label ?? title}
+        />,
+        <View key={`rows-${section.title}`} style={styles.rows}>
+          {section.rows.map((row) => (
+            <View key={row.key}>{renderRow(row)}</View>
+          ))}
+        </View>,
+      ];
+    }),
   ];
   return (
     <Screen

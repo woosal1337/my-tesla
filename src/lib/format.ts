@@ -111,6 +111,10 @@ export function createFormatter(settings: FormatSettings, timeZone: string) {
 
   const duration = durationText;
 
+  function energy(kwh: number | null | undefined): string {
+    return isNumber(kwh) ? withUnit(kwh, adaptive(kwh / 10), "kWh") : missing;
+  }
+
   return {
     settings,
     timeZone,
@@ -181,8 +185,11 @@ export function createFormatter(settings: FormatSettings, timeZone: string) {
         ? missing
         : number(value, efficiencyDigits(settings));
     },
-    energy(kwh: number | null | undefined): string {
-      return isNumber(kwh) ? withUnit(kwh, adaptive(kwh / 10), "kWh") : missing;
+    energy,
+    energyFine(kwh: number | null | undefined): string {
+      return isNumber(kwh) && kwh !== 0 && Math.abs(kwh) < 0.1
+        ? withUnit(kwh * 1000, 0, "Wh")
+        : energy(kwh);
     },
     cost(value: number | null | undefined): string {
       if (!isNumber(value)) return missing;

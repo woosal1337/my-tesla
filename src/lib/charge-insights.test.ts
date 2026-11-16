@@ -3,6 +3,7 @@ import {
   chargeInsightTotals,
   costPer100Km,
   costPerKwh,
+  curveLabels,
   curveRows,
 } from "./charge-insights";
 
@@ -36,6 +37,27 @@ describe("curveRows", () => {
 
   test("gives nothing for no sessions", () => {
     expect(curveRows([])).toEqual({ rows: [], keys: [] });
+  });
+});
+
+describe("curveLabels", () => {
+  test("adds the start time only to the curves of a repeated date", () => {
+    const key = (id: number, startAt: string) => ({
+      key: `s${id}`,
+      id,
+      startAt: new Date(startAt),
+    });
+    expect(
+      curveLabels(
+        [
+          key(1, "2026-11-08T09:12:00Z"),
+          key(2, "2026-11-08T17:40:00Z"),
+          key(3, "2026-11-05T10:00:00Z"),
+        ],
+        (at) => at.toISOString().slice(0, 10),
+        (at) => at.toISOString().slice(11, 16),
+      ),
+    ).toEqual(["2026-11-08 09:12", "2026-11-08 17:40", "2026-11-05"]);
   });
 });
 

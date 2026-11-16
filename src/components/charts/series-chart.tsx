@@ -27,6 +27,7 @@ export function SeriesChart({
   rightDomain,
   xLabel,
   yFormat = "number",
+  wholeY = false,
 }: {
   data: Row[];
   xKey: string;
@@ -38,6 +39,7 @@ export function SeriesChart({
   rightDomain?: [number | "auto", number | "auto"];
   xLabel?: string;
   yFormat?: AxisFormat;
+  wholeY?: boolean;
 }) {
   const config: ChartConfig = Object.fromEntries(
     series.map((line) => [line.key, { label: line.label, color: line.color }]),
@@ -90,6 +92,7 @@ export function SeriesChart({
             width={44}
             tickMargin={6}
             domain={yDomain ?? ["auto", "auto"]}
+            allowDecimals={!wholeY}
             tickFormatter={(value) => formatAxis(value, yFormat, chartStyle)}
           />
           {hasRight && (

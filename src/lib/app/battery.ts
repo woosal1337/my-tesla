@@ -37,7 +37,7 @@ import {
 import { buildChart } from "./chart";
 import type { InsightPage, ShareColor } from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
-import { appStat, appValue } from "./values";
+import { appStat, appValue, noRecordCell, statsWithValue } from "./values";
 
 export type BatteryInput = {
   capacity: BatteryCapacityPoint[];
@@ -105,7 +105,7 @@ export function batteryPage(
     subtitle: null,
     period,
     periods: periodChoices(),
-    hero: [
+    hero: statsWithValue([
       appStat("Health", health === null ? "—" : `${f.number(health, 1)}%`, {
         assessment: assessBatteryHealth(
           health,
@@ -142,9 +142,14 @@ export function batteryPage(
       appStat(
         "Charge cycles",
         figures.cycles === null ? "—" : f.number(figures.cycles, 1),
-        { detail: `${f.number(totals.addedKwh)} kWh added` },
+        {
+          detail:
+            figures.cycles === null
+              ? null
+              : `${f.number(totals.addedKwh)} kWh added`,
+        },
       ),
-    ],
+    ]),
     heroBlocks:
       estimate && health !== null
         ? [
@@ -282,7 +287,7 @@ export function batteryPage(
                       xKey: "level",
                       xFormat: "percent",
                       style,
-                      left: "zero",
+                      left: "count",
                       series: [
                         {
                           key: "start",
@@ -306,10 +311,13 @@ export function batteryPage(
             charges.length ? `${charges.length} charges` : null,
           ),
           panel("Charging advice", [
-            { kind: "note", text: advice.advice },
-            advice.detail ? { kind: "note", text: advice.detail } : null,
+            { kind: "note", role: "body", text: advice.advice },
+            advice.detail
+              ? { kind: "note", role: "body", text: advice.detail }
+              : null,
             {
               kind: "note",
+              role: "caption",
               text: "TeslaMate sets the battery type in its car settings, under LFP battery.",
             },
           ]),
@@ -337,7 +345,7 @@ export function batteryPage(
                             key: "usable",
                             label: "Usable",
                             unit: "%",
-                            color: "chart3" as const,
+                            color: "chart4" as const,
                           },
                         ]
                       : []),
@@ -360,6 +368,7 @@ export function batteryPage(
                   },
                   {
                     kind: "note",
+                    role: "caption",
                     text: "Online includes driving and charging.",
                   },
                 ]
@@ -373,6 +382,7 @@ export function batteryPage(
                 chartBlock(
                   buildChart({
                     title: "By outside temperature",
+                    caption: `By outside temperature (${f.units.temperature})`,
                     rows: rangeByOutside,
                     xKey: "temperature",
                     xFormat: "number",
@@ -392,6 +402,7 @@ export function batteryPage(
                 chartBlock(
                   buildChart({
                     title: "By battery level",
+                    caption: "By battery level (%)",
                     rows: rangeByBattery,
                     xKey: "level",
                     xFormat: "percent",
@@ -415,7 +426,7 @@ export function batteryPage(
               ? [
                   {
                     kind: "stats",
-                    stats: [
+                    stats: statsWithValue([
                       appStat(
                         "Range lost",
                         `${f.number(f.distanceValue(drain.kmPerDay) ?? 0, 1)} ${f.units.distance}/day`,
@@ -436,7 +447,7 @@ export function batteryPage(
                         assessment: assessAsleep(drain.standby),
                         detail: `of ${f.number(drain.hours)} h parked`,
                       }),
-                    ],
+                    ]),
                   },
                   {
                     kind: "table",
@@ -449,15 +460,19 @@ export function batteryPage(
                           appValue(
                             `${f.day(row.start, now)} ${f.clock(row.start)}`,
                           ),
-                          appValue(
-                            row.rangeLostKm === null
-                              ? "—"
-                              : `${f.number(f.distanceValue(row.rangeLostKm) ?? 0, 1)} ${f.units.distance}`,
-                          ),
-                          appValue(
-                            watts === null ? "—" : `${f.number(watts)} W`,
-                            assessIdlePower(watts, f),
-                          ),
+                          ...(row.rangeLostKm === null
+                            ? [noRecordCell]
+                            : [
+                                appValue(
+                                  `${f.number(f.distanceValue(row.rangeLostKm) ?? 0, 1)} ${f.units.distance}`,
+                                ),
+                                watts === null
+                                  ? noRecordCell
+                                  : appValue(
+                                      `${f.number(watts)} W`,
+                                      assessIdlePower(watts, f),
+                                    ),
+                              ]),
                         ],
                       };
                     }),

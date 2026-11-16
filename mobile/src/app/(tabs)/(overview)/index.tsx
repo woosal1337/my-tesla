@@ -12,6 +12,7 @@ import { QuickActions, type QuickAction } from "@/components/quick-actions";
 import { EmptyState, QueryView } from "@/components/query-view";
 import { Screen } from "@/components/screen";
 import { useRefresh } from "@/hooks/use-refresh";
+import { overviewHeaderShown } from "@/navigation/header";
 import { requestInsight } from "@/navigation/insight-request";
 import { mapsUrl } from "@/navigation/maps";
 import { useOpenTab } from "@/navigation/open-tab";
@@ -99,7 +100,9 @@ function Stage({ page }: { page: OverviewPage }) {
   return (
     <View style={styles.stage}>
       <CarStage
+        key={page.car.image}
         image={page.car.image}
+        imageFrame={page.car.imageFrame}
         name={page.car.name}
         callouts={page.callouts}
       />
@@ -146,7 +149,9 @@ export default function OverviewScreen() {
   const wide = useWindowDimensions().width >= wideWidth;
   return (
     <Screen
-      withoutHeader
+      fullWidth
+      withoutHeader={!overviewHeaderShown}
+      coverStatusBar
       refreshing={refresh.refreshing}
       onRefresh={refresh.onRefresh}
     >
@@ -160,13 +165,9 @@ export default function OverviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  stage: {
-    gap: space.lg,
-    marginHorizontal: -space.xl,
-    paddingHorizontal: space.sm,
-  },
+  stage: { flexGrow: 1, gap: space.lg },
   menu: { marginHorizontal: -space.lg },
-  wide: { flexDirection: "row", gap: space.xxl, alignItems: "flex-start" },
+  wide: { flexDirection: "row", gap: space.xxl },
   sidebar: { width: 320, gap: space.xl },
   main: { flex: 1, minWidth: 0 },
 });

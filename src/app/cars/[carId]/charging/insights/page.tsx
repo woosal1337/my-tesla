@@ -19,12 +19,14 @@ import {
 import {
   chargeInsightTotals,
   costPerKwh,
+  curveLabels,
   curveRows,
 } from "@/lib/charge-insights";
 import {
   chargeHistory,
   chargeLegs,
   chargeTime,
+  chargeTimeTitle,
   type ChargeLeg,
   type LevelTime,
 } from "@/lib/charge-time";
@@ -169,6 +171,7 @@ export default async function ChargingInsightsPage({
   } = chargeInsightTotals(types, drives.distanceKm);
   const hundred = f.units.distance === "mi" ? 160.9344 : 100;
   const curveData = curveRows(curves);
+  const curveNames = curveLabels(curveData.keys, f.date, f.clock);
   const grid = weekGrid(starts);
   const legs = chargeLegs(snapshot.batteryLevel);
 
@@ -232,7 +235,7 @@ export default async function ChargingInsightsPage({
                   chartStyle={f.chartStyle}
                   series={curveData.keys.map((key, index) => ({
                     key: key.key,
-                    label: f.date(key.startAt),
+                    label: curveNames[index]!,
                     color: curveColors[index % curveColors.length],
                     unit: "kW",
                   }))}
@@ -242,14 +245,7 @@ export default async function ChargingInsightsPage({
                 <PanelNote>No DC fast charge in this period.</PanelNote>
               )}
             </Panel>
-            <Panel
-              title="Charging time"
-              action={
-                <span className="text-xs text-subtle">
-                  Charges of the last 2 years
-                </span>
-              }
-            >
+            <Panel title={chargeTimeTitle}>
               {levelTimes.length ? (
                 <>
                   <div className="grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">

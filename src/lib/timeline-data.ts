@@ -21,6 +21,30 @@ export type DayRecords = {
   charges: TimelineCharge[];
 };
 
+export const lastActivityBefore = cache(
+  async (carId: number, before: Date): Promise<Date | null> => {
+    await connection();
+    const sql = database();
+    const until = before.toISOString();
+    const [row] = await sql<{ at: Date | null }[]>`
+      select greatest(
+        (
+          select max(start_date) from drives
+          where car_id = ${carId}
+            and end_date is not null
+            and start_date < (${until}::timestamptz at time zone 'UTC')
+        ),
+        (
+          select max(start_date) from charging_processes
+          where car_id = ${carId}
+            and start_date < (${until}::timestamptz at time zone 'UTC')
+        )
+      ) at time zone 'UTC' as at
+    `;
+    return row?.at ?? null;
+  },
+);
+
 export const dayRecords = cache(
   async (carId: number, start: Date, end: Date): Promise<DayRecords> => {
     await connection();

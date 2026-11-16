@@ -1,6 +1,7 @@
 import { assessChargingEfficiency, assessVoltage } from "../assessment";
 import type { ChargeSession, CurvePoint } from "../charge-data";
 import { chargeFigures, powerByLevel } from "../charge-figures";
+import { chargesDayTotal } from "../day-total";
 import type { Formatter } from "../format";
 import type { Charge } from "../queries";
 import { ongoingText } from "../vehicle";
@@ -9,15 +10,58 @@ import type {
   AppChart,
   ChargeDetail,
   ChargeList,
+  ChargeRow,
   LevelRange,
 } from "./contract";
-import { appStat, levelsText } from "./values";
+import { spokenLabel } from "./spoken";
+import { appStat, levelsText, statsWithValue } from "./values";
 
 export const unclosedNotice =
   "TeslaMate did not close this charge. This happens when TeslaMate restarts during a charge. The values come from the charge records.";
 
 function levelsOf(start: number | null, end: number | null): LevelRange | null {
   return start === null || end === null ? null : { start, end };
+}
+
+export function chargeRow(charge: Charge, f: Formatter): ChargeRow {
+  const clock = f.clock(charge.startAt);
+  const duration = charge.endAt ? f.duration(charge.durationMin) : "Now";
+  const detail = [
+    charge.startLevel !== null && charge.endLevel !== null
+      ? levelsText(charge.startLevel, charge.endLevel)
+      : charge.endAt
+        ? "—"
+        : null,
+    charge.maxPowerKw ? `up to ${Math.round(charge.maxPowerKw)} kW` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const energy =
+    charge.energyAddedKwh === null && !charge.endAt
+      ? null
+      : `+${f.energy(charge.energyAddedKwh)}`;
+  const cost = charge.cost === null ? null : f.cost(charge.cost);
+  return {
+    key: `charge-${charge.id}`,
+    id: charge.id,
+    clock,
+    duration,
+    place: charge.place,
+    fast: charge.fastCharger,
+    detail,
+    levels: levelsOf(charge.startLevel, charge.endLevel),
+    energy,
+    cost,
+    label: spokenLabel([
+      clock,
+      duration,
+      charge.place,
+      charge.fastCharger ? "DC" : "AC",
+      detail,
+      energy ?? ongoingText,
+      cost,
+    ]),
+  };
 }
 
 export function chargeList(
@@ -44,35 +88,15 @@ export function chargeList(
       : [],
     sections: f
       .groupByDay(charges, (charge) => charge.startAt, now)
-      .map((group) => ({
-        title: group.label,
-        rows: group.items.map((charge) => ({
-          key: `charge-${charge.id}`,
-          id: charge.id,
-          clock: f.clock(charge.startAt),
-          duration: charge.endAt ? f.duration(charge.durationMin) : "Now",
-          place: charge.place,
-          fast: charge.fastCharger,
-          detail: [
-            charge.startLevel !== null && charge.endLevel !== null
-              ? levelsText(charge.startLevel, charge.endLevel)
-              : charge.endAt
-                ? "—"
-                : null,
-            charge.maxPowerKw
-              ? `up to ${Math.round(charge.maxPowerKw)} kW`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-          levels: levelsOf(charge.startLevel, charge.endLevel),
-          energy:
-            charge.energyAddedKwh === null && !charge.endAt
-              ? null
-              : `+${f.energy(charge.energyAddedKwh)}`,
-          cost: charge.cost === null ? null : f.cost(charge.cost),
-        })),
-      })),
+      .map((group) => {
+        const total = chargesDayTotal(group.items, f);
+        return {
+          title: group.label,
+          total,
+          label: spokenLabel([group.label, ...total]),
+          rows: group.items.map((charge) => chargeRow(charge, f)),
+        };
+      }),
   };
 }
 
@@ -144,7 +168,7 @@ function chargeCharts(curve: CurvePoint[], f: Formatter): AppChart[] {
           key: "current",
           label: "Current",
           unit: "A",
-          color: "chart3",
+          color: "chart1",
           axis: "right",
           digits: 1,
         },
@@ -175,7 +199,7 @@ export function chargeDetail(
     }`,
     fullAt: fullAt ? fullAt.toISOString() : null,
     notice: session.unclosed ? unclosedNotice : null,
-    hero: [
+    hero: statsWithValue([
       appStat(
         "Energy added",
         added === null ? missing : `+${f.number(added, 1)} kWh`,
@@ -198,9 +222,9 @@ export function chargeDetail(
           ? missing
           : f.duration(session.durationMin),
       ),
-    ],
+    ]),
     levels: levelsOf(session.startLevel, session.endLevel),
-    stats: [
+    stats: statsWithValue([
       appStat(
         "Average power",
         figures.averagePower === null
@@ -247,10 +271,9 @@ export function chargeDetail(
       ...(figures.batteryHeater
         ? [appStat("Battery heater", figures.batteryHeater)]
         : []),
-    ],
+    ]),
     cost: breakdown
       ? {
-          source: figures.costSource,
           note:
             [
               figures.tariff && `The price at this place: ${figures.tariff}.`,
@@ -261,7 +284,7 @@ export function chargeDetail(
             ]
               .filter(Boolean)
               .join(" ") || null,
-          stats: [
+          stats: statsWithValue([
             appStat(
               "Energy billed",
               session.billedKwh === null
@@ -295,7 +318,7 @@ export function chargeDetail(
             appStat("Per 1% of battery", f.cost(breakdown.perLevel), {
               detail: levelsAdded === null ? null : `${levelsAdded}% added`,
             }),
-          ],
+          ]),
         }
       : null,
     charts: chargeCharts(curve, f),

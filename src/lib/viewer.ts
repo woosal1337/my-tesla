@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { cache } from "react";
 import type { ChargePrices } from "./charge-cost";
+import { chargingCountry } from "./charging-country-sql";
 import { createFormatter, type Formatter } from "./format";
 import { database } from "./database";
 import { isDemoMode } from "./demo/mode";
@@ -45,13 +46,15 @@ async function cachedTeslamateSettings(): Promise<TeslaMateSettings | null> {
   "use cache";
   cacheLife("minutes");
   cacheTag(teslamateSettingsTag);
-  const [row] = await database()<TeslaMateSettings[]>`
+  const sql = database();
+  const [row] = await sql<TeslaMateSettings[]>`
     select
       unit_of_length::text as "unitOfLength",
       unit_of_temperature::text as "unitOfTemperature",
       unit_of_pressure::text as "unitOfPressure",
       preferred_range::text as "preferredRange",
-      theme_mode as "themeMode"
+      theme_mode as "themeMode",
+      (${chargingCountry(sql)}) as "chargingCountry"
     from settings
     order by id
     limit 1

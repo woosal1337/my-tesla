@@ -14,6 +14,8 @@ export type ChargeHistory = { sessions: number; from: number; to: number };
 
 export const chargeTimeHistoryDays = 730;
 
+export const chargeTimeTitle = `Charging time, last ${chargeTimeHistoryDays / 365} years`;
+
 const usualLimit = 80;
 
 const standardLegs = [

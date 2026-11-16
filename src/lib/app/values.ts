@@ -25,6 +25,18 @@ export function appStat(
   };
 }
 
+export const noRecordCell: AppValue = appValue("No record");
+
+export function hasValue(text: string): boolean {
+  return /[\p{L}\p{N}]/u.test(text);
+}
+
+export function statsWithValue(stats: AppStat[]): AppStat[] {
+  return stats.filter(
+    (stat) => hasValue(stat.value.text) || stat.detail !== null,
+  );
+}
+
 export function levelsText(start: number | null, end: number | null): string {
   return `${start ?? "—"}% → ${end ?? "—"}%`;
 }

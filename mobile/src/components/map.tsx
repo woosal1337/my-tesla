@@ -8,7 +8,7 @@ import {
   TransformRequestManager,
   type InitialViewState,
 } from "@maplibre/maplibre-react-native";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useReducer, useState, type ReactNode } from "react";
 import {
   Animated,
   StyleSheet,
@@ -21,6 +21,7 @@ import { basemapKeyOf } from "@/api/responses";
 import { motion, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { useReducedMotion } from "@/theme/use-reduced-motion";
+import { coverAfter, type MapCover } from "./map-cover";
 import {
   boundsOf,
   lines,
@@ -28,7 +29,8 @@ import {
   placePoints,
   routeEnds,
 } from "./map-geometry";
-import { screenPadding } from "./screen";
+import { screenPadding, useScreenInset } from "./screen";
+import { TeslaMark } from "./tesla-mark";
 import { Text } from "./text";
 
 const mapStyles = {
@@ -36,10 +38,14 @@ const mapStyles = {
   light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
 };
 
+const labelLayer = "watername_ocean";
+
 const carZoom = 15;
 const fitPadding = { top: 48, right: 48, bottom: 48, left: 48 };
 
 const basemapKeyId = "carto-basemap-key";
+
+const coverLimitMs = 8000;
 
 function useBasemapKey(): void {
   const key = basemapKeyOf(useSettings().data);
@@ -76,6 +82,43 @@ function useMapHeight(size: MapSize): number {
   return Math.round(Math.min(560, Math.max(260, height * heightShare[size])));
 }
 
+function Cover({ cover }: { cover: MapCover }) {
+  const palette = usePalette();
+  const reduced = useReducedMotion();
+  const [opacity] = useState(() => new Animated.Value(1));
+  const [faded, setFaded] = useState(false);
+
+  useEffect(() => {
+    if (cover !== "lifted" || reduced) return;
+    const fade = Animated.timing(opacity, {
+      toValue: 0,
+      duration: motion.durationMs,
+      easing: motion.easing,
+      useNativeDriver: true,
+    });
+    fade.start(({ finished }) => setFaded(finished));
+    return () => fade.stop();
+  }, [cover, opacity, reduced]);
+
+  if (faded || (cover === "lifted" && reduced)) return null;
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        StyleSheet.absoluteFill,
+        styles.cover,
+        { backgroundColor: palette.card, opacity },
+      ]}
+    >
+      {cover === "failed" ? (
+        <Text variant="label">The map did not load.</Text>
+      ) : (
+        <TeslaMark size={44} kind="breathe" />
+      )}
+    </Animated.View>
+  );
+}
+
 function MapCanvas({
   label,
   size,
@@ -91,19 +134,31 @@ function MapCanvas({
   useBasemapKey();
   const mapStyle = useMapStyle();
   const height = useMapHeight(size);
+  const inset = useScreenInset();
   const [settled, setSettled] = useState(false);
+  const [cover, signal] = useReducer(coverAfter, "loading");
 
   useEffect(() => {
-    const timer = setTimeout(() => setSettled(true), motion.durationMs);
-    return () => clearTimeout(timer);
+    const mount = setTimeout(() => setSettled(true), motion.durationMs);
+    const limit = setTimeout(() => signal("timeout"), coverLimitMs);
+    return () => {
+      clearTimeout(mount);
+      clearTimeout(limit);
+    };
   }, []);
 
   return (
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel={label}
-      style={[styles.frame, { height, backgroundColor: palette.card }]}
+      accessibilityLabel={
+        cover === "failed" ? `${label}. The map did not load.` : label
+      }
+      accessibilityState={{ busy: cover === "loading" }}
+      style={[
+        styles.frame,
+        { height, marginHorizontal: -inset, backgroundColor: palette.card },
+      ]}
     >
       {settled ? (
         <Map
@@ -115,11 +170,14 @@ function MapCanvas({
           compass={false}
           logo={false}
           attributionPosition={{ bottom: 8, right: screenPadding }}
+          onDidFinishRenderingMapFully={() => signal("rendered")}
+          onDidFailLoadingMap={() => signal("failed")}
         >
           <Camera initialViewState={view} />
           {children}
         </Map>
       ) : null}
+      <Cover cover={cover} />
     </View>
   );
 }
@@ -184,14 +242,16 @@ export function LocationMap({
   latitude,
   longitude,
   label,
+  size,
 }: {
   latitude: number;
   longitude: number;
   label: string;
+  size: MapSize;
 }) {
   const center: LngLat = [longitude, latitude];
   return (
-    <MapCanvas label={label} size="card" view={{ center, zoom: carZoom }}>
+    <MapCanvas label={label} size={size} view={{ center, zoom: carZoom }}>
       <Marker id="car" lngLat={center}>
         <CarDot />
       </Marker>
@@ -262,6 +322,7 @@ export function RouteMap({
         <Layer
           id="route-line"
           type="line"
+          beforeId={labelLayer}
           layout={{ "line-cap": "round", "line-join": "round" }}
           paint={{ "line-color": palette.primary, "line-width": width }}
         />
@@ -353,7 +414,8 @@ export function PlacesMap({ places }: { places: readonly MapPlace[] }) {
 }
 
 const styles = StyleSheet.create({
-  frame: { overflow: "hidden", marginHorizontal: -screenPadding },
+  frame: { overflow: "hidden" },
+  cover: { alignItems: "center", justifyContent: "center" },
   car: {
     width: 24,
     height: 24,
@@ -364,7 +426,12 @@ const styles = StyleSheet.create({
   dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2 },
   places: { gap: space.md },
   section: { gap: space.md, marginTop: space.sm },
-  legend: { flexDirection: "row", gap: space.lg },
+  legend: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: space.lg,
+    rowGap: space.xs,
+  },
   legendItem: { flexDirection: "row", alignItems: "center", gap: space.sm },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
 });

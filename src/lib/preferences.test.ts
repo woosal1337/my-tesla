@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
+  currencyByCountry,
+  currencyOfCountry,
+  currencyOptions,
   defaultPreferences,
   mapThemeOf,
   parsePreferences,
@@ -86,6 +89,7 @@ describe("teslamateDefaults", () => {
       unitOfPressure: "psi",
       preferredRange: "ideal",
       themeMode: "dark",
+      chargingCountry: null,
     });
     expect(defaults.distance).toBe("mi");
     expect(defaults.temperature).toBe("f");
@@ -93,6 +97,38 @@ describe("teslamateDefaults", () => {
     expect(defaults.range).toBe("ideal");
     expect(defaults.theme).toBe("dark");
     expect(teslamateDefaults(null)).toEqual(defaultPreferences);
+  });
+
+  test("takes the currency of the charging country", () => {
+    const base = teslamateDefaults({
+      unitOfLength: "km",
+      unitOfTemperature: "C",
+      unitOfPressure: "bar",
+      preferredRange: "rated",
+      themeMode: "system",
+      chargingCountry: "us",
+    });
+    expect(base.currency).toBe("USD");
+    expect(parsePreferences({}, base).currency).toBe("USD");
+    expect(parsePreferences({ currency: "none" }, base).currency).toBe("none");
+  });
+});
+
+describe("currencyOfCountry", () => {
+  test("maps a country code to a currency", () => {
+    expect(currencyOfCountry("tr")).toBe("TRY");
+    expect(currencyOfCountry("DE")).toBe("EUR");
+    expect(currencyOfCountry("us")).toBe("USD");
+    expect(currencyOfCountry("cz")).toBe("none");
+    expect(currencyOfCountry(null)).toBe("none");
+  });
+
+  test("offers each mapped currency in Settings", () => {
+    const ids = currencyOptions.map((option) => option.id);
+    for (const currency of currencyByCountry.values()) {
+      expect(ids).toContain(currency);
+    }
+    expect(new Set(currencyByCountry.values()).size).toBe(ids.length - 1);
   });
 });
 

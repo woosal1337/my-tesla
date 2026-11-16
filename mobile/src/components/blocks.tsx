@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { space } from "@/theme/tokens";
 import { toneColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import type { TabStack } from "@/navigation/targets";
 import { Chart } from "./chart";
 import { Heatmap } from "./heatmap";
@@ -10,6 +11,7 @@ import { PlacesMap, RouteMap } from "./map";
 import { Notice } from "./notice";
 import { Records } from "./records";
 import { StatGrid } from "./stat";
+import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
 function Shares({
@@ -31,7 +33,7 @@ function Shares({
               {row.label}
             </Text>
             <Text variant="label" style={styles.tabular}>
-              {row.text}
+              {dottedLine(row.text)}
             </Text>
           </View>
           <View style={[styles.shareTrack, { backgroundColor: palette.muted }]}>
@@ -52,8 +54,57 @@ function Shares({
   );
 }
 
-function Table({ block }: { block: Extract<AppBlock, { kind: "table" }> }) {
+type TableBlock = Extract<AppBlock, { kind: "table" }>;
+
+function tableRowLabel(block: TableBlock, row: TableBlock["rows"][number]) {
+  return row.cells
+    .map((cell, index) => `${block.columns[index]}: ${cell.text}`)
+    .join(", ");
+}
+
+function StackedTable({ block }: { block: TableBlock }) {
   const palette = usePalette();
+  return (
+    <View>
+      {block.rows.map((row, rowIndex) => (
+        <View
+          key={row.key}
+          accessible
+          accessibilityLabel={tableRowLabel(block, row)}
+          style={[
+            styles.stackedTableRow,
+            rowIndex > 0 && styles.tableBody,
+            { borderTopColor: palette.border },
+          ]}
+        >
+          {row.cells.map((cell, index) =>
+            index === 0 ? (
+              <Text key={index} variant="label" tone="foreground">
+                {cell.text}
+              </Text>
+            ) : (
+              <View key={index} style={styles.stackedCell}>
+                <Text variant="caption">{block.columns[index]}</Text>
+                <Text
+                  variant="label"
+                  color={toneColor(palette, cell.tone)}
+                  style={styles.tabular}
+                >
+                  {cell.text}
+                </Text>
+              </View>
+            ),
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function Table({ block }: { block: TableBlock }) {
+  const palette = usePalette();
+  const large = useLargeText();
+  if (large) return <StackedTable block={block} />;
   return (
     <View>
       <View style={styles.tableRow}>
@@ -71,9 +122,7 @@ function Table({ block }: { block: Extract<AppBlock, { kind: "table" }> }) {
         <View
           key={row.key}
           accessible
-          accessibilityLabel={row.cells
-            .map((cell, index) => `${block.columns[index]}: ${cell.text}`)
-            .join(", ")}
+          accessibilityLabel={tableRowLabel(block, row)}
           style={[
             styles.tableRow,
             styles.tableBody,
@@ -136,6 +185,31 @@ function Progress({
   );
 }
 
+function Note({ block }: { block: Extract<AppBlock, { kind: "note" }> }) {
+  switch (block.role) {
+    case "heading":
+      return (
+        <Text
+          variant="strong"
+          accessibilityRole="header"
+          style={styles.noteHeading}
+        >
+          {block.text}
+        </Text>
+      );
+    case "body":
+      return <Text variant="body">{block.text}</Text>;
+    case "caption":
+      return <Text variant="label">{block.text}</Text>;
+    default:
+      return (
+        <Text variant="label" style={styles.emptyNote}>
+          {block.text}
+        </Text>
+      );
+  }
+}
+
 export function Block({ block, stack }: { block: AppBlock; stack: TabStack }) {
   switch (block.kind) {
     case "stats":
@@ -166,11 +240,7 @@ export function Block({ block, stack }: { block: AppBlock; stack: TabStack }) {
         />
       );
     case "note":
-      return (
-        <Text variant="label" tone="subtle" style={styles.note}>
-          {block.text}
-        </Text>
-      );
+      return <Note block={block} />;
   }
 }
 
@@ -178,8 +248,10 @@ const styles = StyleSheet.create({
   shares: { gap: space.lg },
   shareText: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: space.lg,
+    columnGap: space.lg,
+    rowGap: 2,
   },
   shareTrack: {
     marginTop: space.sm,
@@ -190,6 +262,14 @@ const styles = StyleSheet.create({
   shareFill: { height: "100%", borderRadius: 3 },
   tableRow: { flexDirection: "row", gap: space.md, paddingVertical: space.sm },
   tableBody: { borderTopWidth: StyleSheet.hairlineWidth },
+  stackedTableRow: { gap: 2, paddingVertical: space.sm },
+  stackedCell: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    columnGap: space.md,
+  },
   cell: { flex: 1.4 },
   numberCell: { flex: 1, textAlign: "right", fontVariant: ["tabular-nums"] },
   progressTrack: { height: 8, borderRadius: 4, overflow: "hidden" },
@@ -197,8 +277,11 @@ const styles = StyleSheet.create({
   progressText: {
     marginTop: space.sm,
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
+    columnGap: space.md,
   },
   tabular: { fontVariant: ["tabular-nums"] },
-  note: { paddingVertical: space.xl, textAlign: "center" },
+  emptyNote: { paddingVertical: space.xl, textAlign: "center" },
+  noteHeading: { marginTop: space.sm, marginBottom: -space.sm },
 });

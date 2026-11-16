@@ -4,7 +4,9 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { targetHref, type TabStack } from "@/navigation/targets";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { ChargerBadge } from "./charger-badge";
+import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
 function recordLabel(row: AppRecord): string {
@@ -23,7 +25,14 @@ function recordLabel(row: AppRecord): string {
 function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
   const router = useRouter();
   const palette = usePalette();
+  const large = useLargeText();
   const target = row.target;
+  const indent = row.rank !== null && !large && styles.indent;
+  const value = row.value ? (
+    <Text variant="label" tone="foreground" style={styles.value}>
+      {row.value}
+    </Text>
+  ) : null;
   const body = (
     <>
       <View style={styles.line}>
@@ -34,17 +43,14 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
         ) : null}
         <View style={styles.title}>
           {row.badge ? <ChargerBadge fast={row.badge === "DC"} /> : null}
-          <Text variant="strong" numberOfLines={1} style={styles.titleText}>
+          <Text variant="strong" style={styles.titleText}>
             {row.title}
           </Text>
         </View>
-        {row.value ? (
-          <Text variant="label" tone="foreground" style={styles.value}>
-            {row.value}
-          </Text>
-        ) : null}
+        {large ? null : value}
       </View>
-      <View style={[styles.below, row.rank !== null && styles.indent]}>
+      <View style={[styles.below, indent]}>
+        {large ? value : null}
         {row.bar ? (
           <View style={[styles.track, { backgroundColor: palette.muted }]}>
             <View
@@ -62,9 +68,7 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
           </View>
         ) : null}
         {row.detail ? (
-          <Text variant="caption" numberOfLines={2}>
-            {row.detail}
-          </Text>
+          <Text variant="caption">{dottedLine(row.detail)}</Text>
         ) : null}
         {row.note ? <Text variant="caption">{row.note}</Text> : null}
       </View>
@@ -89,20 +93,24 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
         </View>
       )}
       {row.links.length ? (
-        <View style={[styles.links, row.rank !== null && styles.indent]}>
+        <View style={[styles.links, indent]}>
           {row.links.map((link) => (
             <Pressable
               key={link.label}
               accessibilityRole="link"
               accessibilityLabel={link.label}
-              hitSlop={12}
               onPress={() =>
                 router.push(targetHref(link.target, stack), {
                   withAnchor: true,
                 })
               }
+              style={({ pressed }) => [styles.link, pressed && styles.pressed]}
             >
-              <Text variant="caption" tone="primary">
+              <Text
+                variant="caption"
+                tone="secondaryForeground"
+                style={styles.linkText}
+              >
                 {link.label}
               </Text>
             </Pressable>
@@ -135,12 +143,12 @@ const styles = StyleSheet.create({
   press: { borderRadius: radius.control },
   pressed: { opacity: 0.6 },
   line: { flexDirection: "row", alignItems: "center", gap: space.md },
-  rank: { width: 20, fontVariant: ["tabular-nums"] },
+  rank: { minWidth: 20, fontVariant: ["tabular-nums"] },
   title: {
     flex: 1,
     minWidth: 0,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: space.sm,
   },
   titleText: { flexShrink: 1 },
@@ -154,5 +162,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   fill: { height: "100%", borderRadius: 3 },
-  links: { flexDirection: "row", flexWrap: "wrap", gap: space.lg },
+  links: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: space.lg,
+    marginVertical: -space.sm,
+  },
+  link: { minHeight: 48, minWidth: 48, justifyContent: "center" },
+  linkText: { textDecorationLine: "underline" },
 });

@@ -1,36 +1,51 @@
-import { assessBatteryLevel, assessTirePressure } from "../assessment";
+import { assessBatteryLevel, assessTire } from "../assessment";
 import type { Formatter } from "../format";
 import { historyText } from "../history/changes";
 import type { HistoryEvent } from "../history/store";
-import { buildTimeline } from "../insights";
+import {
+  batteryCapacity,
+  buildTimeline,
+  type CapacityPoint,
+} from "../insights";
 import type { LiveFeed } from "../live/live";
 import { liveNotices, liveTiles } from "../live/tiles";
+import type { VisitedPlace } from "../places-data";
 import type { Preferences } from "../preferences";
 import type { Car, CarSnapshot, Charge, Drive } from "../queries";
+import type { DriveTotals } from "../stats-data";
+import { statsTotals } from "../stats-figures";
 import type { DayRecords } from "../timeline-data";
+import { dayLegend } from "../timeline-view";
 import { leakWarning, type SlowLeak } from "../tire-leak";
 import {
   activityLabel,
   batteryCaption,
   batteryTone,
   carActivity,
+  coldBatteryText,
   liveActivity,
   ongoingText,
+  unknownPlace,
   variantLine,
 } from "../vehicle";
 import type {
+  AppDayStrip,
   AppValue,
+  CarImageFrame,
   LiveIcon,
   OverviewCallout,
   OverviewMenuRow,
   OverviewPage,
-  RecentRecord,
+  PeriodId,
 } from "./contract";
-import { appStat, appValue } from "./values";
+import { periodLabel } from "./panels";
+import { placesSummary } from "./places";
+import { appStat, appValue, statsWithValue } from "./values";
 
 export type OverviewInput = {
   car: Car;
   image: string | null;
+  imageFrame: CarImageFrame | null;
   snapshot: CarSnapshot;
   lastDrive: Drive | null;
   lastCharge: Charge | null;
@@ -40,15 +55,21 @@ export type OverviewInput = {
   history: HistoryEvent[] | null;
   show: Preferences["overview"];
   showMaps: boolean;
+  capacity: CapacityPoint[];
+  driven: DriveTotals;
+  visited: VisitedPlace[];
+  period: PeriodId;
 };
+
+const batteryCalloutTones = {
+  charge: "charge",
+  low: "warning",
+  normal: "normal",
+} as const;
 
 function joined(parts: (string | null | false | undefined)[]): string | null {
   const kept = parts.filter((part): part is string => Boolean(part));
   return kept.length ? kept.join(" · ") : null;
-}
-
-function recordLine(record: RecentRecord): string {
-  return `${record.title} · ${record.detail}`;
 }
 
 function historyIcon(event: HistoryEvent): LiveIcon {
@@ -60,7 +81,7 @@ export function dayStrip(
   today: NonNullable<OverviewInput["today"]>,
   f: Formatter,
   now: Date,
-): OverviewPage["today"] {
+): AppDayStrip {
   const start = today.start.getTime();
   const total = today.end.getTime() - start;
   const share = (date: Date) => (date.getTime() - start) / total;
@@ -72,34 +93,52 @@ export function dayStrip(
     })),
     now: Math.min(1, Math.max(0, share(now))),
     hours: [0, 6, 12, 18, 24].map((hour) => f.hour(hour)),
+    legend: dayLegend(today, now),
   };
 }
 
-function lastDriveRecord(drive: Drive, f: Formatter, now: Date): RecentRecord {
-  return {
-    title: `${drive.from} → ${drive.to}`,
-    detail: `${f.distance(drive.distanceKm)} · ${f.duration(drive.durationMin)} · ${f.day(drive.startAt, now)} ${f.clock(drive.startAt)}`,
-    target: { kind: "drive", id: drive.id },
-  };
+function lastDriveLine(drive: Drive | null, f: Formatter, now: Date): string {
+  if (!drive) return "No drive yet";
+  return `${drive.from} → ${drive.to} · ${f.distance(drive.distanceKm)} · ${f.duration(drive.durationMin)} · ${f.day(drive.startAt, now)} ${f.clock(drive.startAt)}`;
 }
 
-function lastChargeRecord(
-  charge: Charge,
+function lastChargeLine(
+  charge: Charge | null,
   f: Formatter,
   now: Date,
-): RecentRecord {
+): string {
+  if (!charge) return "No charge yet";
   const done = charge.endAt
     ? `+${f.energy(charge.energyAddedKwh)} · ${charge.startLevel ?? "—"}% → ${charge.endLevel ?? "—"}%`
     : `${ongoingText} since ${f.clock(charge.startAt)}`;
+  return `${charge.place} · ${done} · ${f.day(charge.startAt, now)}`;
+}
+
+function parkedAt(
+  drive: Drive | null,
+  charge: Charge | null,
+  f: Formatter,
+  now: Date,
+): { place: string | null; since: string | null } {
+  const place = drive?.to ?? charge?.place ?? null;
   return {
-    title: charge.place,
-    detail: `${done} · ${f.day(charge.startAt, now)}`,
-    target: { kind: "charge", id: charge.id },
+    place: place === unknownPlace ? null : place,
+    since: drive ? parkedSince(drive.endAt, f, now) : null,
   };
 }
 
-function tireValue(bar: number, f: Formatter): AppValue {
-  return appValue(f.pressure(bar), assessTirePressure(bar, f));
+function parkedSince(endAt: Date, f: Formatter, now: Date): string {
+  const minutes = Math.max(0, (now.getTime() - endAt.getTime()) / 60000);
+  return `Parked since ${f.dayInline(endAt, now)} at ${f.clock(endAt)} · ${f.span(minutes)}`;
+}
+
+function tireValue(
+  tire: SlowLeak["tire"],
+  bar: number,
+  leaks: SlowLeak[],
+  f: Formatter,
+): AppValue {
+  return appValue(f.pressure(bar), assessTire(tire, bar, leaks, f));
 }
 
 export function overviewPage(
@@ -111,13 +150,14 @@ export function overviewPage(
   const liveNow = live?.connected ? live.view : null;
   const chargingNow =
     liveNow?.charging.state === "Charging" ? liveNow.charging : null;
-  const activity = activityLabel(
-    liveActivity(liveNow?.state ?? null) ?? carActivity(snapshot),
-  );
+  const current = liveActivity(liveNow?.state ?? null) ?? carActivity(snapshot);
+  const activity = activityLabel(current);
+  const driving = current === "driving" || snapshot.driving;
   const lastSeen = snapshot.positionAt ?? snapshot.stateSince;
   const charging = snapshot.charging || chargingNow !== null;
   const hasData =
     snapshot.batteryLevel !== null || snapshot.positionAt !== null;
+  const liveCard = hasData && show.live ? live : null;
   const range = f.distanceValue(snapshot.rangeKm);
   const tires = liveNow?.tires ?? snapshot.tires;
   const hasPosition = snapshot.latitude !== null && snapshot.longitude !== null;
@@ -127,6 +167,11 @@ export function overviewPage(
     range === null
       ? null
       : `${f.number(Math.round(range))} ${f.units.distance}`;
+  const showLocation =
+    hasData && show.location && input.showMaps && hasPosition;
+  const parked = driving
+    ? { place: null, since: null }
+    : parkedAt(input.lastDrive, input.lastCharge, f, now);
   const odometer = f.distanceValue(snapshot.odometerKm);
   const odometerText =
     odometer === null
@@ -146,6 +191,30 @@ export function overviewPage(
     chargingNow?.powerKw === null || chargingNow?.powerKw === undefined
       ? null
       : `${f.number(chargingNow.powerKw, 1)} kW`;
+  const chargeText = chargingNow
+    ? joined([
+        powerText,
+        chargingNow.limitPercent === null
+          ? null
+          : `to ${Math.round(chargingNow.limitPercent)}%`,
+      ])
+    : null;
+  const lockCallout: OverviewCallout[] =
+    liveNow && liveNow.locked !== null
+      ? [
+          {
+            key: "lock",
+            side: "top",
+            label: "Security",
+            value:
+              joined([
+                liveNow.locked ? "Locked" : "Unlocked",
+                liveNow.sentryMode === true && "Sentry Mode on",
+              ]) ?? "—",
+            tone: liveNow.locked ? "normal" : "warning",
+          },
+        ]
+      : [];
   const callouts: OverviewCallout[] = hasData
     ? [
         {
@@ -153,39 +222,17 @@ export function overviewPage(
           side: "left",
           label: "Battery",
           value: joined([batteryText, rangeText]) ?? "—",
-          tone: charging ? "charge" : "normal",
+          tone: batteryCalloutTones[
+            batteryTone(snapshot.batteryLevel, charging)
+          ],
         },
-        liveNow && liveNow.locked !== null
-          ? {
-              key: "lock",
-              side: "top",
-              label: "Security",
-              value:
-                joined([
-                  liveNow.locked ? "Locked" : "Unlocked",
-                  liveNow.sentryMode === true && "Sentry Mode on",
-                ]) ?? "—",
-              tone: liveNow.locked ? "normal" : "warning",
-            }
-          : {
-              key: "seen",
-              side: "top",
-              label: "Last seen",
-              value: f.relative(lastSeen, now),
-              tone: "normal",
-            },
-        chargingNow
+        ...lockCallout,
+        chargeText
           ? {
               key: "charging",
               side: "right",
               label: "Charging",
-              value:
-                joined([
-                  powerText,
-                  chargingNow.limitPercent === null
-                    ? null
-                    : `to ${Math.round(chargingNow.limitPercent)}%`,
-                ]) ?? "Charging",
+              value: chargeText,
               tone: "charge",
             }
           : liveNow?.charging.pluggedIn
@@ -205,48 +252,80 @@ export function overviewPage(
               },
       ]
     : [];
+  const stageTiles = new Set(
+    callouts.map((callout) =>
+      callout.key === "plug" ? "charging" : callout.key,
+    ),
+  );
+  const statusTiles = tiles.filter(
+    (tile) => !stageTiles.has(tile.key) && tile.title !== activity.label,
+  );
+  const estimate = batteryCapacity(input.capacity);
+  const health = estimate?.healthPercent ?? null;
+  const { whPerKm, distanceTotal } = statsTotals(input.driven, null, f);
+  const statusSummary = statusTiles.length
+    ? statusTiles
+        .slice(0, 3)
+        .map((tile) => tile.title)
+        .join(" · ")
+    : tiles.length
+      ? null
+      : "No live values yet";
   const menu: OverviewMenuRow[] = [
     {
       key: "drives",
       title: "Drives",
-      subtitle: input.lastDrive
-        ? recordLine(lastDriveRecord(input.lastDrive, f, now))
-        : "No drive yet",
+      subtitle: show.recent ? lastDriveLine(input.lastDrive, f, now) : null,
     },
     {
       key: "charging",
       title: "Charging",
-      subtitle: chargingNow
-        ? joined(["Charging now", powerText])
-        : input.lastCharge
-          ? recordLine(lastChargeRecord(input.lastCharge, f, now))
-          : "No charge yet",
+      subtitle: show.recent ? lastChargeLine(input.lastCharge, f, now) : null,
     },
     {
       key: "battery",
       title: "Battery",
-      subtitle: hasData ? joined([batteryText, rangeText, caption]) : null,
+      subtitle:
+        joined([
+          coldBatteryText({
+            level: snapshot.batteryLevel,
+            usableLevel: snapshot.usableBatteryLevel,
+          }),
+          health !== null && `Health ${f.number(health, 1)}%`,
+          estimate && `Capacity ${f.number(estimate.nowKwh, 1)} kWh`,
+        ]) ?? "No long charge yet",
     },
     {
       key: "stats",
       title: "Stats",
-      subtitle: hasData ? `Odometer ${odometerText}` : null,
+      subtitle: joined([
+        periodLabel(input.period),
+        input.driven.drives
+          ? `${f.number(distanceTotal)} ${f.units.distance}`
+          : "No drive",
+        whPerKm !== null && f.efficiency(whPerKm),
+      ]),
     },
-    { key: "places", title: "Places", subtitle: "Visited and charging places" },
-    ...(hasData && hasPosition
-      ? [{ key: "location" as const, title: "Location", subtitle: seenText }]
+    {
+      key: "places",
+      title: "Places",
+      subtitle: placesSummary(input.visited, input.period),
+    },
+    ...(showLocation
+      ? [
+          {
+            key: "location" as const,
+            title: "Location",
+            subtitle: parked.place || "Map and Open in Maps",
+          },
+        ]
       : []),
     ...(live
       ? [
           {
             key: "status" as const,
             title: "Status",
-            subtitle: tiles.length
-              ? tiles
-                  .slice(0, 3)
-                  .map((tile) => tile.title)
-                  .join(" · ")
-              : "No live values yet",
+            subtitle: liveCard ? statusSummary : null,
           },
         ]
       : []),
@@ -258,6 +337,7 @@ export function overviewPage(
       name: car.name,
       variant: variantLine(car),
       image: show.render ? input.image : null,
+      imageFrame: show.render ? input.imageFrame : null,
     },
     activity: {
       label: activity.label,
@@ -284,9 +364,10 @@ export function overviewPage(
         }
       : null,
     stats: hasData
-      ? [
+      ? statsWithValue([
           appStat("Odometer", odometerText),
-          appStat("Outside", f.temperature(snapshot.outsideTemp), {
+          appStat("Outside", f.temperature(snapshot.outsideTemp)),
+          appStat("Cabin", f.temperature(snapshot.insideTemp), {
             detail:
               snapshot.climateOn === null
                 ? null
@@ -294,24 +375,22 @@ export function overviewPage(
                   ? "Climate on"
                   : "Climate off",
           }),
-          appStat("Cabin", f.temperature(snapshot.insideTemp)),
           appStat("Software", snapshot.softwareVersion ?? "—"),
-        ]
+        ])
       : [],
-    live:
-      hasData && show.live && live
-        ? {
-            connected: live.connected,
-            tiles: tiles.map((tile) => ({
-              ...tile,
-              fullAt: tile.fullAt?.toISOString() ?? null,
-            })),
-            notices: liveNotices(live),
-            empty: live.hasValues
-              ? null
-              : `No live values yet. TeslaMate sends them when ${car.name} is online.`,
-          }
-        : null,
+    live: liveCard
+      ? {
+          connected: liveCard.connected,
+          tiles: tiles.map((tile) => ({
+            ...tile,
+            fullAt: tile.fullAt?.toISOString() ?? null,
+          })),
+          notices: liveNotices(liveCard),
+          empty: liveCard.hasValues
+            ? null
+            : `No live values yet. TeslaMate sends them when ${car.name} is online.`,
+        }
+      : null,
     history:
       show.live && input.history
         ? input.history.map((event) => ({
@@ -330,30 +409,27 @@ export function overviewPage(
     tires:
       hasData && show.tires && tires
         ? {
-            frontLeft: tireValue(tires.frontLeft, f),
-            frontRight: tireValue(tires.frontRight, f),
-            rearLeft: tireValue(tires.rearLeft, f),
-            rearRight: tireValue(tires.rearRight, f),
+            frontLeft: tireValue("frontLeft", tires.frontLeft, input.leaks, f),
+            frontRight: tireValue(
+              "frontRight",
+              tires.frontRight,
+              input.leaks,
+              f,
+            ),
+            rearLeft: tireValue("rearLeft", tires.rearLeft, input.leaks, f),
+            rearRight: tireValue("rearRight", tires.rearRight, input.leaks, f),
             warnings: input.leaks.map((leak) =>
               leakWarning(leak, (bar) => f.pressure(bar)),
             ),
           }
         : null,
-    location:
-      hasData && show.location && input.showMaps && hasPosition
-        ? {
-            latitude: snapshot.latitude ?? 0,
-            longitude: snapshot.longitude ?? 0,
-            lastSeen: seenText,
-          }
-        : null,
-    lastDrive:
-      hasData && show.recent && input.lastDrive
-        ? lastDriveRecord(input.lastDrive, f, now)
-        : null,
-    lastCharge:
-      hasData && show.recent && input.lastCharge
-        ? lastChargeRecord(input.lastCharge, f, now)
-        : null,
+    location: showLocation
+      ? {
+          latitude: snapshot.latitude ?? 0,
+          longitude: snapshot.longitude ?? 0,
+          lastSeen: seenText,
+          ...parked,
+        }
+      : null,
   };
 }

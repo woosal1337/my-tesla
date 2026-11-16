@@ -100,7 +100,7 @@ export function dayText(
 
 function monthText(parts: LocalParts, style: DateStyle): string {
   if (style.dateOrder === "iso") return `${parts.year}-${pad(parts.month)}`;
-  return `${monthNames[parts.month - 1]} ${String(parts.year).slice(2)}`;
+  return `${monthNames[parts.month - 1]} ${parts.year}`;
 }
 
 export function formatClockAt(date: Date, style: DateStyle): string {

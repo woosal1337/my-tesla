@@ -1,6 +1,7 @@
 import type { Formatter } from "./format";
+import { leakTrend, type SlowLeak } from "./tire-leak";
 
-export type Tone = "good" | "typical" | "bad";
+export type Tone = "good" | "typical" | "warning" | "bad";
 
 export type Assessment = {
   tone: Tone;
@@ -12,6 +13,7 @@ export type Assessment = {
 export const toneClass: Record<Tone, string> = {
   good: "text-good",
   typical: "",
+  warning: "text-warning",
   bad: "text-bad",
 };
 
@@ -102,16 +104,26 @@ export function assessBatteryHealth(
   f: Formatter,
 ): Assessment | null {
   if (healthPercent === null || odometerKm === null) return null;
+  const share = (value: number) => `${f.number(value, 1)}%`;
   const average = expectedHealth(odometerKm);
   const gap = healthPercent - average;
   const points = Math.round(Math.abs(gap));
-  const expected = `About ${percent(average)} at ${f.distance(odometerKm)}. Tesla fleet data shows about 85% after 320,000 km for Model 3 and Model Y.`;
-  if (gap >= -1) {
+  const under = `${points} ${points === 1 ? "point" : "points"} under the average`;
+  const expected = `About ${share(average)} at ${f.distance(odometerKm)}. Tesla fleet data shows about 85% after 320,000 km for Model 3 and Model Y.`;
+  if (gap >= 0) {
     return {
       tone: "good",
       verdict: "At or above average",
       expected,
-      meaning: `Your battery keeps ${percent(healthPercent)} of its capacity, at or above the average for this distance.`,
+      meaning: `Your battery keeps ${share(healthPercent)} of its capacity, at or above the average for this distance.`,
+    };
+  }
+  if (gap >= -1) {
+    return {
+      tone: "good",
+      verdict: "At average",
+      expected,
+      meaning: `Your battery keeps ${share(healthPercent)} of its capacity, within 1 point of the average for this distance.`,
     };
   }
   if (gap >= -6) {
@@ -119,14 +131,14 @@ export function assessBatteryHealth(
       tone: "typical",
       verdict: "Close to average",
       expected,
-      meaning: `Your battery keeps ${percent(healthPercent)}, ${points} points under the average. The estimate can move by 2 to 3 points.`,
+      meaning: `Your battery keeps ${share(healthPercent)}, ${under}. The estimate can move by 2 to 3 points.`,
     };
   }
   return {
     tone: "bad",
     verdict: "Below average",
     expected,
-    meaning: `Your battery keeps ${percent(healthPercent)}, ${points} points under the average for this distance. A Tesla service center can test the battery.`,
+    meaning: `Your battery keeps ${share(healthPercent)}, ${under} for this distance. A Tesla service center can test the battery.`,
   };
 }
 
@@ -290,6 +302,21 @@ export function assessTirePressure(
     expected,
     meaning: `${f.pressure(bar)} is ${side}. A correct pressure saves energy and tire wear.`,
   };
+}
+
+export function assessTire(
+  tire: SlowLeak["tire"],
+  bar: number | null,
+  leaks: SlowLeak[],
+  f: Formatter,
+): Assessment | null {
+  const pressure = assessTirePressure(bar, f);
+  const leak = leaks.find((item) => item.tire === tire);
+  if (!pressure || !leak) return pressure;
+  const meaning = `${pressure.meaning} The tire is ${leakTrend(leak, (value) => f.pressure(value))}`;
+  return pressure.tone === "bad"
+    ? { ...pressure, meaning }
+    : { ...pressure, tone: "warning", verdict: "Possible slow leak", meaning };
 }
 
 export function assessBatteryLevel(

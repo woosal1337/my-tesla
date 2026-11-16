@@ -33,7 +33,8 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: primary ? palette.primary : secondaryColor },
-        (pressed || disabled) && styles.dimmed,
+        pressed && styles.pressed,
+        disabled && !busy && styles.off,
       ]}
     >
       {busy ? (
@@ -44,6 +45,7 @@ export function Button({
         <Text
           variant="strong"
           tone={primary ? "primaryForeground" : "secondaryForeground"}
+          style={styles.label}
         >
           {label}
         </Text>
@@ -61,5 +63,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
-  dimmed: { opacity: 0.6 },
+  label: { paddingVertical: space.sm, textAlign: "center" },
+  pressed: { opacity: 0.6 },
+  off: { opacity: 0.38 },
 });

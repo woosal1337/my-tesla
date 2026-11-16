@@ -4,6 +4,7 @@ import {
   batteryCaption,
   batteryTone,
   carActivity,
+  coldBatteryText,
   liveActivity,
   colorName,
   driveEfficiency,
@@ -224,6 +225,16 @@ describe("batteryCaption", () => {
     expect(
       batteryCaption({ level: null, usableLevel: null, charging: false }),
     ).toBe("Rated range");
+  });
+});
+
+describe("coldBatteryText", () => {
+  test("names a cold battery only for a gap of three points or more", () => {
+    expect(coldBatteryText({ level: 57, usableLevel: 54 })).toBe(
+      "54% usable, the battery is cold",
+    );
+    expect(coldBatteryText({ level: 57, usableLevel: 55 })).toBeNull();
+    expect(coldBatteryText({ level: 57, usableLevel: null })).toBeNull();
   });
 });
 

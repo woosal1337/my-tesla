@@ -580,6 +580,7 @@ export default async function BatteryPage({
                   },
                 ]}
                 yDomain={[0, "auto"]}
+                wholeY
               />
             ) : (
               <PanelNote>No record yet.</PanelNote>
@@ -607,7 +608,7 @@ export default async function BatteryPage({
                 f={f}
               />
               <RangeCurve
-                title="By battery level"
+                title="By battery level (%)"
                 data={rangeByBattery}
                 xKey="level"
                 xFormat="percent"

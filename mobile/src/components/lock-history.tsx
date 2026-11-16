@@ -4,6 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { space } from "@/theme/tokens";
 import { liveToneColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { Button } from "./button";
 import { Icon } from "./icon";
 import { liveIcons } from "./icons";
@@ -18,6 +19,7 @@ export function LockHistory({
   history: NonNullable<OverviewPage["history"]>;
 }) {
   const palette = usePalette();
+  const large = useLargeText();
   const [expanded, setExpanded] = useState(false);
   const rows = expanded ? history : history.slice(0, shownFirst);
   const hidden = history.length - shownFirst;
@@ -36,12 +38,14 @@ export function LockHistory({
                 name={liveIcons[event.icon]}
                 color={liveToneColor(palette, event.tone)}
               />
-              <Text variant="strong" style={styles.title}>
-                {event.title}
-              </Text>
-              <Text variant="caption" style={styles.when}>
-                {event.when}
-              </Text>
+              <View style={large ? styles.stackedText : styles.text}>
+                <Text variant="strong" style={!large && styles.title}>
+                  {event.title}
+                </Text>
+                <Text variant="caption" style={styles.when}>
+                  {event.when}
+                </Text>
+              </View>
             </View>
           ))}
           {hidden > 0 ? (
@@ -53,7 +57,7 @@ export function LockHistory({
           ) : null}
         </>
       ) : (
-        <Text variant="label" tone="subtle">
+        <Text variant="label">
           No change in the last 7 days. My Tesla records each lock and Sentry
           Mode change from the MQTT feed.
         </Text>
@@ -64,6 +68,13 @@ export function LockHistory({
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: space.md },
+  text: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+  },
+  stackedText: { flex: 1 },
   title: { flex: 1 },
   when: { fontVariant: ["tabular-nums"] },
 });

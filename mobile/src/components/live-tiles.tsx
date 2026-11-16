@@ -5,6 +5,7 @@ import { useNow } from "@/hooks/use-now";
 import { space } from "@/theme/tokens";
 import { liveToneColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { Icon } from "./icon";
 import { liveIcons } from "./icons";
 import { Notice } from "./notice";
@@ -19,13 +20,15 @@ export function LivePanel({
   live: NonNullable<OverviewPage["live"]>;
 }) {
   const palette = usePalette();
+  const large = useLargeText();
   const now = useNow(countdownMs);
   return (
-    <Panel title="Live" note={live.connected ? "Connected" : "Offline"}>
+    <Panel
+      title="Live"
+      note={live.connected ? "Feed connected" : "Feed offline"}
+    >
       {live.empty ? (
-        <Text variant="label" tone="subtle">
-          {live.empty}
-        </Text>
+        <Text variant="label">{live.empty}</Text>
       ) : (
         <View style={styles.grid}>
           {live.tiles.map((tile) => {
@@ -37,20 +40,16 @@ export function LivePanel({
                 accessibilityLabel={[tile.title, tile.detail, left]
                   .filter(Boolean)
                   .join(", ")}
-                style={styles.tile}
+                style={[styles.tile, large && styles.wide]}
               >
                 <Icon
                   name={liveIcons[tile.icon]}
                   color={liveToneColor(palette, tile.tone)}
                 />
                 <View style={styles.tileText}>
-                  <Text variant="strong" numberOfLines={1}>
-                    {tile.title}
-                  </Text>
+                  <Text variant="strong">{tile.title}</Text>
                   {tile.detail ? (
-                    <Text variant="caption" numberOfLines={2}>
-                      {tile.detail}
-                    </Text>
+                    <Text variant="caption">{tile.detail}</Text>
                   ) : null}
                   {left ? (
                     <Text variant="caption" tone="charge">
@@ -78,5 +77,6 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingRight: space.md,
   },
+  wide: { flexBasis: "100%" },
   tileText: { flex: 1, minWidth: 0 },
 });

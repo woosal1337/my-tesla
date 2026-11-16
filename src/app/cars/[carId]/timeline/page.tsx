@@ -21,8 +21,14 @@ import {
   parseDayKey,
   shiftDayKey,
 } from "@/lib/insights";
-import { dayRecords } from "@/lib/timeline-data";
-import { timelineView, type TimelineRow } from "@/lib/timeline-view";
+import { dayRecords, lastActivityBefore } from "@/lib/timeline-data";
+import {
+  dayLegend,
+  isQuietDay,
+  lastActiveDay,
+  timelineView,
+  type TimelineRow,
+} from "@/lib/timeline-view";
 import { cn } from "@/lib/utils";
 import { getFormatter } from "@/lib/viewer";
 
@@ -156,10 +162,22 @@ export default async function TimelinePage({
     drivenKm: driven,
     chargedKwh: charged,
     drivingMin,
-    asleepPercent,
+    rest,
   } = timelineView(records, window, now, f);
+  const quiet = isQuietDay(records);
+  const lastActive = quiet
+    ? lastActiveDay(await lastActivityBefore(car.id, window.start), f, now)
+    : null;
   const base = carPath(car, "/timeline");
   const label = f.day(window.start, now);
+  const restMetric = (
+    <Metric
+      label={rest.label}
+      value={rest.percent}
+      unit="%"
+      detail={rest.detail}
+    />
+  );
 
   return (
     <PageTransition>
@@ -195,27 +213,46 @@ export default async function TimelinePage({
         </div>
       </div>
 
-      <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
-        <Metric
-          label="Driven"
-          value={f.number(Math.round(f.distanceValue(driven) ?? 0))}
-          unit={f.units.distance}
-          detail={`${records.drives.length} ${records.drives.length === 1 ? "drive" : "drives"}`}
-        />
-        <Metric label="Driving time" value={f.duration(drivingMin)} />
-        <Metric
-          label="Charged"
-          value={f.number(charged, 1)}
-          unit="kWh"
-          detail={`${records.charges.length} ${records.charges.length === 1 ? "session" : "sessions"}`}
-        />
-        <Metric
-          label="Asleep"
-          value={asleepPercent}
-          unit="%"
-          detail="of the recorded time"
-        />
-      </dl>
+      {lastActive && (
+        <Link
+          href={`${base}?day=${lastActive.day}`}
+          transitionTypes={["tab-back"]}
+          className="mt-8 flex items-center justify-between gap-4 rounded-xl bg-card px-5 py-4 transition-tesla hover:bg-accent"
+        >
+          <span>
+            <span className="block font-medium">{lastActive.title}</span>
+            <span className="block text-sm text-muted-foreground">
+              {lastActive.detail}
+            </span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-subtle" />
+        </Link>
+      )}
+
+      {quiet ? (
+        segments.length > 0 && (
+          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+            {restMetric}
+          </dl>
+        )
+      ) : (
+        <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+          <Metric
+            label="Driven"
+            value={f.number(Math.round(f.distanceValue(driven) ?? 0))}
+            unit={f.units.distance}
+            detail={`${records.drives.length} ${records.drives.length === 1 ? "drive" : "drives"}`}
+          />
+          <Metric label="Driving time" value={f.duration(drivingMin)} />
+          <Metric
+            label="Charged"
+            value={f.number(charged, 1)}
+            unit="kWh"
+            detail={`${records.charges.length} ${records.charges.length === 1 ? "session" : "sessions"}`}
+          />
+          {restMetric}
+        </dl>
+      )}
 
       <section className="mt-10 rounded-xl bg-card p-5 md:p-6">
         <DayStrip
@@ -226,7 +263,7 @@ export default async function TimelinePage({
           now={now}
         />
         <div className="mt-4">
-          <DayStripLegend />
+          <DayStripLegend entries={dayLegend(window, now)} />
         </div>
       </section>
 

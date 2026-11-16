@@ -4,8 +4,7 @@ import { createContext, use, useEffect, useState, type ReactNode } from "react";
 import { useCars } from "@/api/queries";
 import { EmptyState, QueryView } from "@/components/query-view";
 import { Screen } from "@/components/screen";
-
-const storageKey = "car";
+import { keychainKeys } from "@/connection/install";
 
 type CarState = {
   cars: CarIdentity[];
@@ -16,7 +15,7 @@ type CarState = {
 const CarContext = createContext<CarState | null>(null);
 
 export async function rememberCar(carId: number): Promise<void> {
-  await SecureStore.setItemAsync(storageKey, String(carId));
+  await SecureStore.setItemAsync(keychainKeys.car, String(carId));
 }
 
 export function CarProvider({ children }: { children: ReactNode }) {
@@ -24,14 +23,14 @@ export function CarProvider({ children }: { children: ReactNode }) {
   const [chosen, setChosen] = useState<number | null>(null);
 
   useEffect(() => {
-    SecureStore.getItemAsync(storageKey)
+    SecureStore.getItemAsync(keychainKeys.car)
       .then((stored) => setChosen(stored ? Number(stored) : null))
       .catch(() => setChosen(null));
   }, []);
 
   const choose = (carId: number) => {
     setChosen(carId);
-    SecureStore.setItemAsync(storageKey, String(carId)).catch(() => null);
+    SecureStore.setItemAsync(keychainKeys.car, String(carId)).catch(() => null);
   };
 
   if (!cars.data) {

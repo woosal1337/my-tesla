@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { OnCard } from "./surface";
 import { Text } from "./text";
 
@@ -15,14 +16,15 @@ export function Panel({
   children: ReactNode;
 }) {
   const palette = usePalette();
+  const large = useLargeText();
   return (
     <View style={[styles.panel, { backgroundColor: palette.card }]}>
-      <View style={styles.header}>
+      <View style={large ? styles.stackedHeader : styles.header}>
         <Text variant="label" accessibilityRole="header" style={styles.title}>
           {title}
         </Text>
         {note ? (
-          <Text variant="caption" numberOfLines={1} style={styles.note}>
+          <Text variant="caption" style={!large && styles.note}>
             {note}
           </Text>
         ) : null}
@@ -46,6 +48,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: space.lg,
   },
+  stackedHeader: { alignItems: "flex-start", gap: 2 },
   title: { flexShrink: 0 },
   note: { flexShrink: 1, textAlign: "right" },
   body: { marginTop: space.lg, gap: space.lg },

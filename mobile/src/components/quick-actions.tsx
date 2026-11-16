@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { Icon } from "./icon";
 import type { IconName } from "./icons";
 import { Text } from "./text";
@@ -14,8 +15,9 @@ export type QuickAction = {
 
 export function QuickActions({ actions }: { actions: QuickAction[] }) {
   const palette = usePalette();
+  const large = useLargeText();
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, large && styles.grid]}>
       {actions.map((action) => (
         <Pressable
           key={action.key}
@@ -23,12 +25,16 @@ export function QuickActions({ actions }: { actions: QuickAction[] }) {
           accessibilityLabel={action.label}
           onPress={action.onPress}
           hitSlop={8}
-          style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.action,
+            large && styles.half,
+            pressed && styles.pressed,
+          ]}
         >
           <View style={[styles.circle, { backgroundColor: palette.card }]}>
             <Icon name={action.icon} color={palette.foreground} size={22} />
           </View>
-          <Text variant="caption" numberOfLines={1}>
+          <Text variant="caption" style={styles.caption}>
             {action.label}
           </Text>
         </Pressable>
@@ -43,7 +49,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "flex-start",
   },
+  grid: { flexWrap: "wrap", justifyContent: "flex-start", rowGap: space.lg },
   action: { alignItems: "center", gap: space.sm, minWidth: 64 },
+  half: { flexBasis: "50%" },
+  caption: { textAlign: "center" },
   pressed: { opacity: 0.6 },
   circle: {
     width: 48,

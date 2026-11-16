@@ -1,4 +1,4 @@
-export type AppTone = "good" | "bad";
+export type AppTone = "good" | "bad" | "warning";
 
 export type AppValue = {
   text: string;
@@ -15,11 +15,14 @@ export type AppStat = {
 export type ChartColor =
   "chart1" | "chart2" | "chart3" | "chart4" | "chart5" | "charge";
 
+export type ChartDash = "solid" | "dashed" | "dotted" | "dashDot";
+
 export type AppChartSeries = {
   key: string;
   label: string;
   unit: string;
   color: ChartColor;
+  dash?: ChartDash;
   kind: "area" | "line" | "bar" | "dot";
   axis: "left" | "right";
   digits: number;
@@ -31,6 +34,7 @@ export type AppAxis = { domain: [number, number]; ticks: AppTick[] };
 
 export type AppChart = {
   title: string;
+  caption?: string;
   locale: string;
   series: AppChartSeries[];
   points: { x: number; label: string; values: (number | null)[] }[];
@@ -89,11 +93,20 @@ export type DriveRow = {
   segments: { kind: "drive" | "stop" | "charge"; share: number }[];
   distance: string;
   consumption: AppValue;
+  charge?: ChargeRow;
+  label?: string;
+};
+
+export type DaySection<Row> = {
+  title: string;
+  total?: string[];
+  label?: string;
+  rows: Row[];
 };
 
 export type DriveList = {
   summary: string[];
-  sections: { title: string; rows: DriveRow[] }[];
+  sections: DaySection<DriveRow>[];
 };
 
 export type DriveDetail = {
@@ -113,6 +126,7 @@ export type TripStepRow = {
   title: string;
   detail: string;
   target: AppTarget | null;
+  label?: string;
 };
 
 export type TripDetail = {
@@ -137,11 +151,12 @@ export type ChargeRow = {
   levels: LevelRange | null;
   energy: string | null;
   cost: string | null;
+  label?: string;
 };
 
 export type ChargeList = {
   summary: string[];
-  sections: { title: string; rows: ChargeRow[] }[];
+  sections: DaySection<ChargeRow>[];
 };
 
 export type ChargeDetail = {
@@ -154,7 +169,7 @@ export type ChargeDetail = {
   hero: AppStat[];
   levels: LevelRange | null;
   stats: AppStat[];
-  cost: { source: string; stats: AppStat[]; note: string | null } | null;
+  cost: { stats: AppStat[]; note: string | null } | null;
   charts: AppChart[];
   location: { latitude: number; longitude: number } | null;
   previousId: number | null;
@@ -164,6 +179,8 @@ export type ChargeDetail = {
 export type PeriodId = "7d" | "30d" | "90d" | "1y" | "all";
 
 export type ShareColor = "primary" | "charge";
+
+export type NoteRole = "heading" | "body" | "caption";
 
 export type AppRecord = {
   key: string;
@@ -207,7 +224,7 @@ export type AppBlock =
   | { kind: "progress"; share: number; start: string; end: string }
   | { kind: "map"; places: MapPlace[] }
   | { kind: "routes"; routes: LngLat[][] }
-  | { kind: "note"; text: string };
+  | { kind: "note"; text: string; role?: NoteRole };
 
 export type AppPanel = {
   title: string;
@@ -238,11 +255,8 @@ export type TimelinePage = {
   previous: string;
   next: string | null;
   stats: AppStat[];
-  strip: {
-    segments: { kind: DayKind; start: number; end: number }[];
-    now: number;
-    hours: string[];
-  };
+  strip: AppDayStrip;
+  lastActive?: { day: string; title: string; detail: string } | null;
   rows: {
     key: string;
     kind: "drive" | "charge" | "parked";
@@ -250,6 +264,7 @@ export type TimelinePage = {
     title: string;
     detail: string;
     target: AppTarget | null;
+    label?: string;
   }[];
 };
 
@@ -263,7 +278,7 @@ export type ReportPage = {
   stats: AppStat[];
   routes: LngLat[][] | null;
   markers: MapMarker[];
-  sections: { title: string; rows: DriveRow[] }[];
+  sections: DaySection<DriveRow>[];
   notice: string | null;
   exports: AppExport[];
 };
@@ -300,10 +315,11 @@ export type ActivityTone = "active" | "charge" | "quiet";
 
 export type DayKind = "drive" | "charge" | "online" | "asleep" | "offline";
 
-export type RecentRecord = {
-  title: string;
-  detail: string;
-  target: AppTarget;
+export type AppDayStrip = {
+  segments: { kind: DayKind; start: number; end: number }[];
+  now: number;
+  hours: string[];
+  legend?: { kind: DayKind | "now"; label: string }[];
 };
 
 export type OverviewMenuKey =
@@ -330,8 +346,21 @@ export type OverviewCallout = {
   tone: LiveTone;
 };
 
+export type CarImageFrame = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
 export type OverviewPage = {
-  car: { id: number; name: string; variant: string; image: string | null };
+  car: {
+    id: number;
+    name: string;
+    variant: string;
+    image: string | null;
+    imageFrame: CarImageFrame | null;
+  };
   activity: { label: string; tone: ActivityTone; updated: string };
   callouts: OverviewCallout[];
   menu: OverviewMenuRow[];
@@ -359,11 +388,7 @@ export type OverviewPage = {
     notices: string[];
     empty: string | null;
   } | null;
-  today: {
-    segments: { kind: DayKind; start: number; end: number }[];
-    now: number;
-    hours: string[];
-  } | null;
+  today: AppDayStrip | null;
   tires: {
     frontLeft: AppValue;
     frontRight: AppValue;
@@ -371,7 +396,13 @@ export type OverviewPage = {
     rearRight: AppValue;
     warnings: string[];
   } | null;
-  location: { latitude: number; longitude: number; lastSeen: string } | null;
+  location: {
+    latitude: number;
+    longitude: number;
+    lastSeen: string;
+    place?: string | null;
+    since?: string | null;
+  } | null;
   history:
     | {
         key: string;
@@ -381,8 +412,6 @@ export type OverviewPage = {
         tone: LiveTone;
       }[]
     | null;
-  lastDrive: RecentRecord | null;
-  lastCharge: RecentRecord | null;
 };
 
 export type SettingOption = { id: string; label: string };

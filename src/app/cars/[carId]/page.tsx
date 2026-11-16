@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AnimatedNumber } from "@/components/animated-number";
-import { DayStrip } from "@/components/day-strip";
+import { DayStrip, DayStripLegend } from "@/components/day-strip";
 import { EmptyState } from "@/components/empty-state";
 import { LocationMap, MapsOff } from "@/components/maps";
 import { BatteryPanel } from "@/components/overview/battery-panel";
@@ -13,7 +13,7 @@ import { RecentCard } from "@/components/overview/recent-card";
 import { Stat } from "@/components/overview/stat";
 import { TireCard } from "@/components/overview/tire-card";
 import { PageTransition } from "@/components/page-transition";
-import { assessBatteryLevel, assessTirePressure } from "@/lib/assessment";
+import { assessBatteryLevel, assessTire } from "@/lib/assessment";
 import { carImageUrl } from "@/lib/car-image";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
@@ -24,6 +24,7 @@ import { mapThemeOf } from "@/lib/preferences";
 import { carSnapshot, recentCharges, recentDrives } from "@/lib/queries";
 import { recentTireLeaks } from "@/lib/stats-data";
 import { dayRecords } from "@/lib/timeline-data";
+import { dayLegend } from "@/lib/timeline-view";
 import { leakWarning } from "@/lib/tire-leak";
 import { cn } from "@/lib/utils";
 import {
@@ -173,8 +174,9 @@ export default async function OverviewPage({
                 animated={preferences.motion !== "reduced"}
               />
             </Stat>
+            <Stat label="Outside">{f.temperature(snapshot.outsideTemp)}</Stat>
             <Stat
-              label="Outside"
+              label="Cabin"
               detail={
                 snapshot.climateOn === null
                   ? undefined
@@ -183,9 +185,8 @@ export default async function OverviewPage({
                     : "Climate off"
               }
             >
-              {f.temperature(snapshot.outsideTemp)}
+              {f.temperature(snapshot.insideTemp)}
             </Stat>
-            <Stat label="Cabin">{f.temperature(snapshot.insideTemp)}</Stat>
             <Stat label="Software">{snapshot.softwareVersion ?? "—"}</Stat>
           </dl>
 
@@ -237,6 +238,9 @@ export default async function OverviewPage({
                   hourLabels={[0, 6, 12, 18, 24].map((hour) => f.hour(hour))}
                 />
               </div>
+              <div className="mt-4">
+                <DayStripLegend entries={dayLegend(today, now)} />
+              </div>
             </section>
           )}
 
@@ -252,7 +256,7 @@ export default async function OverviewPage({
                 <TireCard
                   tires={liveNow?.tires ?? snapshot.tires}
                   format={(bar) => f.pressure(bar)}
-                  assess={(bar) => assessTirePressure(bar, f)}
+                  assess={(tire, bar) => assessTire(tire, bar, leaks, f)}
                   warnings={leaks.map((leak) =>
                     leakWarning(leak, (bar) => f.pressure(bar)),
                   )}

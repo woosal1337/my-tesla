@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { useStackOptions } from "@/navigation/header";
+import { overviewHeaderShown, useStackOptions } from "@/navigation/header";
 
 export const unstable_settings = { anchor: "index" };
 
@@ -8,7 +8,7 @@ export default function OverviewLayout() {
     <Stack screenOptions={useStackOptions()}>
       <Stack.Screen
         name="index"
-        options={{ title: "Overview", headerShown: false }}
+        options={{ title: "Overview", headerShown: overviewHeaderShown }}
       />
       <Stack.Screen name="status" options={{ title: "Status" }} />
       <Stack.Screen name="location" options={{ title: "Location" }} />

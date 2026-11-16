@@ -3,6 +3,7 @@ import {
   chargeHistory,
   chargeLegs,
   chargeTime,
+  chargeTimeTitle,
   type LevelTime,
 } from "./charge-time";
 
@@ -106,5 +107,11 @@ describe("chargeHistory", () => {
 
   test("gives nothing without a record", () => {
     expect(chargeHistory([], true)).toBeNull();
+  });
+});
+
+describe("chargeTimeTitle", () => {
+  test("names the history range, because the panel ignores the period", () => {
+    expect(chargeTimeTitle).toBe("Charging time, last 2 years");
   });
 });

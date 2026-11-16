@@ -92,6 +92,7 @@ describe("driveList", () => {
     const list = driveList(trips, car, f, now);
     expect(list.summary).toEqual(["2 recent trips", "360 km"]);
     expect(list.sections).toHaveLength(1);
+    expect(list.sections[0]!.total).toEqual(["2 trips", "360 km"]);
     const [errandRow, roadRow] = list.sections[0]!.rows;
     expect(errandRow?.target).toEqual({ kind: "drive", id: 13 });
     expect(roadRow).toMatchObject({
@@ -106,6 +107,14 @@ describe("driveList", () => {
       "charge",
       "drive",
     ]);
+  });
+
+  test("gives each row and each day a label with full units", () => {
+    const [section] = driveList(trips, car, f, now).sections;
+    expect(section?.label).toBe("Today, 2 trips, 360 kilometers");
+    expect(section?.rows[1]?.label).toBe(
+      "09:00, 4 hours 30 minutes, Ankara, from Istanbul, 1 stop, 1 with a charge, 240 kilometers, 150 watt-hours per kilometer",
+    );
   });
 
   test("colors a consumption above the usual range", () => {
@@ -180,6 +189,35 @@ describe("driveDetail", () => {
   test("leaves out the route when maps are hidden", () => {
     expect(driveDetail(found, car, f, now, false).route).toBeNull();
   });
+
+  test("leaves out the peak power without a power record", () => {
+    const detail = driveDetail(
+      {
+        ...found,
+        drive: { ...found.drive, powerMaxKw: null, powerMinKw: null },
+      },
+      car,
+      f,
+      now,
+      true,
+    );
+    expect(detail.stats.map((stat) => stat.label)).not.toContain("Peak power");
+  });
+
+  test("shows a small recovered energy in watt-hours", () => {
+    const recovered = (energy: { usedKwh: number; recoveredKwh: number }) =>
+      driveDetail({ ...found, energy }, car, f, now, true).stats.find(
+        (stat) => stat.label === "Energy recovered",
+      );
+    expect(recovered({ usedKwh: 2.53, recoveredKwh: 0.045 })).toMatchObject({
+      value: { text: "45 Wh" },
+      detail: "2.5 kWh used",
+    });
+    expect(recovered(found.energy)).toMatchObject({
+      value: { text: "1.4 kWh" },
+      detail: "18.2 kWh used",
+    });
+  });
 });
 
 describe("tripDetail", () => {
@@ -208,6 +246,11 @@ describe("tripDetail", () => {
       ["drive", { kind: "drive", id: 12 }],
     ]);
     expect(detail.routes).toHaveLength(2);
+    expect(detail.steps.map((step) => step.label)).toEqual([
+      "09:00, Istanbul to Bolu, 120 kilometers, 2 hours, 150 watt-hours per kilometer",
+      "11:00, Supercharger Bolu, Charging stop, 40 minutes, +30.0 kilowatt-hours, 30% to 75%, 312.00",
+      "11:40, Bolu to Ankara, 120 kilometers, 1 hour 50 minutes, 150 watt-hours per kilometer",
+    ]);
     expect(detail.markers?.map((marker) => marker.kind)).toEqual([
       "start",
       "charge",
@@ -217,5 +260,15 @@ describe("tripDetail", () => {
     const hidden = tripDetail(trips[1]!, routes, car, f, now, false);
     expect(hidden.routes).toBeNull();
     expect(hidden.markers).toBeNull();
+  });
+
+  test("shows the charging cost only for a trip with a charge", () => {
+    const labels = (trip: (typeof trips)[number]) =>
+      tripDetail(trip, new Map(), car, f, now, true).stats.map(
+        (stat) => stat.label,
+      );
+    expect(labels(trips[1]!)).toContain("Charging cost");
+    expect(labels(trips[0]!)).not.toContain("Charging cost");
+    expect(labels(trips[0]!)).toHaveLength(7);
   });
 });

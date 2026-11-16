@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { driveEnergy } from "../drive-series";
+import { createFormatter } from "../format";
+import { defaultPreferences } from "../preferences";
 import { generateDemo } from "./generate";
 
 const end = new Date("2026-10-01T09:30:00Z");
@@ -48,11 +51,38 @@ describe("generateDemo", () => {
     }
   });
 
+  test("gives each drive with regen a recovered energy that shows above zero", () => {
+    const f = createFormatter(defaultPreferences, "America/Phoenix");
+    for (const other of [
+      data,
+      generateDemo({
+        seed: 7,
+        end: new Date("2026-10-01T19:05:00Z"),
+        days: 60,
+      }),
+    ]) {
+      const byDrive = Map.groupBy(other.positions, (row) => row.drive_id);
+      for (const drive of other.drives.filter((row) => row.power_min < 0)) {
+        const { recoveredKwh } = driveEnergy(
+          (byDrive.get(drive.id) ?? []).map((row) => ({
+            at: row.date.getTime(),
+            speedKmh: row.speed,
+            powerKw: row.power,
+            elevationM: row.elevation,
+            battery: row.battery_level,
+          })),
+        );
+        expect(f.energyFine(recoveredKwh)).not.toMatch(/^0(\.0)? /);
+      }
+    }
+  });
+
   test("places every address in an Arizona city", () => {
     for (const address of data.addresses) {
       expect(address.city).toBeTruthy();
       expect(address.state).toBe("Arizona");
       expect(address.country).toBe("United States");
+      expect(address.raw.address.country_code).toBe("us");
     }
   });
 
@@ -72,6 +102,11 @@ describe("generateDemo", () => {
       expect(state.state).not.toBe(data.states[index].state);
     });
     expect(data.states.at(-1)?.end_date).toBeNull();
+  });
+
+  test("parks offline on some days and ends with the car not offline", () => {
+    expect(data.states.some((state) => state.state === "offline")).toBe(true);
+    expect(data.states.at(-1)?.state).not.toBe("offline");
   });
 
   test("gives each drive its own positions and a real distance", () => {

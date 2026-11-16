@@ -13,7 +13,7 @@ import { toElevation, type UnitSystem } from "../units";
 import type { VisitedArea } from "../visited-areas";
 import type { AppPanel, AppRecord, InsightPage } from "./contract";
 import { panel, periodChoices, periodLabel } from "./panels";
-import { appStat } from "./values";
+import { appStat, statsWithValue } from "./values";
 
 export type PlacesInput = {
   visited: VisitedPlace[];
@@ -32,6 +32,16 @@ const shownAreas = 10;
 
 function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
+}
+
+export function placesSummary(
+  visited: VisitedPlace[],
+  period: PeriodId,
+): string {
+  const count = visited.length
+    ? plural(visited.length, "place", "places")
+    : "No place";
+  return `${count}, ${periodLabel(period).toLowerCase()}`;
 }
 
 export function record(
@@ -80,11 +90,18 @@ export function visitedRecords(
   );
 }
 
-function areaPanel(title: string, areas: VisitedArea[]): AppPanel {
+function areaStat(label: string, areas: VisitedArea[]) {
+  return appStat(label, String(areas.length), {
+    detail: areas.length === 1 ? areas[0]!.name : null,
+  });
+}
+
+function areaPanel(title: string, areas: VisitedArea[]): AppPanel | null {
+  if (areas.length < 2) return null;
   const shown = areas.slice(0, shownAreas);
   const most = Math.max(1, ...shown.map((area) => area.places));
   return panel(title, [
-    shown.length > 0 && {
+    {
       kind: "records",
       rows: shown.map((area, index) =>
         record({
@@ -112,29 +129,29 @@ export function placesPage(
   const mapPlaces = placesOnMap(visited, charging);
   const figures = placesFigures(visited, charging);
   const { longest, parkedTotal } = figures;
+  const mostTime =
+    longest && parkedTotal
+      ? `${Math.round((longest.parkedS / parkedTotal) * 100)}%`
+      : null;
   return {
     title: "Places",
     subtitle: periodLabel(period),
     period,
     periods: periodChoices(),
-    hero: [
+    hero: statsWithValue([
       appStat("Places", String(visited.length), {
         detail: `${figures.arrivals} arrivals`,
       }),
-      appStat(
-        "Most time",
-        longest && parkedTotal
-          ? `${Math.round((longest.parkedS / parkedTotal) * 100)}%`
-          : "—",
-        { detail: longest ? `at ${longest.label}` : null },
-      ),
+      appStat("Most time", mostTime ?? "—", {
+        detail: mostTime && longest ? `at ${longest.label}` : null,
+      }),
       appStat("Charging places", String(charging.length), {
         detail: `${f.number(figures.chargedTotal)} kWh added`,
       }),
       appStat("Saved places", String(geofences.length), {
         detail: "Geofences in TeslaMate",
       }),
-    ],
+    ]),
     heroBlocks: [],
     sections: [
       {
@@ -224,9 +241,9 @@ export function placesPage(
             {
               kind: "stats",
               stats: [
-                appStat("Countries", String(input.areas.countries.length)),
-                appStat("States", String(input.areas.states.length)),
-                appStat("Cities", String(input.areas.cities.length)),
+                areaStat("Countries", input.areas.countries),
+                areaStat("States", input.areas.states),
+                areaStat("Cities", input.areas.cities),
               ],
             },
           ]),
@@ -245,7 +262,7 @@ export function placesPage(
             ],
             "All records",
           ),
-        ],
+        ].filter((item): item is AppPanel => item !== null),
       },
       {
         title: "Saved places",

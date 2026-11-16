@@ -31,7 +31,7 @@ const colors = {
   battery: "var(--chart-1)",
   power: "var(--charge)",
   voltage: "var(--chart-4)",
-  current: "var(--chart-3)",
+  current: "var(--chart-1)",
 };
 
 function parseId(value: string): number | null {
@@ -301,10 +301,7 @@ export default async function ChargePage({
 
       <div className="mt-12 grid grid-cols-1 gap-4">
         {breakdown && (
-          <Panel
-            title="Cost"
-            action={<span className="text-xs text-subtle">{costSource}</span>}
-          >
+          <Panel title="Cost breakdown">
             <dl className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3">
               <Metric
                 label="Energy billed"

@@ -11,11 +11,16 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const drawMs = 1100;
 const breatheMs = 700;
 
-function useMarkMotion(kind: "draw" | "breathe"): Animated.Value {
+type MarkKind = "draw" | "breathe" | "still";
+
+function useMarkMotion(kind: MarkKind): Animated.Value {
   const reduced = useReducedMotion();
-  const [progress] = useState(() => new Animated.Value(0));
+  const [progress] = useState(
+    () => new Animated.Value(kind === "still" ? 1 : 0),
+  );
 
   useEffect(() => {
+    if (kind === "still") return;
     if (reduced) {
       progress.setValue(1);
       return;
@@ -59,13 +64,7 @@ function useMarkMotion(kind: "draw" | "breathe"): Animated.Value {
   return progress;
 }
 
-export function TeslaMark({
-  size,
-  kind,
-}: {
-  size: number;
-  kind: "draw" | "breathe";
-}) {
+export function TeslaMark({ size, kind }: { size: number; kind: MarkKind }) {
   const palette = usePalette();
   const progress = useMarkMotion(kind);
   const drawing = kind === "draw";

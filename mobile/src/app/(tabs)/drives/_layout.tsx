@@ -10,6 +10,10 @@ export default function DrivesLayout() {
         name="index"
         options={{ title: "Drives", headerLargeTitleEnabled: true }}
       />
+      <Stack.Screen
+        name="timeline"
+        options={{ title: "Timeline", fullScreenGestureEnabled: false }}
+      />
     </Stack>
   );
 }

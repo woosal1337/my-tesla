@@ -1,7 +1,8 @@
 import { appContext, appJson, appNotFound } from "@/lib/app/request";
 import { timelinePage } from "@/lib/app/timeline";
 import { dayWindow, localDayKey, parseDayKey } from "@/lib/insights";
-import { dayRecords } from "@/lib/timeline-data";
+import { dayRecords, lastActivityBefore } from "@/lib/timeline-data";
+import { isQuietDay } from "@/lib/timeline-view";
 
 export async function GET(
   request: Request,
@@ -17,5 +18,10 @@ export async function GET(
   const day = requested && requested <= today ? requested : today;
   const window = dayWindow(day, f.timeZone);
   const records = await dayRecords(car.id, window.start, window.end);
-  return appJson(timelinePage(records, day, today, window, f, now));
+  const lastActivity = isQuietDay(records)
+    ? await lastActivityBefore(car.id, window.start)
+    : null;
+  return appJson(
+    timelinePage(records, day, today, window, f, now, lastActivity),
+  );
 }

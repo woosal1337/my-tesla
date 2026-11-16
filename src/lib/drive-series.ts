@@ -21,9 +21,20 @@ export function driveEnergy(points: DrivePoint[]): DriveEnergy {
     const gapMs = current.at - previous.at;
     if (gapMs <= 0 || gapMs > longestGapMs) continue;
     if (previous.powerKw === null || current.powerKw === null) continue;
-    const kwh = ((previous.powerKw + current.powerKw) / 2) * (gapMs / hourMs);
-    if (kwh >= 0) usedKwh += kwh;
-    else recoveredKwh -= kwh;
+    const from = previous.powerKw;
+    const to = current.powerKw;
+    const hours = gapMs / hourMs;
+    const parts =
+      from * to < 0
+        ? [
+            (from / 2) * hours * (from / (from - to)),
+            (to / 2) * hours * (to / (to - from)),
+          ]
+        : [((from + to) / 2) * hours];
+    for (const kwh of parts) {
+      if (kwh >= 0) usedKwh += kwh;
+      else recoveredKwh -= kwh;
+    }
   }
   return { usedKwh, recoveredKwh };
 }

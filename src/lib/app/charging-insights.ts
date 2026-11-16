@@ -1,19 +1,31 @@
 import type { ChargeTypeTotals, DcCurve } from "../charge-insights-data";
-import { chargeInsightTotals, costPerKwh, curveRows } from "../charge-insights";
+import {
+  chargeInsightTotals,
+  costPerKwh,
+  curveLabels,
+  curveRows,
+} from "../charge-insights";
 import {
   chargeHistory,
   chargeLegs,
   chargeTime,
+  chargeTimeTitle,
   type LevelTime,
 } from "../charge-time";
 import type { Formatter } from "../format";
 import type { PeriodId } from "../insights";
 import type { ChargingPlace } from "../places-data";
 import { buildChart } from "./chart";
-import type { AppBlock, AppRecord, ChartColor, InsightPage } from "./contract";
+import type {
+  AppBlock,
+  AppRecord,
+  ChartColor,
+  ChartDash,
+  InsightPage,
+} from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
 import { heatmap } from "./stats";
-import { appStat, appValue } from "./values";
+import { appStat, appValue, noRecordCell, statsWithValue } from "./values";
 
 export type ChargingInsightsInput = {
   types: ChargeTypeTotals[];
@@ -33,6 +45,14 @@ const curveColors: ChartColor[] = [
   "chart5",
   "chart2",
 ];
+
+const laterCurveDashes: ChartDash[] = ["dashed", "dotted", "dashDot"];
+
+function curveDash(index: number): ChartDash | undefined {
+  return index === 0
+    ? undefined
+    : laterCurveDashes[(index - 1) % laterCurveDashes.length];
+}
 
 function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
@@ -66,6 +86,7 @@ function chargeTimeBlocks(
   return [
     {
       kind: "note",
+      role: "heading",
       text: `${label}: ${plural(history.sessions, "charge", "charges")}, ${history.from}% to ${history.to}%`,
     },
     {
@@ -77,8 +98,12 @@ function chargeTimeBlocks(
           key: `${fast ? "dc" : "ac"}-${leg.from}-${leg.to}`,
           cells: [
             appValue(`${leg.from}% → ${leg.to}%${leg.current ? " (now)" : ""}`),
-            appValue(time ? f.duration(time.typicalMin) : "—"),
-            appValue(time ? f.duration(time.slowMin) : "—"),
+            ...(time
+              ? [
+                  appValue(f.duration(time.typicalMin)),
+                  appValue(f.duration(time.slowMin)),
+                ]
+              : [noRecordCell]),
           ],
         };
       }),
@@ -117,6 +142,7 @@ export function chargingInsightsPage(
   const totals = chargeInsightTotals(input.types, input.drivenKm);
   const hundred = f.units.distance === "mi" ? 160.9344 : 100;
   const curves = curveRows(input.curves);
+  const curveNames = curveLabels(curves.keys, f.date, f.clock);
   const base = {
     title: "Charging insights",
     subtitle: periodLabel(period),
@@ -133,7 +159,7 @@ export function chargingInsightsPage(
   }
   return {
     ...base,
-    hero: [
+    hero: statsWithValue([
       appStat("Sessions", String(totals.sessions)),
       appStat("Energy added", `${f.number(totals.addedKwh)} kWh`),
       appStat(
@@ -149,7 +175,7 @@ export function chargingInsightsPage(
         totals.perKm === null ? "—" : f.cost((totals.perKm * hundred) / 100),
         { detail: `${f.distance(input.drivenKm)} driven` },
       ),
-    ],
+    ]),
     heroBlocks: [
       {
         kind: "stats",
@@ -177,26 +203,24 @@ export function chargingInsightsPage(
                     left: "zero",
                     series: curves.keys.map((key, index) => ({
                       key: key.key,
-                      label: f.date(key.startAt),
+                      label: curveNames[index]!,
                       unit: "kW",
                       color: curveColors[index % curveColors.length]!,
+                      dash: curveDash(index),
                     })),
                   }),
                 )
               : { kind: "note", text: "No DC fast charge in this period." },
           ]),
-          panel(
-            "Charging time",
-            [
-              ...chargeTimeBlocks("DC fast charging", true, input, f),
-              ...chargeTimeBlocks("AC charging", false, input, f),
-              input.levelTimes.length > 0 && {
-                kind: "note",
-                text: "The time that past charges spent at each battery percent. The slow time fits a cold battery or a busy charger.",
-              },
-            ],
-            "Charges of the last 2 years",
-          ),
+          panel(chargeTimeTitle, [
+            ...chargeTimeBlocks("DC fast charging", true, input, f),
+            ...chargeTimeBlocks("AC charging", false, input, f),
+            input.levelTimes.length > 0 && {
+              kind: "note",
+              role: "caption",
+              text: "The time that past charges spent at each battery percent. The slow time fits a cold battery or a busy charger.",
+            },
+          ]),
           panel(
             "When the car charges",
             [heatmap(input.starts, sundayFirst, f, "charges")],

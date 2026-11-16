@@ -11,6 +11,10 @@ import type {
 const dayMs = 86_400_000;
 const shortestScatterKm = 3;
 
+export const softwareUpdateLimit = 12;
+
+export const softwareTitle = `Software, last ${softwareUpdateLimit} updates`;
+
 function round1(value: number | null): number | null {
   return value === null ? null : Math.round(value * 10) / 10;
 }
@@ -69,23 +73,18 @@ export function efficiencyBands(
   f: Formatter,
   fahrenheit: boolean,
 ) {
-  return temperatureBands(
+  const bands = temperatureBands(
     points.map((point) => ({
       ...point,
       temperature: f.temperatureValue(point.temperature) ?? point.temperature,
     })),
     fahrenheit ? 10 : 5,
   );
-}
-
-export function widestEfficiency(
-  bands: { whPerKm: number | null }[],
-  f: Formatter,
-): number {
-  return Math.max(
-    1,
-    ...bands.map((band) => f.efficiencyValue(band.whPerKm) ?? 0),
-  );
+  const distanceKm = bands.reduce((sum, band) => sum + band.distanceKm, 0);
+  return bands.map((band) => ({
+    ...band,
+    share: band.distanceKm / distanceKm,
+  }));
 }
 
 export function updateDays(

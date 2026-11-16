@@ -10,6 +10,7 @@ import { PageTransition } from "@/components/page-transition";
 import { SectionHeader } from "@/components/section-header";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
+import { chargesDayTotal } from "@/lib/day-total";
 import { recentCharges } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { ongoingText } from "@/lib/vehicle";
@@ -102,7 +103,10 @@ export default async function ChargingPage({
             .groupByDay(charges, (charge) => charge.startAt, now)
             .map((group) => (
               <section key={group.label}>
-                <DayHeading>{group.label}</DayHeading>
+                <DayHeading
+                  title={group.label}
+                  total={chargesDayTotal(group.items, f)}
+                />
                 <ul className="space-y-1">
                   {group.items.map((charge) => (
                     <li key={charge.id}>

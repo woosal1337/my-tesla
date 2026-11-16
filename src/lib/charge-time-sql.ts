@@ -12,7 +12,7 @@ export function chargeLevelTimesQuery(
   since: Date,
 ) {
   return sql<LevelTime[]>`
-    with picked as (
+    with picked as materialized (
       select
         cp.id,
         exists (

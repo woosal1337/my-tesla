@@ -232,7 +232,7 @@ function ServerPanel() {
   return (
     <Panel title="Account">
       {signedIn ? (
-        <Text numberOfLines={1}>
+        <Text>
           {me.data
             ? `${me.data.user.name} · ${me.data.user.email}`
             : "Signed in"}
@@ -240,7 +240,7 @@ function ServerPanel() {
       ) : (
         <Text>The demo needs no account.</Text>
       )}
-      <Text variant="caption" numberOfLines={1}>
+      <Text variant="caption">
         {connection.url.replace(/^https?:\/\//, "")}
       </Text>
       <Button

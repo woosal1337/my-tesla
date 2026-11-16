@@ -1,6 +1,6 @@
 const factors = [1, 2, 5, 10];
 
-function niceStep(raw: number, after = 0): number {
+export function niceStep(raw: number, after = 0): number {
   const magnitude = 10 ** Math.floor(Math.log10(raw));
   const candidates = factors.map((factor) => factor * magnitude);
   return (
@@ -55,6 +55,52 @@ export function niceZeroDomain(values: number[]): [number, number] | undefined {
     (intervals) => evenStep(target / intervals) * intervals,
   );
   return [0, roundTick(Math.min(...tops))];
+}
+
+const fitIntervals = [4, 5, 3];
+const fitPadding = 0.05;
+const maxCoarserFits = 24;
+
+export function fitAxis(
+  values: number[],
+  label?: (value: number) => string,
+): { domain: [number, number]; ticks: number[] } | undefined {
+  const finite = values.filter((value) => Number.isFinite(value));
+  if (!finite.length) return undefined;
+  const min = Math.min(...finite);
+  const max = Math.max(...finite);
+  const spread = max - min || Math.abs(max) * 0.02 || 1;
+  const padded = min - spread * fitPadding;
+  const low = min >= 0 ? Math.max(0, padded) : padded;
+  const high = max + spread * fitPadding;
+  const fitFrom = (minStep: number) => {
+    const candidates = fitIntervals.map((count) => {
+      let step = niceStep(Math.max((high - low) / count, minStep));
+      const startOf = () => Math.floor(roundTick(low / step)) * step;
+      let start = startOf();
+      while (start + count * step < high) {
+        step = niceStep(step, step);
+        start = startOf();
+      }
+      return { count, step, start };
+    });
+    const span = ({ count, step }: { count: number; step: number }) =>
+      roundTick(count * step);
+    const best = candidates.reduce((fit, candidate) =>
+      span(candidate) < span(fit) ? candidate : fit,
+    );
+    const ticks = Array.from({ length: best.count + 1 }, (_, index) =>
+      roundTick(best.start + index * best.step),
+    );
+    return { step: best.step, ticks };
+  };
+  const repeats = (ticks: number[]) =>
+    label !== undefined && new Set(ticks.map(label)).size < ticks.length;
+  let fit = fitFrom(0);
+  for (let tries = 0; tries < maxCoarserFits && repeats(fit.ticks); tries++) {
+    fit = fitFrom(niceStep(fit.step, fit.step));
+  }
+  return { domain: [fit.ticks[0]!, fit.ticks.at(-1)!], ticks: fit.ticks };
 }
 
 export function evenTicks([low, high]: [number, number]): number[] {

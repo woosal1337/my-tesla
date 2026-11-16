@@ -31,6 +31,19 @@ export function curveRows(curves: CurveInput[]): {
   return { rows, keys };
 }
 
+export function curveLabels(
+  keys: CurveKey[],
+  date: (at: Date) => string,
+  clock: (at: Date) => string,
+): string[] {
+  const dates = keys.map((key) => date(key.startAt));
+  return keys.map((key, index) =>
+    dates.indexOf(dates[index]!) === dates.lastIndexOf(dates[index]!)
+      ? dates[index]!
+      : `${dates[index]} ${clock(key.startAt)}`,
+  );
+}
+
 export function costPerKwh(cost: number | null, kwh: number): number | null {
   return cost === null || kwh <= 0 ? null : cost / kwh;
 }

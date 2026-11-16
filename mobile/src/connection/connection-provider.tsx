@@ -1,8 +1,26 @@
 import * as SecureStore from "expo-secure-store";
+import { Storage } from "expo-sqlite/kv-store";
 import { createContext, use, useEffect, useState, type ReactNode } from "react";
+import { installMark, isNewInstall, keychainKeys } from "./install";
 import { parseConnection, type Connection } from "./server";
 
-const storageKey = "connection";
+async function forgetEarlierInstall(): Promise<void> {
+  if (isNewInstall(Storage.getAllKeysSync())) {
+    await Promise.all(
+      Object.values(keychainKeys).map((key) =>
+        SecureStore.deleteItemAsync(key),
+      ),
+    );
+  }
+  Storage.setItemSync(installMark, "1");
+}
+
+async function storedConnection(): Promise<Connection | null> {
+  await forgetEarlierInstall();
+  return parseConnection(
+    await SecureStore.getItemAsync(keychainKeys.connection),
+  );
+}
 
 type ConnectionState = {
   loaded: boolean;
@@ -18,21 +36,25 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<Connection | null>(null);
 
   useEffect(() => {
-    SecureStore.getItemAsync(storageKey)
-      .then((stored) => setConnection(parseConnection(stored)))
+    storedConnection()
+      .then(setConnection)
       .catch(() => setConnection(null))
       .finally(() => setLoaded(true));
   }, []);
 
   const save = async (next: Connection) => {
-    await SecureStore.setItemAsync(storageKey, JSON.stringify(next), {
-      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-    });
+    await SecureStore.setItemAsync(
+      keychainKeys.connection,
+      JSON.stringify(next),
+      {
+        keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      },
+    );
     setConnection(next);
   };
 
   const forget = async () => {
-    await SecureStore.deleteItemAsync(storageKey);
+    await SecureStore.deleteItemAsync(keychainKeys.connection);
     setConnection(null);
   };
 

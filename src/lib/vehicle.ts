@@ -110,6 +110,17 @@ export function levelsUsedText(
 
 const coldBatteryGap = 3;
 
+export function coldBatteryText(input: {
+  level: number | null;
+  usableLevel: number | null;
+}): string | null {
+  return input.level !== null &&
+    input.usableLevel !== null &&
+    input.level - input.usableLevel >= coldBatteryGap
+    ? `${input.usableLevel}% usable, the battery is cold`
+    : null;
+}
+
 export function batteryCaption(input: {
   level: number | null;
   usableLevel: number | null;
@@ -121,14 +132,7 @@ export function batteryCaption(input: {
       ? `Charging to ${Math.round(input.limitPercent)}%`
       : "Charging";
   }
-  if (
-    input.level !== null &&
-    input.usableLevel !== null &&
-    input.level - input.usableLevel >= coldBatteryGap
-  ) {
-    return `${input.usableLevel}% usable, the battery is cold`;
-  }
-  return "Rated range";
+  return coldBatteryText(input) ?? "Rated range";
 }
 
 export function driveEfficiency(drive: {
@@ -193,19 +197,21 @@ const fullPlaceStyle: PlaceStyle = {
   addressDetail: "full",
 };
 
+export const unknownPlace = "Unknown place";
+
 export function placeLabel(
   place: PlaceParts,
   style: PlaceStyle = fullPlaceStyle,
 ): string {
   if (style.placeNames === "geofence" && place.geofence) return place.geofence;
   if (style.addressDetail === "city") {
-    return place.city || place.name || place.road || "Unknown place";
+    return place.city || place.name || place.road || unknownPlace;
   }
   if (style.addressDetail === "street") {
-    return place.road || place.name || place.city || "Unknown place";
+    return place.road || place.name || place.city || unknownPlace;
   }
   if (place.name) return place.name;
   const street = [place.road, place.houseNumber].filter(Boolean).join(" ");
   if (street && place.city) return `${street}, ${place.city}`;
-  return street || place.city || "Unknown place";
+  return street || place.city || unknownPlace;
 }

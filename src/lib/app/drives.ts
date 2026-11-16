@@ -1,4 +1,5 @@
 import { assessConsumption, ratedWhPerKm } from "../assessment";
+import { tripsDayTotal } from "../day-total";
 import type { DriveEnergy, DrivePoint } from "../drive-series";
 import type { Formatter } from "../format";
 import { tripMarkers } from "../map-points";
@@ -25,7 +26,8 @@ import type {
   TripDetail,
   TripStepRow,
 } from "./contract";
-import { appStat, appValue, levelsText } from "./values";
+import { spokenLabel } from "./spoken";
+import { appStat, appValue, levelsText, statsWithValue } from "./values";
 
 export const leftOpenNotice =
   "TeslaMate did not close this drive. This happens when TeslaMate restarts during a drive. The values come from the position records.";
@@ -46,24 +48,33 @@ export function tripRow(
   f: Formatter,
 ): DriveRow {
   const summary = tripSummary(trip);
+  const clock = f.clock(trip.startAt);
+  const duration = f.duration(summary.totalMin);
+  const title = tripDestination(trip).place;
+  const subtitle = dotted([tripOrigin(trip), stopsText(summary)]);
+  const distance = f.distance(summary.distanceKm);
+  const consumption = appValue(
+    f.efficiency(summary.consumptionWhPerKm),
+    assessConsumption(summary.consumptionWhPerKm, rated, f, summary.distanceKm),
+  );
   return {
     key: `trip-${trip.id}`,
     target: tripTarget(trip),
-    clock: f.clock(trip.startAt),
-    duration: f.duration(summary.totalMin),
-    title: tripDestination(trip).place,
-    subtitle: dotted([tripOrigin(trip), stopsText(summary)]),
+    clock,
+    duration,
+    title,
+    subtitle,
     segments: tripSegments(trip),
-    distance: f.distance(summary.distanceKm),
-    consumption: appValue(
-      f.efficiency(summary.consumptionWhPerKm),
-      assessConsumption(
-        summary.consumptionWhPerKm,
-        rated,
-        f,
-        summary.distanceKm,
-      ),
-    ),
+    distance,
+    consumption,
+    label: spokenLabel([
+      clock,
+      duration,
+      title,
+      subtitle,
+      distance,
+      consumption.text,
+    ]),
   };
 }
 
@@ -88,10 +99,18 @@ export function driveList(
       : [],
     sections: f
       .groupByDay(summaries, ({ trip }) => trip.startAt, now)
-      .map((group) => ({
-        title: group.label,
-        rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
-      })),
+      .map((group) => {
+        const total = tripsDayTotal(
+          group.items.map(({ summary }) => summary),
+          f,
+        );
+        return {
+          title: group.label,
+          total,
+          label: spokenLabel([group.label, ...total]),
+          rows: group.items.map(({ trip }) => tripRow(trip, rated, f)),
+        };
+      }),
   };
 }
 
@@ -178,7 +197,7 @@ export function driveDetail(
         `${f.temperature(drive.outsideTempAvg)} outside`,
     ]),
     notice: drive.leftOpen ? leftOpenNotice : null,
-    stats: [
+    stats: statsWithValue([
       appStat("Distance", f.distance(drive.distanceKm)),
       appStat("Duration", f.duration(drive.durationMin)),
       appStat("Consumption", f.efficiency(drive.efficiencyWhPerKm), {
@@ -205,8 +224,8 @@ export function driveDetail(
       ),
       appStat(
         "Energy recovered",
-        hasSeries ? f.energy(energy.recoveredKwh) : "—",
-        { detail: hasSeries ? `${f.energy(energy.usedKwh)} used` : null },
+        hasSeries ? f.energyFine(energy.recoveredKwh) : "—",
+        { detail: hasSeries ? `${f.energyFine(energy.usedKwh)} used` : null },
       ),
       appStat("Climb", f.elevation(drive.ascentM), {
         detail:
@@ -214,7 +233,7 @@ export function driveDetail(
             ? `${f.elevation(drive.descentM)} descent`
             : null,
       }),
-    ],
+    ]),
     charts: hasSeries ? driveCharts(series, f) : [],
     route: showMaps && route.length > 1 ? route : null,
     gpxPath: `/api/cars/${car.id}/drives/${drive.id}.gpx`,
@@ -236,7 +255,7 @@ export function tripDetail(
       tripOrigin(trip),
       `${f.day(trip.startAt, now)} ${f.clock(trip.startAt)} to ${f.clock(trip.endAt)}`,
     ]),
-    stats: [
+    stats: statsWithValue([
       appStat("Distance", f.distance(summary.distanceKm), {
         detail: `${summary.legs} ${summary.legs === 1 ? "drive" : "drives"}`,
       }),
@@ -268,32 +287,39 @@ export function tripDetail(
             ? null
             : `Top ${f.speed(summary.speedMaxKmh)}`,
       }),
-    ],
+    ]),
     steps: tripSteps(trip).map((step): TripStepRow => {
       if (step.kind === "leg") {
         const { leg } = step;
+        const clock = f.clock(step.at);
+        const title = `${leg.from} → ${leg.to}`;
+        const detail = dotted([
+          f.distance(leg.distanceKm),
+          f.duration(leg.durationMin),
+          f.efficiency(leg.consumptionWhPerKm),
+        ]);
         return {
           key: `leg-${leg.driveId}`,
           kind: "drive",
-          clock: f.clock(step.at),
-          title: `${leg.from} → ${leg.to}`,
-          detail: dotted([
-            f.distance(leg.distanceKm),
-            f.duration(leg.durationMin),
-            f.efficiency(leg.consumptionWhPerKm),
-          ]),
+          clock,
+          title,
+          detail,
           target: { kind: "drive", id: leg.driveId },
+          label: spokenLabel([clock, title, detail]),
         };
       }
       const { stop } = step;
       const [charge] = stop.charges;
+      const clock = f.clock(step.at);
+      const detail = stopDetail(stop, f);
       return {
         key: `stop-${step.at.getTime()}`,
         kind: stop.charged ? "charge" : "stop",
-        clock: f.clock(step.at),
+        clock,
         title: stop.place,
-        detail: stopDetail(stop, f),
+        detail,
         target: charge ? { kind: "charge", id: charge.id } : null,
+        label: spokenLabel([clock, stop.place, detail]),
       };
     }),
     routes: showMaps

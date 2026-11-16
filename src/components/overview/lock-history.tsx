@@ -98,7 +98,7 @@ export function LockHistory({
           </ul>
         </ShowMore>
       ) : (
-        <p className="mt-3 text-sm text-subtle">
+        <p className="mt-3 text-sm text-muted-foreground">
           No change in the last 7 days. My Tesla records each lock and Sentry
           Mode change from the MQTT feed.
         </p>

@@ -1,4 +1,5 @@
 import { SymbolView } from "expo-symbols";
+import { useIconScale } from "@/theme/use-text-size";
 import type { IconName } from "./icons";
 
 export function Icon({
@@ -10,10 +11,11 @@ export function Icon({
   color: string;
   size?: number;
 }) {
+  const scale = useIconScale();
   return (
     <SymbolView
       name={name}
-      size={size}
+      size={size * scale}
       tintColor={color}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"

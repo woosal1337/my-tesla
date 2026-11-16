@@ -18,9 +18,9 @@ import {
   efficiencyBands,
   efficiencyScatter,
   pressureRows,
+  softwareTitle,
   statsTotals,
   updateDays,
-  widestEfficiency,
 } from "../stats-figures";
 import { leakWarning, type SlowLeak } from "../tire-leak";
 import { odometerRows, type OdometerPoint } from "../trends";
@@ -28,7 +28,7 @@ import { efficiencyDigits } from "../units";
 import { buildChart } from "./chart";
 import type { AppBlock, InsightPage } from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
-import { appStat } from "./values";
+import { appStat, statsWithValue } from "./values";
 
 export type StatsInput = {
   buckets: StatsBucket[];
@@ -93,7 +93,7 @@ export function statsHero(
     f,
   );
   return {
-    hero: [
+    hero: statsWithValue([
       appStat("Distance", `${f.number(distanceTotal)} ${f.units.distance}`, {
         detail: plural(drives.drives, "drive", "drives"),
       }),
@@ -107,11 +107,11 @@ export function statsHero(
           drives.distanceKm,
         ),
       }),
-    ],
+    ]),
     heroBlocks: [
       {
         kind: "stats",
-        stats: [
+        stats: statsWithValue([
           appStat("Charged", `${f.number(charges.addedKwh)} kWh`, {
             detail: plural(charges.sessions, "session", "sessions"),
           }),
@@ -133,7 +133,7 @@ export function statsHero(
               ? "—"
               : `${f.number(f.distanceValue(drives.longestKm) ?? 0)} ${f.units.distance}`,
           ),
-        ],
+        ]),
       },
     ],
   };
@@ -164,21 +164,19 @@ export function statsPage(
     f,
     settings.temperature === "f",
   );
-  const widestBand = widestEfficiency(temperatureBandRows, f);
   const speeds = speedBands(
     input.speedRows,
     speedEdges(settings.distance).shown,
   );
-  const widestSpeed = widestEfficiency(speeds, f);
   const scatter = efficiencyScatter(input.efficiency, f).sort(
     (a, b) => a.x - b.x,
   );
   const pressureDigits = pressureTooltipDigits[settings.pressure];
   const tires = [
-    ["frontLeft", "Front left", "chart1"],
-    ["frontRight", "Front right", "chart3"],
-    ["rearLeft", "Rear left", "chart4"],
-    ["rearRight", "Rear right", "charge"],
+    ["frontLeft", "Front left", "chart1", "solid"],
+    ["frontRight", "Front right", "chart3", "dashed"],
+    ["rearLeft", "Rear left", "chart4", "dotted"],
+    ["rearRight", "Rear right", "charge", "dashDot"],
   ] as const;
 
   return {
@@ -341,17 +339,21 @@ export function statsPage(
                 }),
               ),
           ]),
-          panel("By temperature", [
-            temperatureBandRows.length > 0 && {
-              kind: "shares",
-              rows: temperatureBandRows.map((band) => ({
-                label: `${band.from} to ${band.to} ${f.units.temperature}`,
-                share: (f.efficiencyValue(band.whPerKm) ?? 0) / widestBand,
-                text: `${f.distance(band.distanceKm)} · ${f.efficiency(band.whPerKm)}`,
-                color: "primary",
-              })),
-            },
-          ]),
+          panel(
+            "By temperature",
+            [
+              temperatureBandRows.length > 0 && {
+                kind: "shares",
+                rows: temperatureBandRows.map((band) => ({
+                  label: `${band.from} to ${band.to} ${f.units.temperature}`,
+                  share: band.share,
+                  text: `${f.distance(band.distanceKm)} · ${f.efficiency(band.whPerKm)}`,
+                  color: "primary",
+                })),
+              },
+            ],
+            temperatureBandRows.length ? "Share of distance" : null,
+          ),
           panel(
             "By speed",
             [
@@ -362,7 +364,7 @@ export function statsPage(
                     band.to === null
                       ? `${band.from}+ ${f.units.speed}`
                       : `${band.from} to ${band.to} ${f.units.speed}`,
-                  share: (f.efficiencyValue(band.whPerKm) ?? 0) / widestSpeed,
+                  share: band.share,
                   text: `${Math.round(band.share * 100)}% · ${f.efficiency(band.whPerKm)}`,
                   color: "primary",
                 })),
@@ -403,11 +405,12 @@ export function statsPage(
                 xKey: "at",
                 xFormat: "day",
                 style,
-                series: tires.map(([key, label, color]) => ({
+                series: tires.map(([key, label, color, dash]) => ({
                   key,
                   label,
                   unit: f.units.pressure,
                   color,
+                  dash,
                   digits: pressureDigits,
                 })),
               }),
@@ -417,7 +420,7 @@ export function statsPage(
               text: leakWarning(leak, (bar) => f.pressure(bar)),
             })),
           ]),
-          panel("Software", [
+          panel(softwareTitle, [
             input.updates.length > 0 && {
               kind: "records",
               rows: updateDays(input.updates, now).map(

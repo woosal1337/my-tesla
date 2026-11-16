@@ -158,7 +158,9 @@ export default async function TripPage({
         >
           {f.energy(summary.energyUsedKwh)}
         </Stat>
-        <Stat label="Charging cost">{f.cost(summary.cost)}</Stat>
+        {summary.cost !== null && (
+          <Stat label="Charging cost">{f.cost(summary.cost)}</Stat>
+        )}
         <Stat
           label="Average speed"
           detail={

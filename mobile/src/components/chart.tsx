@@ -1,10 +1,12 @@
-import type { AppChart, AppChartSeries } from "@contract";
+import type { AppChart, AppChartSeries, ChartDash } from "@contract";
 import { useState } from "react";
 import { StyleSheet, View, type GestureResponderEvent } from "react-native";
 import Svg, { Circle, G, Line, Path, Rect } from "react-native-svg";
+import { largeTextCap } from "@/theme/text-size";
 import { space } from "@/theme/tokens";
 import { chartColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { useAxisScale } from "@/theme/use-text-size";
 import {
   areaPath,
   baselineValue,
@@ -16,9 +18,21 @@ import {
 } from "./chart-geometry";
 import { Text } from "./text";
 
-const axisWidth = 40;
+const baseAxisWidth = 40;
 const labelHeight = 20;
 const formats = new Map<string, Intl.NumberFormat>();
+const dashPatterns: Record<ChartDash, number[] | undefined> = {
+  solid: undefined,
+  dashed: [6, 8],
+  dotted: [1, 8],
+  dashDot: [8, 8, 1, 8],
+};
+const sampleWidth = 22;
+const sampleHeight = 8;
+
+function dashOf(series: AppChartSeries): number[] | undefined {
+  return series.dash ? dashPatterns[series.dash] : undefined;
+}
 
 function valueText(
   value: number | null,
@@ -41,21 +55,44 @@ function valueText(
     : `${text}${series.unit ? ` ${series.unit}` : ""}`;
 }
 
-function Legend({ chart }: { chart: AppChart }) {
+function LegendSample({
+  series,
+  dashed,
+}: {
+  series: AppChartSeries;
+  dashed: boolean;
+}) {
   const palette = usePalette();
+  const color = chartColor(palette, series.color);
+  if (!dashed) {
+    return <View style={[styles.dot, { backgroundColor: color }]} />;
+  }
+  return (
+    <Svg width={sampleWidth} height={sampleHeight}>
+      <Line
+        x1={1}
+        x2={sampleWidth - 1}
+        y1={sampleHeight / 2}
+        y2={sampleHeight / 2}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeDasharray={dashOf(series)}
+      />
+    </Svg>
+  );
+}
+
+function Legend({ chart }: { chart: AppChart }) {
   if (chart.series.length < 2) return null;
   const mixedUnits =
     new Set(chart.series.map((series) => series.unit)).size > 1;
+  const dashed = chart.series.some((series) => dashOf(series));
   return (
     <View style={styles.legend}>
       {chart.series.map((series) => (
         <View key={series.key} style={styles.legendItem}>
-          <View
-            style={[
-              styles.dot,
-              { backgroundColor: chartColor(palette, series.color) },
-            ]}
-          />
+          <LegendSample series={series} dashed={dashed} />
           <Text variant="caption" tone="mutedForeground">
             {series.label}
             {mixedUnits && series.unit ? ` (${series.unit})` : ""}
@@ -74,6 +111,7 @@ export function Chart({
   height?: number;
 }) {
   const palette = usePalette();
+  const axisWidth = baseAxisWidth * useAxisScale();
   const [width, setWidth] = useState(0);
   const [active, setActive] = useState<number | null>(null);
   const bars = hasBars(chart);
@@ -105,6 +143,16 @@ export function Chart({
 
   return (
     <View>
+      {chart.caption ? (
+        <Text
+          variant="caption"
+          tone="mutedForeground"
+          accessibilityRole="header"
+          style={styles.caption}
+        >
+          {chart.caption}
+        </Text>
+      ) : null}
       <Legend chart={chart} />
       <View
         accessible
@@ -203,6 +251,7 @@ export function Chart({
                       d={linePath(line)}
                       stroke={color}
                       strokeWidth={2}
+                      strokeDasharray={dashOf(series)}
                       fill="none"
                       strokeLinejoin="round"
                       strokeLinecap="round"
@@ -226,6 +275,7 @@ export function Chart({
                 key={`left-${tick.value}`}
                 variant="caption"
                 numberOfLines={1}
+                maxFontSizeMultiplier={largeTextCap}
                 style={[
                   styles.axisLabel,
                   styles.leftLabel,
@@ -240,6 +290,7 @@ export function Chart({
                 key={`right-${tick.value}`}
                 variant="caption"
                 numberOfLines={1}
+                maxFontSizeMultiplier={largeTextCap}
                 style={[
                   styles.axisLabel,
                   styles.rightLabel,
@@ -261,6 +312,7 @@ export function Chart({
                   key={`x-${tick.value}`}
                   variant="caption"
                   numberOfLines={1}
+                  maxFontSizeMultiplier={largeTextCap}
                   style={[
                     styles.xLabel,
                     { top: plot.bottom + 4, left: x - 32 },
@@ -276,6 +328,7 @@ export function Chart({
                 style={[
                   styles.tooltip,
                   {
+                    maxWidth: width / 2 - 8,
                     backgroundColor: palette.background,
                     borderColor: palette.border,
                   },
@@ -314,6 +367,7 @@ const styles = StyleSheet.create({
     rowGap: space.xs,
     marginBottom: space.md,
   },
+  caption: { marginBottom: space.sm },
   legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   axisLabel: {

@@ -5,7 +5,13 @@ import { useConnection } from "@/connection/connection-provider";
 import { Button } from "./button";
 import { Text } from "./text";
 
-export function ExportButton({ item }: { item: AppExport }) {
+export function ExportButton({
+  item,
+  disabled = false,
+}: {
+  item: AppExport;
+  disabled?: boolean;
+}) {
   const connection = useConnection();
   const share = useMutation({
     mutationFn: () => shareExport(connection, item.path, item.file),
@@ -16,6 +22,7 @@ export function ExportButton({ item }: { item: AppExport }) {
         label={`Share ${item.label}`}
         kind="secondary"
         busy={share.isPending}
+        disabled={disabled}
         onPress={() => share.mutate()}
       />
       {share.error ? (

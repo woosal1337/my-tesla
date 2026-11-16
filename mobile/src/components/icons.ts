@@ -6,6 +6,7 @@ export type IconName = { ios: SFSymbol; android: AndroidSymbol };
 export const icons = {
   check: { ios: "checkmark", android: "check" },
   chevron: { ios: "chevron.right", android: "chevron_right" },
+  chevronLeft: { ios: "chevron.left", android: "chevron_left" },
   warning: { ios: "exclamationmark.triangle.fill", android: "warning" },
   info: { ios: "info.circle", android: "info" },
   drive: {

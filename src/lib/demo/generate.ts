@@ -8,6 +8,7 @@ const day = 24 * hour;
 const localOffset = -7 * hour;
 const addressState = "Arizona";
 const addressCountry = "United States";
+const addressCountryCode = "us";
 
 type PositionRow = {
   id: number;
@@ -132,6 +133,7 @@ type AddressRow = {
   city: string;
   state: string;
   country: string;
+  raw: { address: { country_code: string } };
   inserted_at: Date;
   updated_at: Date;
 };
@@ -308,6 +310,7 @@ export function generateDemo(options: {
     city: place.city,
     state: addressState,
     country: addressCountry,
+    raw: { address: { country_code: addressCountryCode } },
     inserted_at: created,
     updated_at: created,
   }));
@@ -418,6 +421,11 @@ export function generateDemo(options: {
     vehicle.soc = Math.max(5, vehicle.soc - ((to - from) / hour) * perHour);
   };
 
+  const restState = (at: number): StateRow["state"] =>
+    (options.days - 1 - Math.floor((at - firstMidnight) / day)) % 7 === 3
+      ? "offline"
+      : "asleep";
+
   const park = (from: number, to: number) => {
     if (to <= from) return;
     const wakeEnd = Math.min(to, from + random.int(9, 16) * minute);
@@ -430,7 +438,7 @@ export function generateDemo(options: {
     while (cursor < departWake) {
       const nextWake = cursor + random.between(5, 9) * hour;
       const sleepEnd = Math.min(departWake, nextWake);
-      addState("asleep", cursor, sleepEnd);
+      addState(restState(cursor), cursor, sleepEnd);
       drain(cursor, sleepEnd, 0.035);
       cursor = sleepEnd;
       if (cursor < departWake && random.chance(0.35)) {

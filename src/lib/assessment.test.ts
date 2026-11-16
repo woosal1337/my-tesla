@@ -7,6 +7,7 @@ import {
   assessConsumption,
   assessIdleLoss,
   assessIdlePower,
+  assessTire,
   assessTirePressure,
   assessVoltage,
   assessmentTitle,
@@ -63,6 +64,40 @@ describe("assessBatteryHealth", () => {
     expect(assessBatteryHealth(90, 1_341, f)?.tone).toBe("bad");
     expect(assessBatteryHealth(null, 1_341, f)).toBeNull();
   });
+
+  test("writes the health and the average with the digits of the stat", () => {
+    const near = assessBatteryHealth(99.44, 4_120, f);
+    expect(near?.tone).toBe("good");
+    expect(near?.verdict).toBe("At average");
+    expect(near?.meaning).toBe(
+      "Your battery keeps 99.4% of its capacity, within 1 point of the average for this distance.",
+    );
+    expect(near?.expected).toStartWith("About 99.6% at 4,120 km.");
+    const above = assessBatteryHealth(99.9, 4_120, f);
+    expect(above?.verdict).toBe("At or above average");
+    expect(above?.meaning).toContain("99.9%");
+    const close = assessBatteryHealth(96, 1_341, f);
+    expect(close?.meaning).toContain("96.0%");
+    expect(close?.meaning).toContain("4 points under");
+  });
+
+  test("writes one point in the singular and more points in the plural", () => {
+    const one = assessBatteryHealth(98.5, 4_120, f);
+    expect(one?.tone).toBe("typical");
+    expect(one?.meaning).toBe(
+      "Your battery keeps 98.5%, 1 point under the average. The estimate can move by 2 to 3 points.",
+    );
+    expect(one?.meaning).not.toContain("1 points");
+    expect(assessBatteryHealth(98.1, 4_120, f)?.meaning).toContain(
+      "1 point under the average",
+    );
+    expect(assessBatteryHealth(98, 4_120, f)?.meaning).toContain(
+      "2 points under the average",
+    );
+    expect(assessBatteryHealth(90, 1_341, f)?.meaning).toContain(
+      "10 points under the average for this distance",
+    );
+  });
 });
 
 describe("assessChargingEfficiency", () => {
@@ -116,6 +151,41 @@ describe("assessTirePressure", () => {
     expect(assessTirePressure(2.5, f)?.tone).toBe("bad");
     expect(assessTirePressure(3.3, f)?.meaning).toContain("over");
     expect(assessTirePressure(2.9, psi)?.expected).toContain("42 psi");
+  });
+});
+
+describe("assessTire", () => {
+  const leaks = [{ tire: "rearLeft" as const, dropBar: 0.1, days: 13 }];
+
+  test("keeps the pressure tone without a leak on the tire", () => {
+    expect(assessTire("rearLeft", 2.9, [], f)).toEqual(
+      assessTirePressure(2.9, f),
+    );
+    expect(assessTire("frontLeft", 2.9, leaks, f)).toEqual(
+      assessTirePressure(2.9, f),
+    );
+    expect(assessTire("rearLeft", null, leaks, f)).toBeNull();
+  });
+
+  test("gives a tire with a slow leak the warning tone", () => {
+    for (const bar of [2.9, 2.7]) {
+      const tire = assessTire("rearLeft", bar, leaks, f);
+      expect(tire?.tone).toBe("warning");
+      expect(tire?.verdict).toBe("Possible slow leak");
+    }
+    expect(assessTire("rearLeft", 2.9, leaks, f)?.meaning).toBe(
+      "2.9 bar is close to the recommended value. The tire is down 0.1 bar against the other tires in 13 days. Check it for a slow leak.",
+    );
+    expect(assessTire("rearLeft", 2.9, leaks, psi)?.meaning).toContain(
+      "down 1 psi",
+    );
+  });
+
+  test("keeps a bad pressure red and adds the leak", () => {
+    const tire = assessTire("rearLeft", 2.5, leaks, f);
+    expect(tire?.tone).toBe("bad");
+    expect(tire?.verdict).toBe("Check the pressure");
+    expect(tire?.meaning).toContain("Check it for a slow leak.");
   });
 });
 

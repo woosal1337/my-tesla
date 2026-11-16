@@ -80,6 +80,35 @@ describe("screen shapes", () => {
         stats: [],
       }),
     ).not.toBeNull();
+    const overview = {
+      car,
+      activity: { label: "Online" },
+      callouts: [],
+      menu: [],
+      stats: [],
+    };
+    const strip = { segments: [], now: 0.5, hours: [] };
+    expect(overviewPage({ ...overview, today: strip })).not.toBeNull();
+    expect(
+      overviewPage({
+        ...overview,
+        today: { ...strip, legend: [{ kind: "now", label: "Now" }] },
+      }),
+    ).not.toBeNull();
+    expect(
+      overviewPage({ ...overview, today: { ...strip, legend: "Now" } }),
+    ).toBeNull();
+    const location = { latitude: 33.4, longitude: -111.9, lastSeen: "Today" };
+    expect(overviewPage({ ...overview, location })).not.toBeNull();
+    expect(
+      overviewPage({
+        ...overview,
+        location: { ...location, place: "Home", since: null },
+      }),
+    ).not.toBeNull();
+    expect(
+      overviewPage({ ...overview, location: { ...location, place: 4 } }),
+    ).toBeNull();
     expect(overviewPage({ car })).toBeNull();
     expect(
       overviewPage({ car, activity: { label: "Online" }, stats: [] }),
@@ -173,6 +202,33 @@ describe("the new screens", () => {
     };
     expect(timelinePage(timeline)).not.toBeNull();
     expect(timelinePage({ ...timeline, next: 3 })).toBeNull();
+    const withKey = {
+      ...timeline,
+      strip: {
+        ...timeline.strip,
+        legend: [
+          { kind: "drive", label: "Driving" },
+          { kind: "now", label: "Now" },
+        ],
+      },
+      lastActive: {
+        day: "2026-10-15",
+        title: "No drive and no charge on this day",
+        detail: "Open the last day with one: Thu 15 Oct",
+      },
+    };
+    expect(timelinePage(withKey)).not.toBeNull();
+    expect(timelinePage({ ...withKey, lastActive: null })).not.toBeNull();
+    expect(timelinePage({ ...withKey, lastActive: { day: 3 } })).toBeNull();
+    expect(
+      timelinePage({
+        ...withKey,
+        lastActive: { ...withKey.lastActive, day: "../settings" },
+      }),
+    ).toBeNull();
+    expect(
+      timelinePage({ ...withKey, strip: { ...timeline.strip, legend: [1] } }),
+    ).toBeNull();
     const report = {
       presets: [],
       stats: [],

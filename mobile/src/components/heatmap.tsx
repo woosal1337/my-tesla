@@ -1,10 +1,17 @@
 import type { AppBlock } from "@contract";
 import { StyleSheet, View } from "react-native";
+import { largeTextCap } from "@/theme/text-size";
 import { space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { Text } from "./text";
 
 type HeatmapBlock = Extract<AppBlock, { kind: "heatmap" }>;
+
+const keyShares = [0, 0.25, 0.5, 0.75, 1];
+
+function shade(share: number): number {
+  return 0.2 + share * 0.8;
+}
 
 export function Heatmap({ block }: { block: HeatmapBlock }) {
   const palette = usePalette();
@@ -19,7 +26,11 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
             accessibilityLabel={`${row.label}: ${total} ${block.unit}`}
             style={styles.row}
           >
-            <Text variant="caption" style={styles.label}>
+            <Text
+              variant="caption"
+              maxFontSizeMultiplier={largeTextCap}
+              style={styles.label}
+            >
               {row.label}
             </Text>
             <View style={styles.cells}>
@@ -34,7 +45,7 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
                         styles.fill,
                         {
                           backgroundColor: palette.primary,
-                          opacity: 0.2 + (value / block.max) * 0.8,
+                          opacity: shade(value / block.max),
                         },
                       ]}
                     />
@@ -47,10 +58,50 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
       })}
       <View style={styles.hours}>
         {block.hours.map((hour, index) => (
-          <Text key={`${hour}-${index}`} variant="caption" style={styles.hour}>
+          <Text
+            key={`${hour}-${index}`}
+            variant="caption"
+            maxFontSizeMultiplier={largeTextCap}
+            style={styles.hour}
+          >
             {hour}
           </Text>
         ))}
+      </View>
+      <View
+        accessible
+        accessibilityLabel={`Darker cells mean more ${block.unit}. The most in one hour: ${block.max}.`}
+        style={styles.key}
+      >
+        <Text
+          variant="caption"
+          maxFontSizeMultiplier={largeTextCap}
+          style={styles.hour}
+        >
+          0
+        </Text>
+        {keyShares.map((share) => (
+          <View
+            key={share}
+            style={[styles.keyCell, { backgroundColor: palette.muted }]}
+          >
+            {share > 0 ? (
+              <View
+                style={[
+                  styles.fill,
+                  { backgroundColor: palette.primary, opacity: shade(share) },
+                ]}
+              />
+            ) : null}
+          </View>
+        ))}
+        <Text
+          variant="caption"
+          maxFontSizeMultiplier={largeTextCap}
+          style={styles.hour}
+        >
+          {block.max}
+        </Text>
       </View>
     </View>
   );
@@ -69,4 +120,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   hour: { fontSize: 11, fontVariant: ["tabular-nums"] },
+  key: {
+    marginTop: space.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 3,
+  },
+  keyCell: { width: 10, height: 10, borderRadius: 2, overflow: "hidden" },
 });

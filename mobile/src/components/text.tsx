@@ -4,6 +4,7 @@ import {
   type TextProps as NativeTextProps,
 } from "react-native";
 import type { Palette } from "@/theme/palette";
+import { largeTextCap, textCap } from "@/theme/text-size";
 import { fonts } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 
@@ -47,7 +48,6 @@ const defaultTones: Record<Variant, keyof Palette> = {
 };
 
 const largeVariants = new Set<Variant>(["hero", "display", "title"]);
-const largeTextCap = 1.2;
 
 type TextProps = NativeTextProps & {
   variant?: Variant;
@@ -66,7 +66,7 @@ export function Text({
   return (
     <NativeText
       maxFontSizeMultiplier={
-        largeVariants.has(variant) ? largeTextCap : undefined
+        largeVariants.has(variant) ? largeTextCap : textCap
       }
       style={[
         variants[variant],

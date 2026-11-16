@@ -6,7 +6,7 @@ import { chargeSessionsRelation } from "./charge-sessions-sql";
 import type { LevelTime } from "./charge-time";
 import { chargeLevelTimesQuery } from "./charge-time-sql";
 import { demoSchema } from "./demo/schema";
-import { createSql } from "./sql-template";
+import { createSql, type Fragment } from "./sql-template";
 
 let db: PGlite;
 let sql: postgres.Sql;
@@ -122,5 +122,22 @@ describe("chargeLevelTimesQuery", () => {
     expect(await levelTimes(2)).toEqual([
       { fast: true, level: 20, sessions: 1, typicalS: 120, slowS: 120 },
     ]);
+  });
+
+  test("finds the charger type once for each charge", async () => {
+    const query = chargeLevelTimesQuery(
+      sql,
+      chargeSessionsRelation(sql, 1, noPrices),
+      1,
+      since,
+    ) as unknown as Fragment;
+    const params: unknown[] = [];
+    const plan = await db.query<{ "QUERY PLAN": string }>(
+      `explain (costs off) ${query.compile(params)}`,
+      params,
+    );
+    expect(plan.rows.map((row) => row["QUERY PLAN"]).join("\n")).toContain(
+      "CTE picked",
+    );
   });
 });

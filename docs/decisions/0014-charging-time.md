@@ -17,6 +17,7 @@ Charging insights showed the DC curves of past charges, but it gave no answer to
 5. The panel shows DC and AC. A charge is DC when one of its samples has `fast_charger_present`, as on the other charging pages. The AC time mixes all AC chargers that the car used.
 6. The legs are 10 % to 80 %, 20 % to 80 %, 80 % to 100 %, and one leg from the battery level now.
 7. `chargeLevelTimesQuery()` takes the `sql` tag as a parameter, so that a PGlite test can run it.
+8. Since 2026-11-16, the query keeps the charges of the window in a materialized CTE. PostgreSQL inlines a CTE with one reference, and it then looked up the charger type once for each sample, not once for each charge. For an AC charge each lookup read all samples of the charge. On a database with 31 charges and 30,836 charge samples, the query took 4.8 s and read 1.9 million buffers. It now takes 0.05 s and reads 2,210 buffers, and it returns the same rows.
 
 ## Alternatives
 
@@ -27,3 +28,5 @@ Charging insights showed the DC curves of past charges, but it gave no answer to
 ## Consequences
 
 A new car shows "No record" for some legs until its charges cover each percent. A car that uses a slow and a fast AC charger gets one AC time between the two.
+
+A query that computes a value for each charge and then joins `charges` keeps that value in a materialized CTE. `charge-time-sql.test.ts` checks the plan.

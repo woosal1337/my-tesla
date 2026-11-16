@@ -2,7 +2,7 @@
 
 Date: 2026-10-22
 
-Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)). Since 2026-11-16, the Settings of the app name each group after the screen that its switches change. Since 2026-11-16, the Places row gives the count of the visited places in the default period.
+Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)). Since 2026-11-16, the Settings of the app name each group after the screen that its switches change. Since 2026-11-16, the Places row gives the count of the visited places in the default period. Since 2026-11-16, point 7 says that a place name can show in more than one row.
 
 ## Context
 
@@ -38,6 +38,7 @@ The Overview of the mobile app was the web Overview in cards: the car image, the
    - A menu summary gives a fact of the screen that it opens and that the title and the callouts do not show. The Battery row has the same health and capacity as the hero of the Battery page. The Stats row has the default period of the person, because the Stats page has no calendar month.
    - The Places row has the count of the stat "Places" in the hero of the Places page, for the default period of the person, for example "12 places, last 30 days". The period stays in the same part of the text as the count. The Location row has the place of a parked car, else a static description. The empty summary of Settings repeats nothing.
    - A label is not a value. The callout label "Charging" can stand with the state "Charging" in the title.
+   - A place name can show in more than one row. The Drives row names the end of the last drive, the Charging row names the place of the last charge, and the Location row names the place of a parked car. These are three facts, and they can share a place, as the end level of the last charge can equal the battery level in the left callout. The place of a parked car is the end of the last drive ([decision 0037](0037-the-place-of-a-parked-car-and-a-map-cover.md)), so the Location row and the Drives row share the name on most days. The Location row keeps the name, because a person looks there for the place of the car. The rule "one place" is for one value that shows two times, as the battery did in the title and in the callout.
    - The Status row leaves out a live tile that the stage shows (the lock, the charge when the right callout shows it) and a tile with the same title as the state ("Driving").
    - The car switcher shows the battery and the state of each other car. The app reads the Overview answer of each other car when the list opens, so the API needs no new field.
 
@@ -47,8 +48,9 @@ The Overview of the mobile app was the web Overview in cards: the car image, the
 2. A sixth tab for Status. Five is the limit of the native tab bars, and Status is a detail of the Overview.
 3. Callouts drawn at the parts of the car (frunk, trunk, charge port). The compositor image has no fixed anchor points across models and angles, so the lines would miss.
 4. A gradient library (`expo-linear-gradient`). SVG is already bundled for the charts and draws the radial glow.
-5. The most visited place as the summary of the Places row. The name can equal the place of the Location row or of the last charge, so it shows two times.
+5. The most visited place as the summary of the Places row. For most cars it is the home, which the Location row and the last charge name on most days, so the row adds little. The count changes with the period and is a value of the Places page hero.
 6. A separate count query for the Overview. It can drift from the query of the Places page.
+7. The parked time (`location.since`) as the summary of the Location row when the Drives or Charging row shows the same place name. The place of a parked car is the end of the last drive, so with the default Settings the Location row would never show the place. The content of the row would also change with the switch "Last drive and charge".
 
 ## Consequences
 

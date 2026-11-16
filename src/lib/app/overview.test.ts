@@ -442,6 +442,22 @@ describe("overviewPage", () => {
     expect(menuSubtitle(pages[2] as OverviewPage, "status")).toBe("Climate on");
   });
 
+  test("names a shared place in the Drives, Charging, and Location rows", () => {
+    const page = overviewPage(
+      {
+        ...input,
+        lastDrive: { ...lastDrive, from: "Office", to: "Home" },
+        lastCharge,
+      },
+      f,
+      now,
+    );
+    expect(menuSubtitle(page, "drives")).toStartWith("Office → Home · ");
+    expect(menuSubtitle(page, "charging")).toStartWith("Home · ");
+    expect(menuSubtitle(page, "location")).toBe("Home");
+    expect(repeatedValues(page)).toEqual(["Home"]);
+  });
+
   test("shows the live tiles with the end of the charge as a time", () => {
     const view = liveView(
       {

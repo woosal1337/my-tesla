@@ -6,14 +6,20 @@ import {
   type ScrollViewProps,
   StyleSheet,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useScrollToRest } from "@/hooks/use-scroll-to-rest";
 import { space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { screenInset } from "./screen-inset";
 import { headerCoversScreen } from "./sticky-geometry";
 
 export const screenPadding = space.xl;
+
+export function useScreenInset(): number {
+  return screenInset(useWindowDimensions().width, screenPadding);
+}
 
 export function Screen({
   children,
@@ -24,6 +30,7 @@ export function Screen({
   dimmed = false,
   withoutHeader = false,
   coverStatusBar = false,
+  fullWidth = false,
 }: {
   children: ReactNode;
   refreshing?: boolean;
@@ -33,8 +40,10 @@ export function Screen({
   dimmed?: boolean;
   withoutHeader?: boolean;
   coverStatusBar?: boolean;
+  fullWidth?: boolean;
 }) {
   const palette = usePalette();
+  const inset = useScreenInset();
   const { top } = useSafeAreaInsets();
   const { ref, onScrollBeginDrag } = useScrollToRest();
   const statusBar = withoutHeader && Platform.OS === "android" ? top : 0;
@@ -51,7 +60,10 @@ export function Screen({
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: space.lg + statusBar },
+          {
+            paddingTop: space.lg + statusBar,
+            paddingHorizontal: fullWidth ? screenPadding : inset,
+          },
           dimmed && styles.dimmed,
         ]}
         contentInsetAdjustmentBehavior="automatic"
@@ -92,7 +104,6 @@ export function StatusBarStrip() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: screenPadding,
     paddingBottom: space.xxl * 3,
     gap: space.lg,
   },

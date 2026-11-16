@@ -149,6 +149,7 @@ export default function OverviewScreen() {
   const wide = useWindowDimensions().width >= wideWidth;
   return (
     <Screen
+      fullWidth
       withoutHeader={!overviewHeaderShown}
       coverStatusBar
       refreshing={refresh.refreshing}

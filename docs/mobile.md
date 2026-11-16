@@ -19,6 +19,8 @@ Every list refreshes when you pull it down. When a refresh fails, the screen kee
 
 The app follows the text size of the phone. From the text size XXXL up to the largest accessibility size, it uses a large text layout: a row of Drives, Charging, and the Report shows the time on one line, then the title, then the values. The figures stand in one column, the quick actions of the Overview in two, and the note of a card goes under its title. Text stops growing at 2 times its size, the large titles at 1.2 times, and the labels of a segmented control and of the hour strip at 1.2 times. A long press on a segment shows its label in large. Read [decision 0042](decisions/0042-large-text-layout.md).
 
+On an iPad and on another wide screen, every screen except the Overview keeps its content in a column of 672 pt in the middle, in portrait and in landscape. The maps stay edge to edge. The Overview uses the width for its sidebar and the car. Read [decision 0043](decisions/0043-a-readable-column-on-wide-screens.md).
+
 ## Tools
 
 | Tool | Version | Use |

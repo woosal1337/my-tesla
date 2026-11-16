@@ -29,7 +29,7 @@ import {
   placePoints,
   routeEnds,
 } from "./map-geometry";
-import { screenPadding } from "./screen";
+import { screenPadding, useScreenInset } from "./screen";
 import { TeslaMark } from "./tesla-mark";
 import { Text } from "./text";
 
@@ -134,6 +134,7 @@ function MapCanvas({
   useBasemapKey();
   const mapStyle = useMapStyle();
   const height = useMapHeight(size);
+  const inset = useScreenInset();
   const [settled, setSettled] = useState(false);
   const [cover, signal] = useReducer(coverAfter, "loading");
 
@@ -154,7 +155,10 @@ function MapCanvas({
         cover === "failed" ? `${label}. The map did not load.` : label
       }
       accessibilityState={{ busy: cover === "loading" }}
-      style={[styles.frame, { height, backgroundColor: palette.card }]}
+      style={[
+        styles.frame,
+        { height, marginHorizontal: -inset, backgroundColor: palette.card },
+      ]}
     >
       {settled ? (
         <Map
@@ -410,7 +414,7 @@ export function PlacesMap({ places }: { places: readonly MapPlace[] }) {
 }
 
 const styles = StyleSheet.create({
-  frame: { overflow: "hidden", marginHorizontal: -screenPadding },
+  frame: { overflow: "hidden" },
   cover: { alignItems: "center", justifyContent: "center" },
   car: {
     width: 24,

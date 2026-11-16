@@ -3,6 +3,8 @@ import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { space } from "@/theme/tokens";
 import { toneColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { Icon } from "./icon";
+import { icons } from "./icons";
 import { Text } from "./text";
 
 function statLabel(stat: AppStat): string {
@@ -20,9 +22,14 @@ export function Stat({
   const { value } = stat;
   const content = (
     <>
-      <Text variant="label" numberOfLines={1}>
-        {stat.label}
-      </Text>
+      <View style={styles.label}>
+        <Text variant="label" numberOfLines={1} style={styles.labelText}>
+          {stat.label}
+        </Text>
+        {value.note ? (
+          <Icon name={icons.info} color={palette.mutedForeground} size={14} />
+        ) : null}
+      </View>
       <Text
         variant={size}
         color={toneColor(palette, value.tone)}
@@ -77,6 +84,8 @@ export function StatGrid({
 
 const styles = StyleSheet.create({
   stat: { flexBasis: "45%", flexGrow: 1, minWidth: 0, gap: 2 },
+  label: { flexDirection: "row", alignItems: "center", gap: space.xs },
+  labelText: { flexShrink: 1 },
   pressed: { opacity: 0.6 },
   grid: {
     flexDirection: "row",

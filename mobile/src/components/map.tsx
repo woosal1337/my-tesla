@@ -38,6 +38,8 @@ const mapStyles = {
   light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
 };
 
+const labelLayer = "watername_ocean";
+
 const carZoom = 15;
 const fitPadding = { top: 48, right: 48, bottom: 48, left: 48 };
 
@@ -316,6 +318,7 @@ export function RouteMap({
         <Layer
           id="route-line"
           type="line"
+          beforeId={labelLayer}
           layout={{ "line-cap": "round", "line-join": "round" }}
           paint={{ "line-color": palette.primary, "line-width": width }}
         />

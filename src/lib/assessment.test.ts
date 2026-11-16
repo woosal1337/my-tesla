@@ -64,6 +64,22 @@ describe("assessBatteryHealth", () => {
     expect(assessBatteryHealth(90, 1_341, f)?.tone).toBe("bad");
     expect(assessBatteryHealth(null, 1_341, f)).toBeNull();
   });
+
+  test("writes the health and the average with the digits of the stat", () => {
+    const near = assessBatteryHealth(99.44, 4_120, f);
+    expect(near?.tone).toBe("good");
+    expect(near?.verdict).toBe("At average");
+    expect(near?.meaning).toBe(
+      "Your battery keeps 99.4% of its capacity, within 1 point of the average for this distance.",
+    );
+    expect(near?.expected).toStartWith("About 99.6% at 4,120 km.");
+    const above = assessBatteryHealth(99.9, 4_120, f);
+    expect(above?.verdict).toBe("At or above average");
+    expect(above?.meaning).toContain("99.9%");
+    const close = assessBatteryHealth(96, 1_341, f);
+    expect(close?.meaning).toContain("96.0%");
+    expect(close?.meaning).toContain("4 points under");
+  });
 });
 
 describe("assessChargingEfficiency", () => {

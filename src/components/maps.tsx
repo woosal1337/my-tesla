@@ -19,6 +19,7 @@ import type { MapPlace, TripMarker } from "@/lib/map-points";
 import { routeBounds, type LngLat } from "@/lib/route";
 
 const electricBlue = "#3e6ae1";
+const labelLayer = "watername_ocean";
 
 const quietMap = {
   cooperativeGestures: true,
@@ -172,7 +173,12 @@ export function RouteMap({
     >
       <CollapsedAttribution />
       <MapControls position="top-right" showZoom />
-      <MapRoute coordinates={route} color={electricBlue} width={4} />
+      <MapRoute
+        coordinates={route}
+        color={electricBlue}
+        width={4}
+        beforeId={labelLayer}
+      />
       <MapMarker longitude={start[0]} latitude={start[1]}>
         <MarkerContent>
           <EndPoint kind="start" />
@@ -291,6 +297,7 @@ export function TripMap({
           color={electricBlue}
           width={3}
           interactive={false}
+          beforeId={labelLayer}
         />
       ))}
       {markers.map((marker) => (

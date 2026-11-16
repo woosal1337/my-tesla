@@ -9,7 +9,7 @@ Some values on the dashboard have a color and a tooltip.
 | Amber | A warning about the value |
 | Red | Worse than usual, or a problem |
 
-Move the pointer over a value with a dotted underline, or tap it on a phone. The tooltip gives your value, what it means, and the expected value. A value without a dotted underline has no rule.
+Move the pointer over a value with a dotted underline, or tap it on a phone. The tooltip gives your value, what it means, and the expected value. A value without a dotted underline has no rule. The mobile app shows an info symbol after the label of such a value, and a press opens the same text.
 
 ## The rules
 
@@ -28,7 +28,7 @@ Move the pointer over a value with a dotted underline, or tap it on a phone. The
 Notes:
 
 1. The rated consumption is the car efficiency that TeslaMate calculates from the charges. A drive under 3 km gets no color, because the car uses more energy in the first minutes.
-2. The fleet average of battery health is a line through 100% at 0 km, 95% at 50,000 km, and 85% at 320,000 km.
+2. The fleet average of battery health is a line through 100% at 0 km, 95% at 50,000 km, and 85% at 320,000 km. The health text uses one digit, as the value does: "99.4%" and "About 99.6% at 4,120 km".
 3. Most Model 3 and Model Y wheels need 2.9 bar cold. Some wheels need another value. The label in the door frame gives the value for your wheels.
 4. The charge levels and the charge limit have no color. An LFP battery and an NMC battery need different charge limits, and TeslaMate does not record which one the car has.
 5. Distances, durations, speeds, temperatures, costs, and places have no color.

@@ -40,6 +40,27 @@ describe("batteryPage", () => {
     expect(blocks.every((block) => block.kind === "note")).toBe(true);
   });
 
+  test("explains the health with the number of the stat", () => {
+    const page = batteryPage(
+      {
+        ...empty,
+        capacity: [78, 77.6, 77.5].map((kwh, index) => ({
+          at: new Date(Date.UTC(2026, 9, 1 + index)),
+          kwh,
+          rangeKm: 500,
+          odometerKm: 4_120,
+        })),
+      },
+      "30d",
+      f,
+      now,
+    );
+    const health = page.hero[0];
+    expect(health?.value.text).toBe("99.5%");
+    expect(health?.value.note).toContain(health?.value.text ?? "");
+    expect(health?.value.note).toContain("About 99.6% at 4,120 km.");
+  });
+
   test("splits the charged energy into AC and DC shares", () => {
     const page = batteryPage(
       {

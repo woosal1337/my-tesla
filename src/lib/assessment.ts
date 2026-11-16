@@ -104,16 +104,25 @@ export function assessBatteryHealth(
   f: Formatter,
 ): Assessment | null {
   if (healthPercent === null || odometerKm === null) return null;
+  const share = (value: number) => `${f.number(value, 1)}%`;
   const average = expectedHealth(odometerKm);
   const gap = healthPercent - average;
   const points = Math.round(Math.abs(gap));
-  const expected = `About ${percent(average)} at ${f.distance(odometerKm)}. Tesla fleet data shows about 85% after 320,000 km for Model 3 and Model Y.`;
-  if (gap >= -1) {
+  const expected = `About ${share(average)} at ${f.distance(odometerKm)}. Tesla fleet data shows about 85% after 320,000 km for Model 3 and Model Y.`;
+  if (gap >= 0) {
     return {
       tone: "good",
       verdict: "At or above average",
       expected,
-      meaning: `Your battery keeps ${percent(healthPercent)} of its capacity, at or above the average for this distance.`,
+      meaning: `Your battery keeps ${share(healthPercent)} of its capacity, at or above the average for this distance.`,
+    };
+  }
+  if (gap >= -1) {
+    return {
+      tone: "good",
+      verdict: "At average",
+      expected,
+      meaning: `Your battery keeps ${share(healthPercent)} of its capacity, within 1 point of the average for this distance.`,
     };
   }
   if (gap >= -6) {
@@ -121,14 +130,14 @@ export function assessBatteryHealth(
       tone: "typical",
       verdict: "Close to average",
       expected,
-      meaning: `Your battery keeps ${percent(healthPercent)}, ${points} points under the average. The estimate can move by 2 to 3 points.`,
+      meaning: `Your battery keeps ${share(healthPercent)}, ${points} points under the average. The estimate can move by 2 to 3 points.`,
     };
   }
   return {
     tone: "bad",
     verdict: "Below average",
     expected,
-    meaning: `Your battery keeps ${percent(healthPercent)}, ${points} points under the average for this distance. A Tesla service center can test the battery.`,
+    meaning: `Your battery keeps ${share(healthPercent)}, ${points} points under the average for this distance. A Tesla service center can test the battery.`,
   };
 }
 

@@ -25,6 +25,8 @@ export function appStat(
   };
 }
 
+export const noRecordCell: AppValue = appValue("No record");
+
 export function hasValue(text: string): boolean {
   return /[\p{L}\p{N}]/u.test(text);
 }

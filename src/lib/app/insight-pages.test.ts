@@ -81,8 +81,11 @@ describe("statsPage", () => {
       "Distance",
       "Driving time",
       "Energy used",
-      "Efficiency",
     ]);
+    const [block] = page.heroBlocks;
+    expect(
+      block?.kind === "stats" ? block.stats.map((stat) => stat.label) : [],
+    ).toEqual(["Charged"]);
     expect(blocksOf(page, "Distance (km)")).toEqual([
       { kind: "note", text: "No record yet." },
     ]);
@@ -91,6 +94,38 @@ describe("statsPage", () => {
         panel.title.startsWith("Charging cost"),
       ),
     ).toBe(false);
+  });
+
+  test("shows every hero stat when the period has drives and costs", () => {
+    const page = statsPage(
+      {
+        ...emptyStats,
+        drives: {
+          drives: 2,
+          distanceKm: 300,
+          minutes: 240,
+          usedKwh: 45,
+          speedMaxKmh: 120,
+          longestKm: 200,
+        },
+        charges: { ...emptyStats.charges, cost: 12 },
+      },
+      car,
+      defaultPreferences,
+      "30d",
+      f,
+      now,
+    );
+    expect(page.hero.map((stat) => stat.label)).toEqual([
+      "Distance",
+      "Driving time",
+      "Energy used",
+      "Efficiency",
+    ]);
+    const [block] = page.heroBlocks;
+    expect(
+      block?.kind === "stats" ? block.stats.map((stat) => stat.label) : [],
+    ).toEqual(["Charged", "Charging cost", "Top speed", "Longest drive"]);
   });
 
   test("orders the heatmap from Sunday and links the longest drives", () => {
@@ -292,6 +327,22 @@ describe("placesPage", () => {
       kind: "records",
       rows: [{ badge: "AC", value: "No cost" }],
     });
+  });
+
+  test("leaves Most time out of the hero without a visited place", () => {
+    const page = placesPage(
+      { ...input, visited: [] },
+      defaultPreferences,
+      "30d",
+      f,
+      now,
+      true,
+    );
+    expect(page.hero.map((stat) => stat.label)).toEqual([
+      "Places",
+      "Charging places",
+      "Saved places",
+    ]);
   });
 
   test("explains an empty route list and an empty geofence list", () => {

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createFormatter } from "../format";
 import { defaultPreferences } from "../preferences";
 import { batteryPage, type BatteryInput } from "./battery";
+import { hasValue } from "./values";
 
 const f = createFormatter(defaultPreferences, "Europe/Istanbul");
 const now = new Date("2026-10-17T15:00:00Z");
@@ -28,6 +29,7 @@ describe("batteryPage", () => {
       value: { text: "—" },
       detail: "Needs 3 charges of 45 kWh or more",
     });
+    expect(page.hero.map((stat) => stat.label)).toEqual(["Health"]);
     expect(page.heroBlocks).toEqual([]);
     expect(page.sections[1]).toMatchObject({
       title: "Habits",
@@ -38,6 +40,64 @@ describe("batteryPage", () => {
       section.panels.flatMap((panel) => panel.blocks),
     );
     expect(blocks.every((block) => block.kind === "note")).toBe(true);
+  });
+
+  test("shows the range at 100% without a capacity estimate", () => {
+    const page = batteryPage(
+      { ...empty, latest: { rangeAt100Km: 400, at: now } },
+      "30d",
+      f,
+      now,
+    );
+    expect(page.hero.map((stat) => stat.label)).toEqual([
+      "Health",
+      "Range at 100%",
+    ]);
+  });
+
+  test("says No record in one cell of an idle row without a range or a power", () => {
+    const period = (
+      hour: number,
+      rangeLostKm: number | null,
+      energyKwh: number | null,
+    ) => ({
+      start: new Date(Date.UTC(2026, 9, 16, hour)),
+      end: new Date(Date.UTC(2026, 9, 16, hour + 8)),
+      durationS: 28_800,
+      standby: 0.9,
+      levelLost: 1,
+      rangeLostKm,
+      energyKwh,
+    });
+    const idleOf = (idle: BatteryInput["idle"]) => {
+      const blocks = batteryPage({ ...empty, idle }, "30d", f, now)
+        .sections.flatMap((section) => section.panels)
+        .find((panel) => panel.title === "Idle drain")?.blocks;
+      const stats = blocks?.find((block) => block.kind === "stats");
+      const table = blocks?.find((block) => block.kind === "table");
+      return {
+        stats:
+          stats?.kind === "stats" ? stats.stats.map((stat) => stat.label) : [],
+        rows:
+          table?.kind === "table"
+            ? table.rows.map((row) => row.cells.map((cell) => cell.text))
+            : [],
+      };
+    };
+    const mixed = idleOf([
+      period(0, 2, 0.3),
+      period(8, null, null),
+      period(16, 2, null),
+    ]);
+    expect(mixed.rows[0]).toHaveLength(3);
+    expect(mixed.rows[0]?.[1]).toContain("km");
+    expect(mixed.rows[0]?.[2]).toContain("W");
+    expect(mixed.rows[1]).toEqual([expect.any(String), "No record"]);
+    expect(mixed.rows[2]).toEqual([expect.any(String), "2.0 km", "No record"]);
+    expect(mixed.rows.flat().every(hasValue)).toBe(true);
+    expect(mixed.stats).not.toContain("Average power");
+    const complete = idleOf([period(0, 2, 0.3), period(8, null, null)]);
+    expect(complete.stats).toContain("Average power");
   });
 
   test("explains the health with the number of the stat", () => {

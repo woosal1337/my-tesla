@@ -37,7 +37,7 @@ import {
 import { buildChart } from "./chart";
 import type { InsightPage, ShareColor } from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
-import { appStat, appValue } from "./values";
+import { appStat, appValue, noRecordCell, statsWithValue } from "./values";
 
 export type BatteryInput = {
   capacity: BatteryCapacityPoint[];
@@ -105,7 +105,7 @@ export function batteryPage(
     subtitle: null,
     period,
     periods: periodChoices(),
-    hero: [
+    hero: statsWithValue([
       appStat("Health", health === null ? "—" : `${f.number(health, 1)}%`, {
         assessment: assessBatteryHealth(
           health,
@@ -142,9 +142,14 @@ export function batteryPage(
       appStat(
         "Charge cycles",
         figures.cycles === null ? "—" : f.number(figures.cycles, 1),
-        { detail: `${f.number(totals.addedKwh)} kWh added` },
+        {
+          detail:
+            figures.cycles === null
+              ? null
+              : `${f.number(totals.addedKwh)} kWh added`,
+        },
       ),
-    ],
+    ]),
     heroBlocks:
       estimate && health !== null
         ? [
@@ -421,7 +426,7 @@ export function batteryPage(
               ? [
                   {
                     kind: "stats",
-                    stats: [
+                    stats: statsWithValue([
                       appStat(
                         "Range lost",
                         `${f.number(f.distanceValue(drain.kmPerDay) ?? 0, 1)} ${f.units.distance}/day`,
@@ -442,7 +447,7 @@ export function batteryPage(
                         assessment: assessAsleep(drain.standby),
                         detail: `of ${f.number(drain.hours)} h parked`,
                       }),
-                    ],
+                    ]),
                   },
                   {
                     kind: "table",
@@ -455,15 +460,19 @@ export function batteryPage(
                           appValue(
                             `${f.day(row.start, now)} ${f.clock(row.start)}`,
                           ),
-                          appValue(
-                            row.rangeLostKm === null
-                              ? "—"
-                              : `${f.number(f.distanceValue(row.rangeLostKm) ?? 0, 1)} ${f.units.distance}`,
-                          ),
-                          appValue(
-                            watts === null ? "—" : `${f.number(watts)} W`,
-                            assessIdlePower(watts, f),
-                          ),
+                          ...(row.rangeLostKm === null
+                            ? [noRecordCell]
+                            : [
+                                appValue(
+                                  `${f.number(f.distanceValue(row.rangeLostKm) ?? 0, 1)} ${f.units.distance}`,
+                                ),
+                                watts === null
+                                  ? noRecordCell
+                                  : appValue(
+                                      `${f.number(watts)} W`,
+                                      assessIdlePower(watts, f),
+                                    ),
+                              ]),
                         ],
                       };
                     }),

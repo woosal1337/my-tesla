@@ -25,7 +25,7 @@ import type {
 } from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
 import { heatmap } from "./stats";
-import { appStat, appValue, statsWithValue } from "./values";
+import { appStat, appValue, noRecordCell, statsWithValue } from "./values";
 
 export type ChargingInsightsInput = {
   types: ChargeTypeTotals[];
@@ -103,7 +103,7 @@ function chargeTimeBlocks(
                   appValue(f.duration(time.typicalMin)),
                   appValue(f.duration(time.slowMin)),
                 ]
-              : [appValue("No record")]),
+              : [noRecordCell]),
           ],
         };
       }),

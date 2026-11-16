@@ -2,7 +2,7 @@
 
 Date: 2026-11-16
 
-Status: Accepted.
+Status: Accepted. Since 2026-11-16, the rule also covers the insight heroes, the idle table of Battery, and the web trip page (points 7 to 9).
 
 ## Context
 
@@ -23,6 +23,9 @@ The pass of 2026-11-15 on an iPhone with real data and on the simulator with the
 4. The climate state is the detail of "Cabin", in the app answer and on the web Overview.
 5. One charge row for Charging and the Report. `chargeRow()` in `src/lib/app/charges.ts` builds the row of the charge list, and a Report charge row carries it in the optional field `charge`. The app draws it with `ChargeListRow`, the component of the Charging list. The old fields of the Report row stay.
 6. The switch "Last drive and charge" off gives the Drives and Charging rows of the Overview menu no summary. The Overview answer drops `lastDrive` and `lastCharge`.
+7. The heroes of Battery, Stats, Year, and Places and the stats of the Battery panel "Idle drain" use `statsWithValue()`. A detail must give the reason. "Charge cycles" and "Most time" carry their detail ("N kWh added", "at X") only with a value, so without a value they leave the answer. "Health —" keeps its detail, which names the long charges that the estimate needs.
+8. A row of the Battery idle table says "No record" in one cell after the last known value. A period without a range gives the time and "No record". A period with a range and without a power gives the time, the range, and "No record". The row stays. `noRecordCell` in `src/lib/app/values.ts` gives this table and the "Charging time" table the same words.
+9. The web trip page leaves out "Charging cost" when the trip has no recorded cost, as the app does. The stat does not apply to such a trip. The other web values keep "—", because each shows a missing measurement in a fixed place.
 
 ## Alternatives
 
@@ -32,17 +35,22 @@ The pass of 2026-11-15 on an iPhone with real data and on the simulator with the
 4. For the switch: draw two cards for the last drive and charge on Status. They repeat the values of the Overview menu, against "each value has one place" of decision 0025.
 5. For the switch: remove it. The web Overview uses the same preference for its two cards.
 6. For the empty values: a check in the app for the text "—". The server writes the text, so the rule belongs to the server, and the app keeps no magic text.
+7. For the idle table: remove a row without a range. The person then does not see that the car was parked at that time.
+8. For the idle table: say "Battery cold". It is true for one of the two causes only, and it is a new text.
+9. For the web trip page: keep "—" with the detail "No charge on this trip". It is wrong for a charge without a price, and the web then differs from the app.
+10. For the web trip page: hide the stat only for a trip without a charge. A charge without a cost still gives "—" without a reason.
 
 ## Consequences
 
 - A released app reads none of the removed fields, so it works with this server. It draws the old Report charge row, because it does not know `charge`. A new app with an older server draws the old row too. Only a new app with this server draws the shared row.
 - An older app with this server shows the source of the cost one time, and keeps the panel title "Cost".
-- The web trip, drive, and Report pages keep "—" in their fixed grids. The web trip page still shows "Charging cost —" for a trip without a charge.
-- The heroes of Battery, Stats, and Places and the idle table of Battery can still show "—" without a detail.
+- The web trip, drive, and Report pages keep "—" for a missing measurement in their fixed grids. The web Battery, Stats, and Places heroes and the web idle table keep "—" too.
+- A released app draws the shorter heroes and the shorter table rows without a change. Its table draws a row with any number of cells, as it does for "Charging time".
 - `docs/mobile.md` names the car figures on Status, the map on Location, and the last drive and charge in the menu rows.
 
 ## Sources
 
 - [WCAG 2.2 Understanding 3.2.4 Consistent Identification](https://www.w3.org/WAI/WCAG22/Understanding/consistent-identification.html), read on 2026-11-16: components with the same function are identified consistently.
 - [WCAG 2.2 Understanding 1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html), read on 2026-11-16: a detail sits with the value that it describes.
+- [University of Colorado Boulder, Accessibility Minute, January 2026](https://www.colorado.edu/digital-accessibility/newsletter/accessibility-minute-january-2026), read on 2026-11-16: avoid empty data cells, and say why a cell has no value.
 - [Apple HIG: lists and tables](https://developer.apple.com/design/human-interface-guidelines/lists-and-tables) and [writing](https://developer.apple.com/design/human-interface-guidelines/writing), read on 2026-11-16: keep row text succinct, and let each word earn its place.

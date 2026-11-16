@@ -28,7 +28,7 @@ import { efficiencyDigits } from "../units";
 import { buildChart } from "./chart";
 import type { AppBlock, InsightPage } from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
-import { appStat } from "./values";
+import { appStat, statsWithValue } from "./values";
 
 export type StatsInput = {
   buckets: StatsBucket[];
@@ -93,7 +93,7 @@ export function statsHero(
     f,
   );
   return {
-    hero: [
+    hero: statsWithValue([
       appStat("Distance", `${f.number(distanceTotal)} ${f.units.distance}`, {
         detail: plural(drives.drives, "drive", "drives"),
       }),
@@ -107,11 +107,11 @@ export function statsHero(
           drives.distanceKm,
         ),
       }),
-    ],
+    ]),
     heroBlocks: [
       {
         kind: "stats",
-        stats: [
+        stats: statsWithValue([
           appStat("Charged", `${f.number(charges.addedKwh)} kWh`, {
             detail: plural(charges.sessions, "session", "sessions"),
           }),
@@ -133,7 +133,7 @@ export function statsHero(
               ? "—"
               : `${f.number(f.distanceValue(drives.longestKm) ?? 0)} ${f.units.distance}`,
           ),
-        ],
+        ]),
       },
     ],
   };

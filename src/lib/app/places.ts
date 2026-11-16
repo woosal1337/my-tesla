@@ -13,7 +13,7 @@ import { toElevation, type UnitSystem } from "../units";
 import type { VisitedArea } from "../visited-areas";
 import type { AppPanel, AppRecord, InsightPage } from "./contract";
 import { panel, periodChoices, periodLabel } from "./panels";
-import { appStat } from "./values";
+import { appStat, statsWithValue } from "./values";
 
 export type PlacesInput = {
   visited: VisitedPlace[];
@@ -129,29 +129,29 @@ export function placesPage(
   const mapPlaces = placesOnMap(visited, charging);
   const figures = placesFigures(visited, charging);
   const { longest, parkedTotal } = figures;
+  const mostTime =
+    longest && parkedTotal
+      ? `${Math.round((longest.parkedS / parkedTotal) * 100)}%`
+      : null;
   return {
     title: "Places",
     subtitle: periodLabel(period),
     period,
     periods: periodChoices(),
-    hero: [
+    hero: statsWithValue([
       appStat("Places", String(visited.length), {
         detail: `${figures.arrivals} arrivals`,
       }),
-      appStat(
-        "Most time",
-        longest && parkedTotal
-          ? `${Math.round((longest.parkedS / parkedTotal) * 100)}%`
-          : "—",
-        { detail: longest ? `at ${longest.label}` : null },
-      ),
+      appStat("Most time", mostTime ?? "—", {
+        detail: mostTime && longest ? `at ${longest.label}` : null,
+      }),
       appStat("Charging places", String(charging.length), {
         detail: `${f.number(figures.chargedTotal)} kWh added`,
       }),
       appStat("Saved places", String(geofences.length), {
         detail: "Geofences in TeslaMate",
       }),
-    ],
+    ]),
     heroBlocks: [],
     sections: [
       {

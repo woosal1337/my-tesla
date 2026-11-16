@@ -38,7 +38,6 @@ import {
   efficiencyScatter,
   pressureRows,
   updateDays,
-  widestEfficiency,
 } from "@/lib/stats-figures";
 import { odometerRows } from "@/lib/trends";
 import { efficiencyDigits } from "@/lib/units";
@@ -112,9 +111,7 @@ export default async function StatsPage({
   ]);
 
   const speeds = speedBands(speedRows, edges.shown);
-  const widestSpeed = widestEfficiency(speeds, f);
   const bands = efficiencyBands(efficiency, f, preferences.temperature === "f");
-  const widest = widestEfficiency(bands, f);
   const grid = weekGrid(starts);
   const series = bucketRows(buckets, f);
   const temperatures = series.flatMap((bucket) =>
@@ -358,7 +355,14 @@ export default async function StatsPage({
               <PanelNote>No record yet.</PanelNote>
             )}
           </Panel>
-          <Panel title="By temperature">
+          <Panel
+            title="By temperature"
+            action={
+              bands.length ? (
+                <span className="text-xs text-subtle">Share of distance</span>
+              ) : undefined
+            }
+          >
             {bands.length ? (
               <ul className="space-y-4">
                 {bands.map((band) => (
@@ -378,7 +382,7 @@ export default async function StatsPage({
                       <div
                         className="h-full rounded-full bg-primary transition-[width] duration-700 ease-tesla starting:w-0!"
                         style={{
-                          width: `${((f.efficiencyValue(band.whPerKm) ?? 0) / widest) * 100}%`,
+                          width: `${band.share * 100}%`,
                         }}
                       />
                     </div>
@@ -420,7 +424,7 @@ export default async function StatsPage({
                       <div
                         className="h-full rounded-full bg-primary transition-[width] duration-700 ease-tesla starting:w-0!"
                         style={{
-                          width: `${((f.efficiencyValue(band.whPerKm) ?? 0) / widestSpeed) * 100}%`,
+                          width: `${band.share * 100}%`,
                         }}
                       />
                     </div>

@@ -20,7 +20,6 @@ import {
   pressureRows,
   statsTotals,
   updateDays,
-  widestEfficiency,
 } from "../stats-figures";
 import { leakWarning, type SlowLeak } from "../tire-leak";
 import { odometerRows, type OdometerPoint } from "../trends";
@@ -164,12 +163,10 @@ export function statsPage(
     f,
     settings.temperature === "f",
   );
-  const widestBand = widestEfficiency(temperatureBandRows, f);
   const speeds = speedBands(
     input.speedRows,
     speedEdges(settings.distance).shown,
   );
-  const widestSpeed = widestEfficiency(speeds, f);
   const scatter = efficiencyScatter(input.efficiency, f).sort(
     (a, b) => a.x - b.x,
   );
@@ -341,17 +338,21 @@ export function statsPage(
                 }),
               ),
           ]),
-          panel("By temperature", [
-            temperatureBandRows.length > 0 && {
-              kind: "shares",
-              rows: temperatureBandRows.map((band) => ({
-                label: `${band.from} to ${band.to} ${f.units.temperature}`,
-                share: (f.efficiencyValue(band.whPerKm) ?? 0) / widestBand,
-                text: `${f.distance(band.distanceKm)} · ${f.efficiency(band.whPerKm)}`,
-                color: "primary",
-              })),
-            },
-          ]),
+          panel(
+            "By temperature",
+            [
+              temperatureBandRows.length > 0 && {
+                kind: "shares",
+                rows: temperatureBandRows.map((band) => ({
+                  label: `${band.from} to ${band.to} ${f.units.temperature}`,
+                  share: band.share,
+                  text: `${f.distance(band.distanceKm)} · ${f.efficiency(band.whPerKm)}`,
+                  color: "primary",
+                })),
+              },
+            ],
+            temperatureBandRows.length ? "Share of distance" : null,
+          ),
           panel(
             "By speed",
             [
@@ -362,7 +363,7 @@ export function statsPage(
                     band.to === null
                       ? `${band.from}+ ${f.units.speed}`
                       : `${band.from} to ${band.to} ${f.units.speed}`,
-                  share: (f.efficiencyValue(band.whPerKm) ?? 0) / widestSpeed,
+                  share: band.share,
                   text: `${Math.round(band.share * 100)}% · ${f.efficiency(band.whPerKm)}`,
                   color: "primary",
                 })),

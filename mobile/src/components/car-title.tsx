@@ -7,7 +7,7 @@ import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { Icon } from "./icon";
 import { icons } from "./icons";
-import { summaryLine } from "./summary-line";
+import { dottedLine, summaryLine } from "./summary-line";
 import { Text } from "./text";
 
 function CarOption({
@@ -62,11 +62,11 @@ export function CarTitle({ page }: { page: OverviewPage }) {
           />
         ) : null}
       </Pressable>
-      <Text variant="strong" numberOfLines={1}>
-        {page.activity.label}
-      </Text>
-      <Text variant="caption" numberOfLines={1}>
-        {page.car.variant} · {page.activity.updated.toLowerCase()}
+      <Text variant="strong">{page.activity.label}</Text>
+      <Text variant="caption">
+        {dottedLine(
+          `${page.car.variant} · ${page.activity.updated.toLowerCase()}`,
+        )}
       </Text>
       {open && others.length ? (
         <View style={[styles.list, { backgroundColor: palette.card }]}>

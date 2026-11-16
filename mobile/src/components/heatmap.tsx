@@ -1,5 +1,6 @@
 import type { AppBlock } from "@contract";
 import { StyleSheet, View } from "react-native";
+import { largeTextCap } from "@/theme/text-size";
 import { space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { Text } from "./text";
@@ -25,7 +26,11 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
             accessibilityLabel={`${row.label}: ${total} ${block.unit}`}
             style={styles.row}
           >
-            <Text variant="caption" style={styles.label}>
+            <Text
+              variant="caption"
+              maxFontSizeMultiplier={largeTextCap}
+              style={styles.label}
+            >
               {row.label}
             </Text>
             <View style={styles.cells}>
@@ -53,7 +58,12 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
       })}
       <View style={styles.hours}>
         {block.hours.map((hour, index) => (
-          <Text key={`${hour}-${index}`} variant="caption" style={styles.hour}>
+          <Text
+            key={`${hour}-${index}`}
+            variant="caption"
+            maxFontSizeMultiplier={largeTextCap}
+            style={styles.hour}
+          >
             {hour}
           </Text>
         ))}
@@ -63,7 +73,11 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
         accessibilityLabel={`Darker cells mean more ${block.unit}. The most in one hour: ${block.max}.`}
         style={styles.key}
       >
-        <Text variant="caption" style={styles.hour}>
+        <Text
+          variant="caption"
+          maxFontSizeMultiplier={largeTextCap}
+          style={styles.hour}
+        >
           0
         </Text>
         {keyShares.map((share) => (
@@ -81,7 +95,11 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
             ) : null}
           </View>
         ))}
-        <Text variant="caption" style={styles.hour}>
+        <Text
+          variant="caption"
+          maxFontSizeMultiplier={largeTextCap}
+          style={styles.hour}
+        >
           {block.max}
         </Text>
       </View>

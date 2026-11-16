@@ -3,8 +3,10 @@ import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { space } from "@/theme/tokens";
 import { toneColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { Icon } from "./icon";
 import { icons } from "./icons";
+import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
 function statLabel(stat: AppStat): string {
@@ -19,11 +21,12 @@ export function Stat({
   size?: "value" | "title";
 }) {
   const palette = usePalette();
+  const wide = useLargeText();
   const { value } = stat;
   const content = (
     <>
       <View style={styles.label}>
-        <Text variant="label" numberOfLines={1} style={styles.labelText}>
+        <Text variant="label" style={styles.labelText}>
           {stat.label}
         </Text>
         {value.note ? (
@@ -39,15 +42,17 @@ export function Stat({
         {value.text}
       </Text>
       {stat.detail ? (
-        <Text variant="caption" numberOfLines={2}>
-          {stat.detail}
-        </Text>
+        <Text variant="caption">{dottedLine(stat.detail)}</Text>
       ) : null}
     </>
   );
   if (!value.note) {
     return (
-      <View accessible accessibilityLabel={statLabel(stat)} style={styles.stat}>
+      <View
+        accessible
+        accessibilityLabel={statLabel(stat)}
+        style={[styles.stat, wide && styles.wide]}
+      >
         {content}
       </View>
     );
@@ -59,7 +64,11 @@ export function Stat({
       accessibilityLabel={statLabel(stat)}
       accessibilityHint="Explains the value"
       onPress={() => Alert.alert(stat.label, note)}
-      style={({ pressed }) => [styles.stat, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.stat,
+        wide && styles.wide,
+        pressed && styles.pressed,
+      ]}
     >
       {content}
     </Pressable>
@@ -84,6 +93,7 @@ export function StatGrid({
 
 const styles = StyleSheet.create({
   stat: { flexBasis: "45%", flexGrow: 1, minWidth: 0, gap: 2 },
+  wide: { flexBasis: "100%" },
   label: { flexDirection: "row", alignItems: "center", gap: space.xs },
   labelText: { flexShrink: 1 },
   pressed: { opacity: 0.6 },

@@ -45,6 +45,7 @@ export function Button({
         <Text
           variant="strong"
           tone={primary ? "primaryForeground" : "secondaryForeground"}
+          style={styles.label}
         >
           {label}
         </Text>
@@ -62,6 +63,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
+  label: { paddingVertical: space.sm, textAlign: "center" },
   pressed: { opacity: 0.6 },
   off: { opacity: 0.38 },
 });

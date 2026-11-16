@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { targetHref, type TabStack } from "@/navigation/targets";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { ChargerBadge } from "./charger-badge";
 import { dottedLine } from "./summary-line";
 import { Text } from "./text";
@@ -24,7 +25,14 @@ function recordLabel(row: AppRecord): string {
 function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
   const router = useRouter();
   const palette = usePalette();
+  const large = useLargeText();
   const target = row.target;
+  const indent = row.rank !== null && !large && styles.indent;
+  const value = row.value ? (
+    <Text variant="label" tone="foreground" style={styles.value}>
+      {row.value}
+    </Text>
+  ) : null;
   const body = (
     <>
       <View style={styles.line}>
@@ -39,13 +47,10 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
             {row.title}
           </Text>
         </View>
-        {row.value ? (
-          <Text variant="label" tone="foreground" style={styles.value}>
-            {row.value}
-          </Text>
-        ) : null}
+        {large ? null : value}
       </View>
-      <View style={[styles.below, row.rank !== null && styles.indent]}>
+      <View style={[styles.below, indent]}>
+        {large ? value : null}
         {row.bar ? (
           <View style={[styles.track, { backgroundColor: palette.muted }]}>
             <View
@@ -88,7 +93,7 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
         </View>
       )}
       {row.links.length ? (
-        <View style={[styles.links, row.rank !== null && styles.indent]}>
+        <View style={[styles.links, indent]}>
           {row.links.map((link) => (
             <Pressable
               key={link.label}
@@ -138,7 +143,7 @@ const styles = StyleSheet.create({
   press: { borderRadius: radius.control },
   pressed: { opacity: 0.6 },
   line: { flexDirection: "row", alignItems: "center", gap: space.md },
-  rank: { width: 20, fontVariant: ["tabular-nums"] },
+  rank: { minWidth: 20, fontVariant: ["tabular-nums"] },
   title: {
     flex: 1,
     minWidth: 0,

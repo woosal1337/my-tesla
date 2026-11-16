@@ -5,8 +5,6 @@ import { icons } from "./icons";
 import { StepButton } from "./step-button";
 import { Text } from "./text";
 
-const titleTextCap = 2;
-
 export function DayStepper({
   title,
   onPrevious,
@@ -21,12 +19,7 @@ export function DayStepper({
   const palette = usePalette();
   return (
     <View style={styles.row}>
-      <Text
-        variant="heading"
-        accessibilityRole="header"
-        maxFontSizeMultiplier={titleTextCap}
-        style={styles.title}
-      >
+      <Text variant="heading" accessibilityRole="header" style={styles.title}>
         {title}
       </Text>
       <View style={styles.controls}>

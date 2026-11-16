@@ -6,6 +6,7 @@ import {
   View,
   type LayoutRectangle,
 } from "react-native";
+import { largeTextCap } from "@/theme/text-size";
 import { motion, radius } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { useReducedMotion } from "@/theme/use-reduced-motion";
@@ -77,6 +78,8 @@ export function SegmentedControl<Id extends string>({
             accessibilityRole="tab"
             accessibilityLabel={item.label}
             accessibilityState={{ selected }}
+            accessibilityShowsLargeContentViewer
+            accessibilityLargeContentTitle={item.label}
             hitSlop={compact ? 8 : 4}
             onPress={() => onChange(item.id)}
             onLayout={(event) => {
@@ -89,6 +92,7 @@ export function SegmentedControl<Id extends string>({
               variant="strong"
               tone={selected ? "foreground" : "mutedForeground"}
               numberOfLines={1}
+              maxFontSizeMultiplier={largeTextCap}
               style={compact && styles.compactText}
             >
               {item.label}
@@ -119,6 +123,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 8,
   },
-  compactItem: { minHeight: 32 },
+  compactItem: { minHeight: 32, paddingHorizontal: 4 },
   compactText: { fontSize: 13 },
 });

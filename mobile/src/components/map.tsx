@@ -422,7 +422,12 @@ const styles = StyleSheet.create({
   dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2 },
   places: { gap: space.md },
   section: { gap: space.md, marginTop: space.sm },
-  legend: { flexDirection: "row", gap: space.lg },
+  legend: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: space.lg,
+    rowGap: space.xs,
+  },
   legendItem: { flexDirection: "row", alignItems: "center", gap: space.sm },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
 });

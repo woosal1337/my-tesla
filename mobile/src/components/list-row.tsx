@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { useLargeText } from "@/theme/use-text-size";
 import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
@@ -29,18 +30,24 @@ export function ListRow({
   disabled?: boolean;
 }) {
   const palette = usePalette();
+  const stacked = useLargeText() && Boolean(start) && startWidth === undefined;
+  const rowStyle = stacked ? [styles.row, styles.stackedRow] : styles.row;
   const body = (
     <>
       {start ? (
         <View
           style={
-            startWidth === undefined ? styles.start : { width: startWidth }
+            stacked
+              ? styles.stackedLine
+              : startWidth === undefined
+                ? styles.start
+                : { width: startWidth }
           }
         >
           {start}
         </View>
       ) : null}
-      <View style={styles.middle}>
+      <View style={stacked ? styles.stackedMiddle : styles.middle}>
         {typeof title === "string" ? (
           <Text variant="strong">{title}</Text>
         ) : (
@@ -49,12 +56,14 @@ export function ListRow({
         {subtitle ? <Text variant="label">{dottedLine(subtitle)}</Text> : null}
         {accessory}
       </View>
-      {end ? <View style={styles.end}>{end}</View> : null}
+      {end ? (
+        <View style={stacked ? styles.stackedLine : styles.end}>{end}</View>
+      ) : null}
     </>
   );
   if (!onPress) {
     return (
-      <View accessible accessibilityLabel={label} style={styles.row}>
+      <View accessible accessibilityLabel={label} style={rowStyle}>
         {body}
       </View>
     );
@@ -68,7 +77,7 @@ export function ListRow({
       onPress={onPress}
       android_ripple={{ color: palette.accent }}
       style={({ pressed }) => [
-        styles.row,
+        rowStyle,
         pressed && { backgroundColor: palette.card },
       ]}
     >
@@ -109,8 +118,16 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     overflow: "hidden",
   },
+  stackedRow: { flexDirection: "column", alignItems: "stretch", gap: space.xs },
   start: { width: 76 },
   middle: { flex: 1, minWidth: 0 },
+  stackedMiddle: { minWidth: 0 },
   end: { alignItems: "flex-end", maxWidth: "35%" },
+  stackedLine: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    columnGap: space.md,
+  },
   tabular: { fontVariant: ["tabular-nums"] },
 });

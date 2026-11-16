@@ -1,6 +1,7 @@
 import type { AppDayStrip, DayKind } from "@contract";
 import { StyleSheet, View } from "react-native";
 import type { Palette } from "@/theme/palette";
+import { largeTextCap } from "@/theme/text-size";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { Text } from "./text";
@@ -73,7 +74,12 @@ export function DayStrip({
       </View>
       <View style={styles.hours}>
         {today.hours.map((hour, index) => (
-          <Text key={`${hour}-${index}`} variant="caption" style={styles.hour}>
+          <Text
+            key={`${hour}-${index}`}
+            variant="caption"
+            maxFontSizeMultiplier={largeTextCap}
+            style={styles.hour}
+          >
             {hour}
           </Text>
         ))}

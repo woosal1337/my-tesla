@@ -2,9 +2,11 @@ import type { AppChart, AppChartSeries, ChartDash } from "@contract";
 import { useState } from "react";
 import { StyleSheet, View, type GestureResponderEvent } from "react-native";
 import Svg, { Circle, G, Line, Path, Rect } from "react-native-svg";
+import { largeTextCap } from "@/theme/text-size";
 import { space } from "@/theme/tokens";
 import { chartColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { useAxisScale } from "@/theme/use-text-size";
 import {
   areaPath,
   baselineValue,
@@ -14,9 +16,9 @@ import {
   scale,
   type Plot,
 } from "./chart-geometry";
-import { largeTextCap, Text } from "./text";
+import { Text } from "./text";
 
-const axisWidth = 40;
+const baseAxisWidth = 40;
 const labelHeight = 20;
 const formats = new Map<string, Intl.NumberFormat>();
 const dashPatterns: Record<ChartDash, number[] | undefined> = {
@@ -109,6 +111,7 @@ export function Chart({
   height?: number;
 }) {
   const palette = usePalette();
+  const axisWidth = baseAxisWidth * useAxisScale();
   const [width, setWidth] = useState(0);
   const [active, setActive] = useState<number | null>(null);
   const bars = hasBars(chart);
@@ -325,6 +328,7 @@ export function Chart({
                 style={[
                   styles.tooltip,
                   {
+                    maxWidth: width / 2 - 8,
                     backgroundColor: palette.background,
                     borderColor: palette.border,
                   },

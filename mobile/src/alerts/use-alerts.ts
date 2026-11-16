@@ -9,15 +9,15 @@ import { pushCatalog } from "@/api/responses";
 import type { Connection } from "@/connection/server";
 import { useCar } from "@/car/car-provider";
 import { useConnection } from "@/connection/connection-provider";
+import { keychainKeys } from "@/connection/install";
 import { createChannels, pushToken, PushSetupError } from "./push-token";
 
-const storageKey = "alert-events";
 const choicesKey = ["alert-events"];
 
 async function readChoices(): Promise<string[]> {
   try {
     const stored: unknown = JSON.parse(
-      (await SecureStore.getItemAsync(storageKey)) ?? "[]",
+      (await SecureStore.getItemAsync(keychainKeys.alerts)) ?? "[]",
     );
     return Array.isArray(stored)
       ? stored.filter((id) => typeof id === "string")
@@ -61,7 +61,10 @@ export function useAlertChoices(events: readonly PushEvent[]) {
   const update = useMutation({
     mutationFn: async (chosen: string[]) => {
       await registerDevice(connection, events, chosen, true);
-      await SecureStore.setItemAsync(storageKey, JSON.stringify(chosen));
+      await SecureStore.setItemAsync(
+        keychainKeys.alerts,
+        JSON.stringify(chosen),
+      );
       return chosen;
     },
     onSuccess: (chosen) => queryClient.setQueryData(choicesKey, chosen),
@@ -87,7 +90,7 @@ export async function forgetAlerts(connection: Connection): Promise<void> {
       body: { token },
     }).catch(() => null);
   }
-  await SecureStore.deleteItemAsync(storageKey);
+  await SecureStore.deleteItemAsync(keychainKeys.alerts);
 }
 
 export function useAlertRefresh(): void {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { defaultPreferences } from "../preferences";
+import { defaultPreferences, overviewKeys } from "../preferences";
 import { applySetting, settingsPage } from "./settings";
 
 const base = defaultPreferences;
@@ -13,7 +13,9 @@ describe("settingsPage", () => {
       "Numbers",
       "Charging cost",
       "Location",
+      "Insights",
       "Overview",
+      "Status and Location",
     ]);
     const zone = page.groups[1]?.items[0];
     expect(zone).toMatchObject({ key: "timeZone", value: "auto" });
@@ -29,13 +31,34 @@ describe("settingsPage", () => {
       "maps",
       "mapTheme",
     ]);
-    expect(page.groups[5]?.items[1]).toEqual({
+  });
+
+  test("puts each switch in the group of the screen that it changes", () => {
+    const page = settingsPage(base, [], "UTC");
+    const group = (title: string) =>
+      page.groups.find((entry) => entry.title === title)?.items ?? [];
+    const keys = (title: string) => group(title).map((item) => item.key);
+    expect(keys("Insights")).toEqual(["period"]);
+    expect(keys("Overview")).toEqual(["overview.render", "overview.recent"]);
+    expect(group("Overview")[0]).toEqual({
       key: "overview.render",
       kind: "switch",
       label: "Car image",
       hint: null,
       value: true,
     });
+    expect(keys("Status and Location")).toEqual([
+      "overview.live",
+      "overview.today",
+      "overview.tires",
+      "overview.location",
+    ]);
+    const switches = page.groups
+      .flatMap((entry) => entry.items.map((item) => item.key))
+      .filter((key) => key.startsWith("overview."));
+    expect(switches.toSorted()).toEqual(
+      overviewKeys.map(({ id }) => `overview.${id}`).toSorted(),
+    );
   });
 
   test("previews the sample values in the chosen units", () => {
@@ -59,7 +82,7 @@ describe("applySetting", () => {
     expect(next?.temperature).toBe(base.temperature);
   });
 
-  test("turns an Overview card off", () => {
+  test("turns a card off", () => {
     const next = applySetting(
       base,
       { key: "overview.tires", value: false },

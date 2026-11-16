@@ -12,6 +12,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 - Without a saved currency, the web and the mobile app show costs in the currency of the country where the cars charged most often, for example "$59.93 spent". The demo shows US dollars. A saved currency stays, also "No symbol". A country without a listed currency keeps "No symbol".
 - The Overview of the mobile app shows each value once. The title shows the state without the battery, the left callout shows the battery and the range, and the top callout shows the lock only with the MQTT feed. The right callout shows a charge only with its power or limit. The Battery row shows the health and the capacity, and the Stats row shows the distance and the efficiency of the default period. The Status row leaves out the values on the stage. The rows of the car switcher show the battery and the state of each car. `GET /api/app/cars/{carId}/overview` reads the capacity history and the drive totals for these summaries.
+- The Settings tab of the mobile app names its last groups after the screens that they change. "Insights" holds "Default period", "Overview" holds "Car image" and "Last drive and charge", and "Status and Location" holds "Live status", "Today", "Tires", and "Location". Before, one group "Overview" held all seven, and most of them changed Status or Location. The hint of "Default period" names Charging insights too, on the web and in the app. The app needs this server version, and needs no update.
 
 ### Fixed
 

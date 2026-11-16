@@ -216,7 +216,7 @@ export function settingsPage(
         ],
       },
       {
-        title: "Overview",
+        title: "Insights",
         note: null,
         items: [
           choice(
@@ -224,19 +224,39 @@ export function settingsPage(
             "Default period",
             preferences,
             periods,
-            "The first period of Battery, Stats, and Places.",
+            "The first period of Battery, Stats, Places, and Charging insights.",
           ),
-          ...overviewKeys.map(({ id, label }): SettingItem => ({
-            key: `overview.${id}`,
-            kind: "switch",
-            label,
-            hint: null,
-            value: preferences.overview[id],
-          })),
         ],
+      },
+      {
+        title: "Overview",
+        note: null,
+        items: cardSwitches(preferences, true),
+      },
+      {
+        title: "Status and Location",
+        note: null,
+        items: cardSwitches(preferences, false),
       },
     ],
   };
+}
+
+const overviewScreenSwitches: readonly string[] = ["render", "recent"];
+
+function cardSwitches(
+  preferences: Preferences,
+  onOverview: boolean,
+): SettingItem[] {
+  return overviewKeys
+    .filter(({ id }) => overviewScreenSwitches.includes(id) === onOverview)
+    .map(({ id, label }): SettingItem => ({
+      key: `overview.${id}`,
+      kind: "switch",
+      label,
+      hint: null,
+      value: preferences.overview[id],
+    }));
 }
 
 function isChoiceKey(key: string): key is ChoiceKey {

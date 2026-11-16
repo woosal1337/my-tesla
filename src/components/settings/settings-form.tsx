@@ -503,7 +503,7 @@ export function SettingsForm({
             />
             <SettingRow
               label="Default period"
-              hint="Battery, Stats, and Places open with this period."
+              hint="Battery, Stats, Places, and Charging insights open with this period."
               control={
                 <Choice
                   label="Default period"

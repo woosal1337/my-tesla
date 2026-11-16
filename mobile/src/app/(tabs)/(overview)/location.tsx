@@ -18,15 +18,11 @@ export default function LocationScreen() {
       <QueryView query={overview}>
         {(page) => {
           const location = page.location;
-          const seen = page.menu.find((row) => row.key === "location");
           if (!location) {
             return (
               <EmptyState
                 title="No map"
-                text={
-                  seen?.subtitle ??
-                  "Maps are off in Settings, or TeslaMate has no position yet."
-                }
+                text="Maps are off in Settings, or TeslaMate has no position yet."
               />
             );
           }

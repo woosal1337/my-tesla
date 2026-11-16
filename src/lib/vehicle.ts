@@ -110,6 +110,17 @@ export function levelsUsedText(
 
 const coldBatteryGap = 3;
 
+export function coldBatteryText(input: {
+  level: number | null;
+  usableLevel: number | null;
+}): string | null {
+  return input.level !== null &&
+    input.usableLevel !== null &&
+    input.level - input.usableLevel >= coldBatteryGap
+    ? `${input.usableLevel}% usable, the battery is cold`
+    : null;
+}
+
 export function batteryCaption(input: {
   level: number | null;
   usableLevel: number | null;
@@ -121,14 +132,7 @@ export function batteryCaption(input: {
       ? `Charging to ${Math.round(input.limitPercent)}%`
       : "Charging";
   }
-  if (
-    input.level !== null &&
-    input.usableLevel !== null &&
-    input.level - input.usableLevel >= coldBatteryGap
-  ) {
-    return `${input.usableLevel}% usable, the battery is cold`;
-  }
-  return "Rated range";
+  return coldBatteryText(input) ?? "Rated range";
 }
 
 export function driveEfficiency(drive: {

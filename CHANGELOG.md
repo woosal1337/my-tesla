@@ -8,6 +8,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 - The day headings of Drives, Charging, and the Report show the total of the day, on the web and in the mobile app: the trip count and the distance, and the energy added, for example "Wed 21 Oct · 4 trips · 64 km". `GET /api/app/cars/{carId}/drives`, `charges`, and `report` give `total` for each day. The app needs this server version for the total, and shows only the date with an older server.
 
+### Changed
+
+- The Overview of the mobile app shows each value once. The title shows the state without the battery, the left callout shows the battery and the range, and the top callout shows the lock only with the MQTT feed. The right callout shows a charge only with its power or limit. The Battery row shows the health and the capacity, and the Stats row shows the distance and the efficiency of the default period. The Status row leaves out the values on the stage. The rows of the car switcher show the battery and the state of each car. `GET /api/app/cars/{carId}/overview` reads the capacity history and the drive totals for these summaries.
+
 ### Fixed
 
 - A duration of 10 hours or more and a 12-hour clock stay on one line in the rows of Drives, Charging, and the Report. The time column is now 76 pt wide.

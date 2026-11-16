@@ -2,11 +2,17 @@ import { assessBatteryLevel, assessTirePressure } from "../assessment";
 import type { Formatter } from "../format";
 import { historyText } from "../history/changes";
 import type { HistoryEvent } from "../history/store";
-import { buildTimeline } from "../insights";
+import {
+  batteryCapacity,
+  buildTimeline,
+  type CapacityPoint,
+} from "../insights";
 import type { LiveFeed } from "../live/live";
 import { liveNotices, liveTiles } from "../live/tiles";
 import type { Preferences } from "../preferences";
 import type { Car, CarSnapshot, Charge, Drive } from "../queries";
+import type { DriveTotals } from "../stats-data";
+import { statsTotals } from "../stats-figures";
 import type { DayRecords } from "../timeline-data";
 import { leakWarning, type SlowLeak } from "../tire-leak";
 import {
@@ -14,6 +20,7 @@ import {
   batteryCaption,
   batteryTone,
   carActivity,
+  coldBatteryText,
   liveActivity,
   ongoingText,
   variantLine,
@@ -25,8 +32,10 @@ import type {
   OverviewCallout,
   OverviewMenuRow,
   OverviewPage,
+  PeriodId,
   RecentRecord,
 } from "./contract";
+import { periodLabel } from "./panels";
 import { appStat, appValue } from "./values";
 
 export type OverviewInput = {
@@ -42,7 +51,16 @@ export type OverviewInput = {
   history: HistoryEvent[] | null;
   show: Preferences["overview"];
   showMaps: boolean;
+  capacity: CapacityPoint[];
+  driven: DriveTotals;
+  period: PeriodId;
 };
+
+const batteryCalloutTones = {
+  charge: "charge",
+  low: "warning",
+  normal: "normal",
+} as const;
 
 function joined(parts: (string | null | false | undefined)[]): string | null {
   const kept = parts.filter((part): part is string => Boolean(part));
@@ -148,6 +166,30 @@ export function overviewPage(
     chargingNow?.powerKw === null || chargingNow?.powerKw === undefined
       ? null
       : `${f.number(chargingNow.powerKw, 1)} kW`;
+  const chargeText = chargingNow
+    ? joined([
+        powerText,
+        chargingNow.limitPercent === null
+          ? null
+          : `to ${Math.round(chargingNow.limitPercent)}%`,
+      ])
+    : null;
+  const lockCallout: OverviewCallout[] =
+    liveNow && liveNow.locked !== null
+      ? [
+          {
+            key: "lock",
+            side: "top",
+            label: "Security",
+            value:
+              joined([
+                liveNow.locked ? "Locked" : "Unlocked",
+                liveNow.sentryMode === true && "Sentry Mode on",
+              ]) ?? "—",
+            tone: liveNow.locked ? "normal" : "warning",
+          },
+        ]
+      : [];
   const callouts: OverviewCallout[] = hasData
     ? [
         {
@@ -155,39 +197,17 @@ export function overviewPage(
           side: "left",
           label: "Battery",
           value: joined([batteryText, rangeText]) ?? "—",
-          tone: charging ? "charge" : "normal",
+          tone: batteryCalloutTones[
+            batteryTone(snapshot.batteryLevel, charging)
+          ],
         },
-        liveNow && liveNow.locked !== null
-          ? {
-              key: "lock",
-              side: "top",
-              label: "Security",
-              value:
-                joined([
-                  liveNow.locked ? "Locked" : "Unlocked",
-                  liveNow.sentryMode === true && "Sentry Mode on",
-                ]) ?? "—",
-              tone: liveNow.locked ? "normal" : "warning",
-            }
-          : {
-              key: "seen",
-              side: "top",
-              label: "Last seen",
-              value: f.relative(lastSeen, now),
-              tone: "normal",
-            },
-        chargingNow
+        ...lockCallout,
+        chargeText
           ? {
               key: "charging",
               side: "right",
               label: "Charging",
-              value:
-                joined([
-                  powerText,
-                  chargingNow.limitPercent === null
-                    ? null
-                    : `to ${Math.round(chargingNow.limitPercent)}%`,
-                ]) ?? "Charging",
+              value: chargeText,
               tone: "charge",
             }
           : liveNow?.charging.pluggedIn
@@ -207,6 +227,17 @@ export function overviewPage(
               },
       ]
     : [];
+  const stageTiles = new Set(
+    callouts.map((callout) =>
+      callout.key === "plug" ? "charging" : callout.key,
+    ),
+  );
+  const statusTiles = tiles.filter(
+    (tile) => !stageTiles.has(tile.key) && tile.title !== activity.label,
+  );
+  const estimate = batteryCapacity(input.capacity);
+  const health = estimate?.healthPercent ?? null;
+  const { whPerKm, distanceTotal } = statsTotals(input.driven, null, f);
   const menu: OverviewMenuRow[] = [
     {
       key: "drives",
@@ -218,37 +249,57 @@ export function overviewPage(
     {
       key: "charging",
       title: "Charging",
-      subtitle: chargingNow
-        ? joined(["Charging now", powerText])
-        : input.lastCharge
-          ? recordLine(lastChargeRecord(input.lastCharge, f, now))
-          : "No charge yet",
+      subtitle: input.lastCharge
+        ? recordLine(lastChargeRecord(input.lastCharge, f, now))
+        : "No charge yet",
     },
     {
       key: "battery",
       title: "Battery",
-      subtitle: hasData ? joined([batteryText, rangeText, caption]) : null,
+      subtitle:
+        joined([
+          coldBatteryText({
+            level: snapshot.batteryLevel,
+            usableLevel: snapshot.usableBatteryLevel,
+          }),
+          health !== null && `Health ${f.number(health, 1)}%`,
+          estimate && `Capacity ${f.number(estimate.nowKwh, 1)} kWh`,
+        ]) ?? "No long charge yet",
     },
     {
       key: "stats",
       title: "Stats",
-      subtitle: hasData ? `Odometer ${odometerText}` : null,
+      subtitle: joined([
+        periodLabel(input.period),
+        input.driven.drives
+          ? `${f.number(distanceTotal)} ${f.units.distance}`
+          : "No drive",
+        whPerKm !== null && f.efficiency(whPerKm),
+      ]),
     },
     { key: "places", title: "Places", subtitle: "Visited and charging places" },
     ...(hasData && hasPosition
-      ? [{ key: "location" as const, title: "Location", subtitle: seenText }]
+      ? [
+          {
+            key: "location" as const,
+            title: "Location",
+            subtitle: "Map and Open in Maps",
+          },
+        ]
       : []),
     ...(live
       ? [
           {
             key: "status" as const,
             title: "Status",
-            subtitle: tiles.length
-              ? tiles
+            subtitle: statusTiles.length
+              ? statusTiles
                   .slice(0, 3)
                   .map((tile) => tile.title)
                   .join(" · ")
-              : "No live values yet",
+              : tiles.length
+                ? null
+                : "No live values yet",
           },
         ]
       : []),

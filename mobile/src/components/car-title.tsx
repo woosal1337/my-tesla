@@ -1,39 +1,36 @@
-import type { OverviewPage } from "@contract";
+import type { CarIdentity, OverviewPage } from "@contract";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { useOverview } from "@/api/queries";
 import { useCar } from "@/car/car-provider";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { Icon } from "./icon";
 import { icons } from "./icons";
+import { summaryLine } from "./summary-line";
 import { Text } from "./text";
 
-function BatteryGlyph({
-  level,
-  tone,
+function CarOption({
+  entry,
+  onPress,
 }: {
-  level: number | null;
-  tone: "charge" | "low" | "normal";
+  entry: CarIdentity;
+  onPress: () => void;
 }) {
-  const palette = usePalette();
-  const fill = {
-    charge: palette.charge,
-    low: palette.destructive,
-    normal: palette.foreground,
-  }[tone];
-  const share = Math.min(100, Math.max(0, level ?? 0));
+  const page = useOverview(entry.id).data;
+  const parts = [page?.battery?.value.text, page?.activity.label].filter(
+    (part): part is string => Boolean(part),
+  );
   return (
-    <View style={styles.glyph} accessibilityElementsHidden>
-      <View style={[styles.glyphBody, { borderColor: palette.subtle }]}>
-        <View
-          style={[
-            styles.glyphFill,
-            { width: `${share}%`, backgroundColor: fill },
-          ]}
-        />
-      </View>
-      <View style={[styles.glyphTip, { backgroundColor: palette.subtle }]} />
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={[`Show ${entry.name}`, ...parts].join(", ")}
+      onPress={onPress}
+      style={({ pressed }) => [styles.option, pressed && styles.pressed]}
+    >
+      <Text variant="strong">{entry.name}</Text>
+      <Text variant="label">{parts.length ? summaryLine(parts) : " "}</Text>
+    </Pressable>
   );
 }
 
@@ -42,10 +39,6 @@ export function CarTitle({ page }: { page: OverviewPage }) {
   const { cars, car, choose } = useCar();
   const [open, setOpen] = useState(false);
   const others = cars.filter((entry) => entry.id !== car.id);
-  const battery = page.battery;
-  const state = [battery?.value.text, page.activity.label]
-    .filter(Boolean)
-    .join(" · ");
   return (
     <View style={styles.title}>
       <Pressable
@@ -69,39 +62,23 @@ export function CarTitle({ page }: { page: OverviewPage }) {
           />
         ) : null}
       </Pressable>
-      <View
-        accessible
-        accessibilityLabel={`${state}, ${page.activity.updated}`}
-        style={styles.state}
-      >
-        {battery ? (
-          <BatteryGlyph level={battery.level} tone={battery.tone} />
-        ) : null}
-        <Text variant="strong" numberOfLines={1}>
-          {state}
-        </Text>
-      </View>
+      <Text variant="strong" numberOfLines={1}>
+        {page.activity.label}
+      </Text>
       <Text variant="caption" numberOfLines={1}>
         {page.car.variant} · {page.activity.updated.toLowerCase()}
       </Text>
       {open && others.length ? (
         <View style={[styles.list, { backgroundColor: palette.card }]}>
           {others.map((entry) => (
-            <Pressable
+            <CarOption
               key={entry.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Show ${entry.name}`}
+              entry={entry}
               onPress={() => {
                 choose(entry.id);
                 setOpen(false);
               }}
-              style={({ pressed }) => [
-                styles.option,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text variant="strong">{entry.name}</Text>
-            </Pressable>
+            />
           ))}
         </View>
       ) : null}
@@ -113,23 +90,17 @@ const styles = StyleSheet.create({
   title: { gap: space.xs },
   name: { flexDirection: "row", alignItems: "center", gap: space.sm },
   nameText: { flexShrink: 1 },
-  state: { flexDirection: "row", alignItems: "center", gap: space.sm },
-  glyph: { flexDirection: "row", alignItems: "center" },
-  glyphBody: {
-    width: 24,
-    height: 12,
-    borderWidth: 1.5,
-    borderRadius: 3,
-    padding: 1.5,
-  },
-  glyphFill: { height: "100%", borderRadius: 1 },
-  glyphTip: { width: 2, height: 5, borderRadius: 1, marginLeft: 1 },
   list: {
     marginTop: space.sm,
     borderRadius: radius.card,
     borderCurve: "continuous",
     overflow: "hidden",
   },
-  option: { paddingHorizontal: space.lg, paddingVertical: space.md },
+  option: {
+    minHeight: 48,
+    gap: 2,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+  },
   pressed: { opacity: 0.6 },
 });

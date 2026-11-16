@@ -2,7 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { createFormatter } from "../format";
 import { liveView } from "../live/view";
 import { defaultPreferences } from "../preferences";
-import type { Car, CarSnapshot } from "../queries";
+import type { Car, CarSnapshot, Charge, Drive } from "../queries";
+import type { OverviewPage } from "./contract";
 import { overviewPage, type OverviewInput } from "./overview";
 
 const f = createFormatter(defaultPreferences, "Europe/Istanbul");
@@ -57,7 +58,78 @@ const input: OverviewInput = {
   history: null,
   show: defaultPreferences.overview,
   showMaps: true,
+  capacity: [],
+  driven: {
+    drives: 0,
+    distanceKm: 0,
+    minutes: 0,
+    usedKwh: 0,
+    speedMaxKmh: null,
+    longestKm: null,
+  },
+  period: "30d",
 };
+
+const lastDrive: Drive = {
+  id: 7,
+  startAt: new Date("2026-10-17T13:00:00Z"),
+  endAt: new Date("2026-10-17T13:25:00Z"),
+  from: "Home",
+  to: "Office",
+  distanceKm: 18.2,
+  durationMin: 25,
+  efficiencyWhPerKm: 150,
+  speedMaxKmh: 90,
+  powerMaxKw: 120,
+  powerMinKw: -40,
+  ascentM: null,
+  descentM: null,
+  outsideTempAvg: 18,
+  startLevel: 66,
+  endLevel: 62,
+  leftOpen: false,
+};
+
+const lastCharge: Charge = {
+  id: 9,
+  startAt: new Date("2026-10-16T19:00:00Z"),
+  endAt: new Date("2026-10-16T22:00:00Z"),
+  place: "Home",
+  energyAddedKwh: 24.6,
+  startLevel: 30,
+  endLevel: 66,
+  durationMin: 180,
+  maxPowerKw: 11,
+  fastCharger: false,
+  cost: null,
+  costEstimated: false,
+  latitude: null,
+  longitude: null,
+};
+
+function liveInput(values: Record<string, string>): OverviewInput {
+  return {
+    ...input,
+    live: {
+      connected: true,
+      hasValues: true,
+      view: liveView(values, {}, now.getTime()),
+    },
+  };
+}
+
+function menuSubtitle(page: OverviewPage, key: string): string | null {
+  return page.menu.find((row) => row.key === key)?.subtitle ?? null;
+}
+
+function repeatedValues(page: OverviewPage): string[] {
+  const parts = [
+    page.activity.label,
+    ...page.callouts.map((callout) => callout.value),
+    ...page.menu.map((row) => row.subtitle),
+  ].flatMap((text) => text?.split(" · ") ?? []);
+  return parts.filter((part, index) => parts.indexOf(part) !== index);
+}
 
 describe("overviewPage", () => {
   test("lists the lock and Sentry Mode changes with an unlock as a warning", () => {
@@ -123,13 +195,6 @@ describe("overviewPage", () => {
         tone: "normal",
       },
       {
-        key: "seen",
-        side: "top",
-        label: "Last seen",
-        value: "5 min ago",
-        tone: "normal",
-      },
-      {
         key: "odometer",
         side: "right",
         label: "Odometer",
@@ -146,9 +211,133 @@ describe("overviewPage", () => {
       "location",
       "settings",
     ]);
-    expect(page.menu[0]?.subtitle).toBe("No drive yet");
-    expect(page.menu[2]?.subtitle).toBe("62% · 271 km · Rated range");
-    expect(page.menu[5]?.subtitle).toBe("Last seen today at 17:55");
+    expect(page.menu.map((row) => row.subtitle)).toEqual([
+      "No drive yet",
+      "No charge yet",
+      "No long charge yet",
+      "Last 30 days · No drive",
+      "Visited and charging places",
+      "Map and Open in Maps",
+      null,
+    ]);
+  });
+
+  test("gives the health, the capacity, and the totals of the period", () => {
+    const page = overviewPage(
+      {
+        ...input,
+        capacity: [
+          { at: new Date("2026-08-01T00:00:00Z"), kwh: 60 },
+          { at: new Date("2026-09-01T00:00:00Z"), kwh: 59.5 },
+          { at: new Date("2026-10-01T00:00:00Z"), kwh: 59 },
+        ],
+        driven: {
+          drives: 41,
+          distanceKm: 1760.4,
+          minutes: 1900,
+          usedKwh: 257,
+          speedMaxKmh: 130,
+          longestKm: 210,
+        },
+      },
+      f,
+      now,
+    );
+    expect(menuSubtitle(page, "battery")).toBe(
+      "Health 99.2% · Capacity 59.5 kWh",
+    );
+    expect(menuSubtitle(page, "stats")).toBe(
+      "Last 30 days · 1,760 km · 146 Wh/km",
+    );
+  });
+
+  test("names a cold battery first in the Battery row", () => {
+    const page = overviewPage(
+      { ...input, snapshot: { ...snapshot, usableBatteryLevel: 58 } },
+      f,
+      now,
+    );
+    expect(menuSubtitle(page, "battery")).toBe(
+      "58% usable, the battery is cold",
+    );
+  });
+
+  test("warns about a low battery in the left callout", () => {
+    const page = overviewPage(
+      { ...input, snapshot: { ...snapshot, batteryLevel: 15 } },
+      f,
+      now,
+    );
+    expect(page.callouts[0]).toMatchObject({
+      key: "battery",
+      value: "15% · 271 km",
+      tone: "warning",
+    });
+  });
+
+  test("shows the power and the limit of a charge in the right callout", () => {
+    const page = overviewPage(
+      liveInput({
+        charging_state: "Charging",
+        plugged_in: "true",
+        charger_power: "7.4",
+        charge_limit_soc: "80",
+      }),
+      f,
+      now,
+    );
+    expect(page.callouts.at(-1)).toEqual({
+      key: "charging",
+      side: "right",
+      label: "Charging",
+      value: "7.4 kW · to 80%",
+      tone: "charge",
+    });
+    expect(page.callouts[0]?.tone).toBe("charge");
+  });
+
+  test("shows each value once", () => {
+    const pages = [
+      overviewPage(input, f, now),
+      overviewPage(
+        {
+          ...liveInput({
+            state: "online",
+            locked: "true",
+            sentry_mode: "true",
+            plugged_in: "true",
+            charging_state: "Complete",
+            charge_limit_soc: "80",
+            doors_open: "false",
+            is_climate_on: "false",
+            version: "2026.20.300",
+          }),
+          lastDrive,
+          lastCharge,
+        },
+        f,
+        now,
+      ),
+      overviewPage(
+        {
+          ...liveInput({
+            state: "driving",
+            shift_state: "D",
+            locked: "true",
+            is_climate_on: "true",
+          }),
+          lastDrive,
+          lastCharge,
+        },
+        f,
+        now,
+      ),
+    ];
+    for (const page of pages) expect(repeatedValues(page)).toEqual([]);
+    expect(menuSubtitle(pages[1] as OverviewPage, "status")).toBe(
+      "All closed · Climate off · Up to date",
+    );
+    expect(menuSubtitle(pages[2] as OverviewPage, "status")).toBe("Climate on");
   });
 
   test("shows the live tiles with the end of the charge as a time", () => {
@@ -174,14 +363,10 @@ describe("overviewPage", () => {
     ).toEqual([
       ["battery", "62% · 271 km"],
       ["lock", "Locked"],
-      ["charging", "Charging"],
+      ["plug", "Plugged in"],
     ]);
-    expect(page.menu.find((row) => row.key === "status")?.subtitle).toContain(
-      "Locked",
-    );
-    expect(page.menu.find((row) => row.key === "charging")?.subtitle).toBe(
-      "Charging now",
-    );
+    expect(menuSubtitle(page, "status")).toBeNull();
+    expect(menuSubtitle(page, "charging")).toBe("No charge yet");
     expect(page.battery?.caption).toBe("Charging");
     expect(page.battery?.fullAt).toBe("2026-10-17T17:00:00.000Z");
   });
@@ -214,5 +399,8 @@ describe("overviewPage", () => {
     expect(page.empty).toContain("TeslaMate fills this page");
     expect(page.battery).toBeNull();
     expect(page.stats).toEqual([]);
+    expect(page.callouts).toEqual([]);
+    expect(menuSubtitle(page, "battery")).toBe("No long charge yet");
+    expect(menuSubtitle(page, "stats")).toBe("Last 30 days · No drive");
   });
 });

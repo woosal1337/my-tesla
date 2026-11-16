@@ -2,10 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { createFormatter } from "../format";
 import { dayWindow } from "../insights";
 import { liveView } from "../live/view";
+import type { VisitedPlace } from "../places-data";
 import { defaultPreferences } from "../preferences";
 import type { Car, CarSnapshot, Charge, Drive } from "../queries";
 import type { OverviewPage } from "./contract";
 import { dayStrip, overviewPage, type OverviewInput } from "./overview";
+import { placesPage } from "./places";
 
 const f = createFormatter(defaultPreferences, "Europe/Istanbul");
 const now = new Date("2026-10-17T15:00:00Z");
@@ -68,6 +70,7 @@ const input: OverviewInput = {
     speedMaxKmh: null,
     longestKm: null,
   },
+  visited: [],
   period: "30d",
 };
 
@@ -107,6 +110,31 @@ const lastCharge: Charge = {
   latitude: null,
   longitude: null,
 };
+
+const visited: VisitedPlace[] = [
+  {
+    key: "g1",
+    label: "Home",
+    city: "Tempe",
+    geofenceId: 1,
+    visits: 20,
+    parkedS: 72_000,
+    lastAt: now,
+    latitude: null,
+    longitude: null,
+  },
+  {
+    key: "g2",
+    label: "Office",
+    city: "Tempe",
+    geofenceId: 2,
+    visits: 8,
+    parkedS: 28_800,
+    lastAt: now,
+    latitude: null,
+    longitude: null,
+  },
+];
 
 function liveInput(values: Record<string, string>): OverviewInput {
   return {
@@ -254,7 +282,7 @@ describe("overviewPage", () => {
       "No charge yet",
       "No long charge yet",
       "Last 30 days · No drive",
-      "Visited and charging places",
+      "No place, last 30 days",
       "Map and Open in Maps",
       null,
     ]);
@@ -286,6 +314,41 @@ describe("overviewPage", () => {
     );
     expect(menuSubtitle(page, "stats")).toBe(
       "Last 30 days · 1,760 km · 146 Wh/km",
+    );
+  });
+
+  test("counts the visited places of the default period in the Places row", () => {
+    const page = overviewPage({ ...input, visited }, f, now);
+    expect(menuSubtitle(page, "places")).toBe("2 places, last 30 days");
+    expect(
+      menuSubtitle(
+        overviewPage({ ...input, visited: visited.slice(0, 1) }, f, now),
+        "places",
+      ),
+    ).toBe("1 place, last 30 days");
+    expect(
+      menuSubtitle(
+        overviewPage({ ...input, visited, period: "all" }, f, now),
+        "places",
+      ),
+    ).toBe("2 places, all records");
+    const places = placesPage(
+      {
+        visited,
+        charging: [],
+        geofences: [],
+        routes: [],
+        areas: { countries: [], states: [], cities: [] },
+        roads: [],
+      },
+      defaultPreferences,
+      "30d",
+      f,
+      now,
+      true,
+    );
+    expect(menuSubtitle(page, "places")).toStartWith(
+      `${places.hero[0]?.value.text} places`,
     );
   });
 
@@ -352,6 +415,7 @@ describe("overviewPage", () => {
           }),
           lastDrive,
           lastCharge,
+          visited,
         },
         f,
         now,

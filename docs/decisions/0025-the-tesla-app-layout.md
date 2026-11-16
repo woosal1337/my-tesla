@@ -2,7 +2,7 @@
 
 Date: 2026-10-22
 
-Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)). Since 2026-11-16, the Settings of the app name each group after the screen that its switches change.
+Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)). Since 2026-11-16, the Settings of the app name each group after the screen that its switches change. Since 2026-11-16, the Places row gives the count of the visited places in the default period.
 
 ## Context
 
@@ -31,10 +31,12 @@ The Overview of the mobile app was the web Overview in cards: the car image, the
    | Last charge, also an open charge | Charging row |
    | Cold battery, health, capacity | Battery row |
    | Distance and efficiency of the default period of the person | Stats row |
+   | Count of the visited places in the default period of the person | Places row |
+   | Place of a parked car | Location row |
    | Openings, the charge port when it is not on the stage, climate, software, route | Status row |
 
    - A menu summary gives a fact of the screen that it opens and that the title and the callouts do not show. The Battery row has the same health and capacity as the hero of the Battery page. The Stats row has the default period of the person, because the Stats page has no calendar month.
-   - A static description (Places, Location) and an empty summary (Settings) repeat nothing. A real fact for these rows is follow-up work.
+   - The Places row has the count of the stat "Places" in the hero of the Places page, for the default period of the person, for example "12 places, last 30 days". The period stays in the same part of the text as the count. The Location row has the place of a parked car, else a static description. The empty summary of Settings repeats nothing.
    - A label is not a value. The callout label "Charging" can stand with the state "Charging" in the title.
    - The Status row leaves out a live tile that the stage shows (the lock, the charge when the right callout shows it) and a tile with the same title as the state ("Driving").
    - The car switcher shows the battery and the state of each other car. The app reads the Overview answer of each other car when the list opens, so the API needs no new field.
@@ -45,11 +47,13 @@ The Overview of the mobile app was the web Overview in cards: the car image, the
 2. A sixth tab for Status. Five is the limit of the native tab bars, and Status is a detail of the Overview.
 3. Callouts drawn at the parts of the car (frunk, trunk, charge port). The compositor image has no fixed anchor points across models and angles, so the lines would miss.
 4. A gradient library (`expo-linear-gradient`). SVG is already bundled for the charts and draws the radial glow.
+5. The most visited place as the summary of the Places row. The name can equal the place of the Location row or of the last charge, so it shows two times.
+6. A separate count query for the Overview. It can drift from the query of the Places page.
 
 ## Consequences
 
 - `research/mobile-ui.md` records the rows, the callouts, the glow, the quick actions, and the car switcher with their sources.
 - The Overview answer of the app API carries two more fields, and an older server without them fails the shape check with the "server is too old" message.
 - The Settings of the app group the card switches by the screen that they change. "Overview" holds "Car image" and "Last drive and charge": the car on the stage and the summaries of the Drives and Charging rows. "Status and Location" holds "Live status", "Today", "Tires", and "Location": the Live card and the lock history, Today, the tires, and the map. "Insights" holds the default period. The switch "Last drive and charge" changed no app screen until 2026-11-16.
-- The Overview route runs two more queries on each request: the capacity history and the drive totals of the default period. Measure the 30 s poll on a large database if it becomes slow.
+- The Overview route runs three more queries on each request: the capacity history, the drive totals of the default period, and the visited places of the default period. The car switcher runs them one time for each other car when the list opens. Measure the 30 s poll on a large database if it becomes slow.
 - The open car switcher reads the Overview answer of each other car. This works with every released server, adds no query to the poll of the shown car, and fills the cache, so the chosen car shows at once.

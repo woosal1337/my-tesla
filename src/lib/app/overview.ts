@@ -9,6 +9,7 @@ import {
 } from "../insights";
 import type { LiveFeed } from "../live/live";
 import { liveNotices, liveTiles } from "../live/tiles";
+import type { VisitedPlace } from "../places-data";
 import type { Preferences } from "../preferences";
 import type { Car, CarSnapshot, Charge, Drive } from "../queries";
 import type { DriveTotals } from "../stats-data";
@@ -38,6 +39,7 @@ import type {
   PeriodId,
 } from "./contract";
 import { periodLabel } from "./panels";
+import { placesSummary } from "./places";
 import { appStat, appValue, statsWithValue } from "./values";
 
 export type OverviewInput = {
@@ -55,6 +57,7 @@ export type OverviewInput = {
   showMaps: boolean;
   capacity: CapacityPoint[];
   driven: DriveTotals;
+  visited: VisitedPlace[];
   period: PeriodId;
 };
 
@@ -294,7 +297,11 @@ export function overviewPage(
         whPerKm !== null && f.efficiency(whPerKm),
       ]),
     },
-    { key: "places", title: "Places", subtitle: "Visited and charging places" },
+    {
+      key: "places",
+      title: "Places",
+      subtitle: placesSummary(input.visited, input.period),
+    },
     ...(hasData && hasPosition
       ? [
           {

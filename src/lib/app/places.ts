@@ -34,6 +34,16 @@ function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
 }
 
+export function placesSummary(
+  visited: VisitedPlace[],
+  period: PeriodId,
+): string {
+  const count = visited.length
+    ? plural(visited.length, "place", "places")
+    : "No place";
+  return `${count}, ${periodLabel(period).toLowerCase()}`;
+}
+
 export function record(
   input: Pick<AppRecord, "key" | "title"> & Partial<AppRecord>,
 ): AppRecord {

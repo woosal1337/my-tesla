@@ -5,6 +5,7 @@ import { carImage } from "@/lib/car-image";
 import { lockHistory } from "@/lib/history/recorder";
 import { dayWindow, localDayKey, periodStart } from "@/lib/insights";
 import { getLive } from "@/lib/live/live";
+import { visitedPlaces } from "@/lib/places-data";
 import { carSnapshot, recentCharges, recentDrives } from "@/lib/queries";
 import { driveTotals, recentTireLeaks } from "@/lib/stats-data";
 import { dayRecords } from "@/lib/timeline-data";
@@ -18,6 +19,7 @@ export async function GET(
   const { car, f, preferences, showMaps, now } = context;
   const show = preferences.overview;
   const window = dayWindow(localDayKey(now, f.timeZone), f.timeZone);
+  const from = periodStart(preferences.period, now);
   const [
     snapshot,
     [lastDrive],
@@ -27,6 +29,7 @@ export async function GET(
     leaks,
     capacity,
     driven,
+    visited,
   ] = await Promise.all([
     carSnapshot(car.id),
     recentDrives(car, 1),
@@ -37,7 +40,8 @@ export async function GET(
     getLive(car.id),
     show.tires ? recentTireLeaks(car.id, f.timeZone) : Promise.resolve([]),
     capacityHistory(car.id),
-    driveTotals(car.id, periodStart(preferences.period, now)),
+    driveTotals(car.id, from),
+    visitedPlaces(car.id, from),
   ]);
   const render = carImage(car);
   return appJson(
@@ -57,6 +61,7 @@ export async function GET(
         showMaps,
         capacity,
         driven,
+        visited,
         period: preferences.period,
       },
       f,

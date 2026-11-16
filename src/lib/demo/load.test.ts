@@ -1,5 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { describe, expect, test } from "bun:test";
+import type postgres from "postgres";
+import { chargingCountry } from "../charging-country-sql";
 import { createSql } from "../sql-template";
 import { loadDemo } from "./load";
 
@@ -36,6 +38,11 @@ describe("loadDemo", () => {
     `;
     expect(typeof geofence.name).toBe("string");
     expect(geofence.km).toBeGreaterThan(1);
+
+    const [country] = await sql`
+      select (${chargingCountry(sql as unknown as postgres.Sql)}) as code
+    `;
+    expect(country.code).toBe("us");
     await db.close();
   });
 });

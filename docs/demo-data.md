@@ -18,6 +18,8 @@ The generator makes:
 - home charges, Supercharger sessions, and idle drain. The Flagstaff Supercharger has no geofence price, so its sessions show the price setting,
 - slow battery wear, two software updates, and a slow tire leak.
 
+The addresses carry the country code `us`, so the demo shows costs in US dollars.
+
 A fixed seed makes the same data on each run.
 
 ## 1. Start the demo database

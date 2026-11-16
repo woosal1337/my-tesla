@@ -8,6 +8,7 @@ const day = 24 * hour;
 const localOffset = -7 * hour;
 const addressState = "Arizona";
 const addressCountry = "United States";
+const addressCountryCode = "us";
 
 type PositionRow = {
   id: number;
@@ -132,6 +133,7 @@ type AddressRow = {
   city: string;
   state: string;
   country: string;
+  raw: { address: { country_code: string } };
   inserted_at: Date;
   updated_at: Date;
 };
@@ -308,6 +310,7 @@ export function generateDemo(options: {
     city: place.city,
     state: addressState,
     country: addressCountry,
+    raw: { address: { country_code: addressCountryCode } },
     inserted_at: created,
     updated_at: created,
   }));

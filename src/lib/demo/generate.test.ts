@@ -53,6 +53,7 @@ describe("generateDemo", () => {
       expect(address.city).toBeTruthy();
       expect(address.state).toBe("Arizona");
       expect(address.country).toBe("United States");
+      expect(address.raw.address.country_code).toBe("us");
     }
   });
 

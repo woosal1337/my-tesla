@@ -302,7 +302,33 @@ export type TeslaMateSettings = {
   unitOfPressure: string | null;
   preferredRange: string | null;
   themeMode: string | null;
+  chargingCountry: string | null;
 };
+
+const euroArea =
+  "at be bg hr cy ee fi fr de gr ie it lv lt lu mt nl pt sk si es";
+
+export const currencyByCountry = new Map<string, Preferences["currency"]>([
+  ...euroArea.split(" ").map((code) => [code, "EUR"] as const),
+  ["tr", "TRY"],
+  ["us", "USD"],
+  ["gb", "GBP"],
+  ["ch", "CHF"],
+  ["no", "NOK"],
+  ["se", "SEK"],
+  ["dk", "DKK"],
+  ["pl", "PLN"],
+  ["ca", "CAD"],
+  ["au", "AUD"],
+  ["jp", "JPY"],
+  ["cn", "CNY"],
+]);
+
+export function currencyOfCountry(
+  code: string | null,
+): Preferences["currency"] {
+  return currencyByCountry.get(code?.toLowerCase() ?? "") ?? "none";
+}
 
 export function teslamateDefaults(
   settings: TeslaMateSettings | null,
@@ -314,6 +340,7 @@ export function teslamateDefaults(
     pressure: settings.unitOfPressure,
     range: settings.preferredRange,
     theme: settings.themeMode,
+    currency: currencyOfCountry(settings.chargingCountry),
   });
 }
 

@@ -46,14 +46,14 @@ Open Settings from the tab bar. Each change saves at once, and a preview shows t
 | Tabs | Show or hide Drives, Charging, Battery, Stats, and Places |
 | Overview | Show or hide the car image, Live status, Today, Tires, Location, and Last drive and charge |
 
-The defaults come from the TeslaMate settings page: distance, temperature, tire pressure, preferred range, and theme. A saved value replaces a default. "Reset to defaults" removes your saved values.
+The defaults come from the TeslaMate settings page: distance, temperature, tire pressure, preferred range, and theme. The default currency comes from the country where the cars charged most often. For a country without a listed currency, it stays "No symbol". [Decision 0030](decisions/0030-default-currency-from-the-charging-country.md) explains the rule. A saved value replaces a default. "Reset to defaults" removes your saved values.
 
 ## Charging cost
 
 TeslaMate records a cost only for a charge in a geofence with a price. For the other charges, set a price in the app:
 
 1. Open Settings, then Charging cost.
-2. Choose the currency.
+2. Check the currency. The app picks the currency of the country where the cars charged most often. Choose another one to change it.
 3. Type the price per kWh, then press Enter. Use a dot or a comma for the decimals.
 4. Optional: type a separate price for DC fast chargers.
 

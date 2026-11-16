@@ -80,6 +80,24 @@ describe("assessBatteryHealth", () => {
     expect(close?.meaning).toContain("96.0%");
     expect(close?.meaning).toContain("4 points under");
   });
+
+  test("writes one point in the singular and more points in the plural", () => {
+    const one = assessBatteryHealth(98.5, 4_120, f);
+    expect(one?.tone).toBe("typical");
+    expect(one?.meaning).toBe(
+      "Your battery keeps 98.5%, 1 point under the average. The estimate can move by 2 to 3 points.",
+    );
+    expect(one?.meaning).not.toContain("1 points");
+    expect(assessBatteryHealth(98.1, 4_120, f)?.meaning).toContain(
+      "1 point under the average",
+    );
+    expect(assessBatteryHealth(98, 4_120, f)?.meaning).toContain(
+      "2 points under the average",
+    );
+    expect(assessBatteryHealth(90, 1_341, f)?.meaning).toContain(
+      "10 points under the average for this distance",
+    );
+  });
 });
 
 describe("assessChargingEfficiency", () => {

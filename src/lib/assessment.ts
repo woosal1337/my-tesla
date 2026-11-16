@@ -108,6 +108,7 @@ export function assessBatteryHealth(
   const average = expectedHealth(odometerKm);
   const gap = healthPercent - average;
   const points = Math.round(Math.abs(gap));
+  const under = `${points} ${points === 1 ? "point" : "points"} under the average`;
   const expected = `About ${share(average)} at ${f.distance(odometerKm)}. Tesla fleet data shows about 85% after 320,000 km for Model 3 and Model Y.`;
   if (gap >= 0) {
     return {
@@ -130,14 +131,14 @@ export function assessBatteryHealth(
       tone: "typical",
       verdict: "Close to average",
       expected,
-      meaning: `Your battery keeps ${share(healthPercent)}, ${points} points under the average. The estimate can move by 2 to 3 points.`,
+      meaning: `Your battery keeps ${share(healthPercent)}, ${under}. The estimate can move by 2 to 3 points.`,
     };
   }
   return {
     tone: "bad",
     verdict: "Below average",
     expected,
-    meaning: `Your battery keeps ${share(healthPercent)}, ${points} points under the average for this distance. A Tesla service center can test the battery.`,
+    meaning: `Your battery keeps ${share(healthPercent)}, ${under} for this distance. A Tesla service center can test the battery.`,
   };
 }
 

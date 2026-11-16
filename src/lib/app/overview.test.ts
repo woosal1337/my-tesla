@@ -461,6 +461,59 @@ describe("overviewPage", () => {
     expect(page.location).toBeNull();
   });
 
+  test("names the place of a parked car from the last drive", () => {
+    const page = overviewPage({ ...input, lastDrive, lastCharge }, f, now);
+    expect(page.location).toMatchObject({
+      place: "Office",
+      since: "Parked since today at 16:25 · 1 h 35 min",
+      lastSeen: "Last seen today at 17:55",
+    });
+    expect(menuSubtitle(page, "location")).toBe("Office");
+  });
+
+  test("gives no place while the car drives", () => {
+    const pages = [
+      overviewPage(
+        {
+          ...input,
+          snapshot: { ...snapshot, driving: true },
+          lastDrive,
+          lastCharge,
+        },
+        f,
+        now,
+      ),
+      overviewPage(
+        { ...liveInput({ state: "driving" }), lastDrive, lastCharge },
+        f,
+        now,
+      ),
+    ];
+    for (const page of pages) {
+      expect(page.location).toMatchObject({ place: null, since: null });
+      expect(menuSubtitle(page, "location")).toBe("Map and Open in Maps");
+    }
+  });
+
+  test("falls back to the last charge and leaves out an unknown place", () => {
+    const charged = overviewPage({ ...input, lastCharge }, f, now);
+    expect(charged.location).toMatchObject({ place: "Home", since: null });
+    const unknown = overviewPage(
+      { ...input, lastDrive: { ...lastDrive, to: "Unknown place" } },
+      f,
+      now,
+    );
+    expect(unknown.location?.place).toBeNull();
+    expect(unknown.location?.since).toStartWith("Parked since today at 16:25");
+    expect(menuSubtitle(unknown, "location")).toBe("Map and Open in Maps");
+  });
+
+  test("keeps the place out of the menu when maps are off", () => {
+    const page = overviewPage({ ...input, lastDrive, showMaps: false }, f, now);
+    expect(page.location).toBeNull();
+    expect(menuSubtitle(page, "location")).toBe("Map and Open in Maps");
+  });
+
   test("explains a car without records", () => {
     const page = overviewPage(
       {

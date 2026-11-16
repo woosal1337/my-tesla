@@ -387,7 +387,13 @@ export type OverviewPage = {
     rearRight: AppValue;
     warnings: string[];
   } | null;
-  location: { latitude: number; longitude: number; lastSeen: string } | null;
+  location: {
+    latitude: number;
+    longitude: number;
+    lastSeen: string;
+    place?: string | null;
+    since?: string | null;
+  } | null;
   history:
     | {
         key: string;

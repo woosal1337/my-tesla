@@ -95,6 +95,10 @@ function isOptionalLegend(value: unknown): boolean {
   );
 }
 
+function isOptionalText(value: unknown): boolean {
+  return value === undefined || value === null || typeof value === "string";
+}
+
 function isOptionalLastActive(value: unknown): boolean {
   return (
     value === undefined ||
@@ -119,7 +123,10 @@ export const overviewPage = (value: unknown) =>
       Array.isArray(shape.callouts) &&
       Array.isArray(shape.menu) &&
       Array.isArray(shape.stats) &&
-      (!isRecord(shape.today) || isOptionalLegend(shape.today.legend)),
+      (!isRecord(shape.today) || isOptionalLegend(shape.today.legend)) &&
+      (!isRecord(shape.location) ||
+        (isOptionalText(shape.location.place) &&
+          isOptionalText(shape.location.since))),
   );
 
 export const driveList = (value: unknown) =>

@@ -98,6 +98,17 @@ describe("screen shapes", () => {
     expect(
       overviewPage({ ...overview, today: { ...strip, legend: "Now" } }),
     ).toBeNull();
+    const location = { latitude: 33.4, longitude: -111.9, lastSeen: "Today" };
+    expect(overviewPage({ ...overview, location })).not.toBeNull();
+    expect(
+      overviewPage({
+        ...overview,
+        location: { ...location, place: "Home", since: null },
+      }),
+    ).not.toBeNull();
+    expect(
+      overviewPage({ ...overview, location: { ...location, place: 4 } }),
+    ).toBeNull();
     expect(overviewPage({ car })).toBeNull();
     expect(
       overviewPage({ car, activity: { label: "Online" }, stats: [] }),

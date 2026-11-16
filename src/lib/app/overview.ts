@@ -24,6 +24,7 @@ import {
   coldBatteryText,
   liveActivity,
   ongoingText,
+  unknownPlace,
   variantLine,
 } from "../vehicle";
 import type {
@@ -110,6 +111,24 @@ function lastChargeLine(
   return `${charge.place} · ${done} · ${f.day(charge.startAt, now)}`;
 }
 
+function parkedAt(
+  drive: Drive | null,
+  charge: Charge | null,
+  f: Formatter,
+  now: Date,
+): { place: string | null; since: string | null } {
+  const place = drive?.to ?? charge?.place ?? null;
+  return {
+    place: place === unknownPlace ? null : place,
+    since: drive ? parkedSince(drive.endAt, f, now) : null,
+  };
+}
+
+function parkedSince(endAt: Date, f: Formatter, now: Date): string {
+  const minutes = Math.max(0, (now.getTime() - endAt.getTime()) / 60000);
+  return `Parked since ${f.dayInline(endAt, now)} at ${f.clock(endAt)} · ${f.span(minutes)}`;
+}
+
 function tireValue(
   tire: SlowLeak["tire"],
   bar: number,
@@ -128,9 +147,9 @@ export function overviewPage(
   const liveNow = live?.connected ? live.view : null;
   const chargingNow =
     liveNow?.charging.state === "Charging" ? liveNow.charging : null;
-  const activity = activityLabel(
-    liveActivity(liveNow?.state ?? null) ?? carActivity(snapshot),
-  );
+  const current = liveActivity(liveNow?.state ?? null) ?? carActivity(snapshot);
+  const activity = activityLabel(current);
+  const driving = current === "driving" || snapshot.driving;
   const lastSeen = snapshot.positionAt ?? snapshot.stateSince;
   const charging = snapshot.charging || chargingNow !== null;
   const hasData =
@@ -144,6 +163,11 @@ export function overviewPage(
     range === null
       ? null
       : `${f.number(Math.round(range))} ${f.units.distance}`;
+  const showLocation =
+    hasData && show.location && input.showMaps && hasPosition;
+  const parked = driving
+    ? { place: null, since: null }
+    : parkedAt(input.lastDrive, input.lastCharge, f, now);
   const odometer = f.distanceValue(snapshot.odometerKm);
   const odometerText =
     odometer === null
@@ -276,7 +300,7 @@ export function overviewPage(
           {
             key: "location" as const,
             title: "Location",
-            subtitle: "Map and Open in Maps",
+            subtitle: (showLocation && parked.place) || "Map and Open in Maps",
           },
         ]
       : []),
@@ -391,13 +415,13 @@ export function overviewPage(
             ),
           }
         : null,
-    location:
-      hasData && show.location && input.showMaps && hasPosition
-        ? {
-            latitude: snapshot.latitude ?? 0,
-            longitude: snapshot.longitude ?? 0,
-            lastSeen: seenText,
-          }
-        : null,
+    location: showLocation
+      ? {
+          latitude: snapshot.latitude ?? 0,
+          longitude: snapshot.longitude ?? 0,
+          lastSeen: seenText,
+          ...parked,
+        }
+      : null,
   };
 }

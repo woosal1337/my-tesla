@@ -107,6 +107,7 @@ export function ChargeScreen({ chargeId }: { chargeId: string }) {
                     latitude={detail.location.latitude}
                     longitude={detail.location.longitude}
                     label={`Map of the charge at ${detail.title}`}
+                    size="card"
                   />
                 </MapSection>
               ) : null}

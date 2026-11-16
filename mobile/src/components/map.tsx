@@ -8,7 +8,7 @@ import {
   TransformRequestManager,
   type InitialViewState,
 } from "@maplibre/maplibre-react-native";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useReducer, useState, type ReactNode } from "react";
 import {
   Animated,
   StyleSheet,
@@ -21,6 +21,7 @@ import { basemapKeyOf } from "@/api/responses";
 import { motion, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { useReducedMotion } from "@/theme/use-reduced-motion";
+import { coverAfter, type MapCover } from "./map-cover";
 import {
   boundsOf,
   lines,
@@ -29,6 +30,7 @@ import {
   routeEnds,
 } from "./map-geometry";
 import { screenPadding } from "./screen";
+import { TeslaMark } from "./tesla-mark";
 import { Text } from "./text";
 
 const mapStyles = {
@@ -40,6 +42,8 @@ const carZoom = 15;
 const fitPadding = { top: 48, right: 48, bottom: 48, left: 48 };
 
 const basemapKeyId = "carto-basemap-key";
+
+const coverLimitMs = 8000;
 
 function useBasemapKey(): void {
   const key = basemapKeyOf(useSettings().data);
@@ -76,6 +80,43 @@ function useMapHeight(size: MapSize): number {
   return Math.round(Math.min(560, Math.max(260, height * heightShare[size])));
 }
 
+function Cover({ cover }: { cover: MapCover }) {
+  const palette = usePalette();
+  const reduced = useReducedMotion();
+  const [opacity] = useState(() => new Animated.Value(1));
+  const [faded, setFaded] = useState(false);
+
+  useEffect(() => {
+    if (cover !== "lifted" || reduced) return;
+    const fade = Animated.timing(opacity, {
+      toValue: 0,
+      duration: motion.durationMs,
+      easing: motion.easing,
+      useNativeDriver: true,
+    });
+    fade.start(({ finished }) => setFaded(finished));
+    return () => fade.stop();
+  }, [cover, opacity, reduced]);
+
+  if (faded || (cover === "lifted" && reduced)) return null;
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        StyleSheet.absoluteFill,
+        styles.cover,
+        { backgroundColor: palette.card, opacity },
+      ]}
+    >
+      {cover === "failed" ? (
+        <Text variant="label">The map did not load.</Text>
+      ) : (
+        <TeslaMark size={44} kind="breathe" />
+      )}
+    </Animated.View>
+  );
+}
+
 function MapCanvas({
   label,
   size,
@@ -92,17 +133,25 @@ function MapCanvas({
   const mapStyle = useMapStyle();
   const height = useMapHeight(size);
   const [settled, setSettled] = useState(false);
+  const [cover, signal] = useReducer(coverAfter, "loading");
 
   useEffect(() => {
-    const timer = setTimeout(() => setSettled(true), motion.durationMs);
-    return () => clearTimeout(timer);
+    const mount = setTimeout(() => setSettled(true), motion.durationMs);
+    const limit = setTimeout(() => signal("timeout"), coverLimitMs);
+    return () => {
+      clearTimeout(mount);
+      clearTimeout(limit);
+    };
   }, []);
 
   return (
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel={label}
+      accessibilityLabel={
+        cover === "failed" ? `${label}. The map did not load.` : label
+      }
+      accessibilityState={{ busy: cover === "loading" }}
       style={[styles.frame, { height, backgroundColor: palette.card }]}
     >
       {settled ? (
@@ -115,11 +164,14 @@ function MapCanvas({
           compass={false}
           logo={false}
           attributionPosition={{ bottom: 8, right: screenPadding }}
+          onDidFinishRenderingMapFully={() => signal("rendered")}
+          onDidFailLoadingMap={() => signal("failed")}
         >
           <Camera initialViewState={view} />
           {children}
         </Map>
       ) : null}
+      <Cover cover={cover} />
     </View>
   );
 }
@@ -184,14 +236,16 @@ export function LocationMap({
   latitude,
   longitude,
   label,
+  size,
 }: {
   latitude: number;
   longitude: number;
   label: string;
+  size: MapSize;
 }) {
   const center: LngLat = [longitude, latitude];
   return (
-    <MapCanvas label={label} size="card" view={{ center, zoom: carZoom }}>
+    <MapCanvas label={label} size={size} view={{ center, zoom: carZoom }}>
       <Marker id="car" lngLat={center}>
         <CarDot />
       </Marker>
@@ -354,6 +408,7 @@ export function PlacesMap({ places }: { places: readonly MapPlace[] }) {
 
 const styles = StyleSheet.create({
   frame: { overflow: "hidden", marginHorizontal: -screenPadding },
+  cover: { alignItems: "center", justifyContent: "center" },
   car: {
     width: 24,
     height: 24,

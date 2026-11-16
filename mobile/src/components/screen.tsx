@@ -5,10 +5,13 @@ import {
   ScrollView,
   type ScrollViewProps,
   StyleSheet,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScrollToRest } from "@/hooks/use-scroll-to-rest";
 import { space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { headerCoversScreen } from "./sticky-geometry";
 
 export const screenPadding = space.xl;
 
@@ -20,6 +23,7 @@ export function Screen({
   StickyHeaderComponent,
   dimmed = false,
   withoutHeader = false,
+  coverStatusBar = false,
 }: {
   children: ReactNode;
   refreshing?: boolean;
@@ -28,35 +32,55 @@ export function Screen({
   StickyHeaderComponent?: ScrollViewProps["StickyHeaderComponent"];
   dimmed?: boolean;
   withoutHeader?: boolean;
+  coverStatusBar?: boolean;
 }) {
   const palette = usePalette();
   const { top } = useSafeAreaInsets();
+  const { ref, onScrollBeginDrag } = useScrollToRest();
   const statusBar = withoutHeader && Platform.OS === "android" ? top : 0;
+  const strip =
+    withoutHeader ||
+    (coverStatusBar &&
+      headerCoversScreen(Platform.OS, Platform.Version, false));
   return (
-    <ScrollView
-      style={{ backgroundColor: palette.background }}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: space.lg + statusBar },
-        dimmed && styles.dimmed,
-      ]}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-      automaticallyAdjustKeyboardInsets
-      stickyHeaderIndices={stickyHeaderIndices}
-      StickyHeaderComponent={StickyHeaderComponent}
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl
-            refreshing={refreshing ?? false}
-            onRefresh={onRefresh}
-            tintColor={palette.subtle}
-          />
-        ) : undefined
-      }
-    >
-      {children}
-    </ScrollView>
+    <>
+      <ScrollView
+        ref={ref}
+        onScrollBeginDrag={onScrollBeginDrag}
+        scrollToOverflowEnabled
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: space.lg + statusBar },
+          dimmed && styles.dimmed,
+        ]}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        stickyHeaderIndices={stickyHeaderIndices}
+        StickyHeaderComponent={StickyHeaderComponent}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing ?? false}
+              onRefresh={onRefresh}
+              tintColor={palette.subtle}
+            />
+          ) : undefined
+        }
+      >
+        {children}
+      </ScrollView>
+      {strip ? (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.statusBar,
+            { height: top, backgroundColor: palette.background },
+          ]}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -67,4 +91,5 @@ const styles = StyleSheet.create({
     gap: space.lg,
   },
   dimmed: { opacity: 0.6 },
+  statusBar: { position: "absolute", top: 0, left: 0, right: 0 },
 });

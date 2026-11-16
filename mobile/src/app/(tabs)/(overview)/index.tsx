@@ -12,6 +12,7 @@ import { QuickActions, type QuickAction } from "@/components/quick-actions";
 import { EmptyState, QueryView } from "@/components/query-view";
 import { Screen } from "@/components/screen";
 import { useRefresh } from "@/hooks/use-refresh";
+import { overviewHeaderShown } from "@/navigation/header";
 import { requestInsight } from "@/navigation/insight-request";
 import { mapsUrl } from "@/navigation/maps";
 import { useOpenTab } from "@/navigation/open-tab";
@@ -148,7 +149,8 @@ export default function OverviewScreen() {
   const wide = useWindowDimensions().width >= wideWidth;
   return (
     <Screen
-      withoutHeader
+      withoutHeader={!overviewHeaderShown}
+      coverStatusBar
       refreshing={refresh.refreshing}
       onRefresh={refresh.onRefresh}
     >

@@ -30,7 +30,7 @@ export function Panel({
 
 export function PanelNote({ children }: { children: ReactNode }) {
   return (
-    <p className="grid h-full min-h-32 place-items-center text-sm text-subtle">
+    <p className="grid h-full min-h-32 place-items-center text-sm text-muted-foreground">
       {children}
     </p>
   );

@@ -203,7 +203,7 @@ function Note({ block }: { block: Extract<AppBlock, { kind: "note" }> }) {
       return <Text variant="label">{block.text}</Text>;
     default:
       return (
-        <Text variant="label" tone="subtle" style={styles.emptyNote}>
+        <Text variant="label" style={styles.emptyNote}>
           {block.text}
         </Text>
       );

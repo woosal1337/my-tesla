@@ -116,7 +116,7 @@ export function LivePanel({
           ))}
         </div>
       ) : (
-        <p className="mt-3 text-sm text-subtle">
+        <p className="mt-3 text-sm text-muted-foreground">
           No live values yet. TeslaMate sends them when {carName} is online.
         </p>
       )}

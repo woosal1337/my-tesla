@@ -57,7 +57,7 @@ export function LockHistory({
           ) : null}
         </>
       ) : (
-        <Text variant="label" tone="subtle">
+        <Text variant="label">
           No change in the last 7 days. My Tesla records each lock and Sentry
           Mode change from the MQTT feed.
         </Text>

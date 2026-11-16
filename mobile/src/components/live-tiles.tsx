@@ -28,9 +28,7 @@ export function LivePanel({
       note={live.connected ? "Feed connected" : "Feed offline"}
     >
       {live.empty ? (
-        <Text variant="label" tone="subtle">
-          {live.empty}
-        </Text>
+        <Text variant="label">{live.empty}</Text>
       ) : (
         <View style={styles.grid}>
           {live.tiles.map((tile) => {

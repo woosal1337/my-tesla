@@ -91,9 +91,9 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | `Button` | The primary button is the only blue control on a screen. Use `kind="secondary"` for every other action. |
 | `SwitchRow`, `Field` | An on and off setting with an optional detail, and a labelled text field |
 | `Icon`, `icons` | A symbol with a name for each platform: an SF Symbol and a Material Symbol. The types reject a wrong name. Add new icons to `icons.ts`. |
-| `Chart` | An `AppChart` from the server. It draws areas, lines, and bars on one or two axes, and a scrubbing tooltip. |
+| `Chart` | An `AppChart` from the server. It draws areas, lines, and bars on one or two axes, and a scrubbing tooltip. It shows the `caption` of the server above the legend, and draws each line in the `dash` style of its series. When a series has a pattern, the legend shows a line sample for each series instead of the dot. The tick labels stop growing at 1.2 times the font scale. |
 | `Block` | One block of an insight panel: stats, chart, shares, table, records, heatmap, progress, notice, or note. It takes the tab stack, so a record opens its target in the same tab. |
-| `Records`, `Heatmap` | A ranked list with a bar, a badge, links, and a target, and the drive starts by weekday and hour |
+| `Records`, `Heatmap` | A ranked list with a bar, a badge, links, and a target, and the drive or charge starts by weekday and hour, with a key for the shades under the hours |
 | `LocationMap`, `RouteMap`, `PlacesMap` | The maps of the web: the car, a route with its markers, and the places sized by visits, on the CARTO styles |
 | `Notice` | A warning line with an icon, for a server notice |
 | `EmptyState`, `Problem` | A list without records, and an error with a retry button |

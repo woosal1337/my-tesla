@@ -15,11 +15,14 @@ export type AppStat = {
 export type ChartColor =
   "chart1" | "chart2" | "chart3" | "chart4" | "chart5" | "charge";
 
+export type ChartDash = "solid" | "dashed" | "dotted" | "dashDot";
+
 export type AppChartSeries = {
   key: string;
   label: string;
   unit: string;
   color: ChartColor;
+  dash?: ChartDash;
   kind: "area" | "line" | "bar" | "dot";
   axis: "left" | "right";
   digits: number;
@@ -31,6 +34,7 @@ export type AppAxis = { domain: [number, number]; ticks: AppTick[] };
 
 export type AppChart = {
   title: string;
+  caption?: string;
   locale: string;
   series: AppChartSeries[];
   points: { x: number; label: string; values: (number | null)[] }[];

@@ -103,3 +103,24 @@ describe("statsPage share bars", () => {
     }
   });
 });
+
+describe("statsPage tire pressure", () => {
+  test("gives each tire its own line style", () => {
+    const point = (day: number) => ({
+      at: new Date(Date.UTC(2026, 9, day)),
+      frontLeft: 2.9,
+      frontRight: 2.9,
+      rearLeft: 2.9,
+      rearRight: 2.9,
+    });
+    const block = panelOf(
+      { ...emptyStats, pressure: [point(1), point(2), point(3)] },
+      "Tire pressure (bar)",
+    )?.blocks[0];
+    const dashes =
+      block?.kind === "chart"
+        ? block.chart.series.map((series) => series.dash)
+        : [];
+    expect(dashes).toEqual(["solid", "dashed", "dotted", "dashDot"]);
+  });
+});

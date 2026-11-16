@@ -172,10 +172,10 @@ export function statsPage(
   );
   const pressureDigits = pressureTooltipDigits[settings.pressure];
   const tires = [
-    ["frontLeft", "Front left", "chart1"],
-    ["frontRight", "Front right", "chart3"],
-    ["rearLeft", "Rear left", "chart4"],
-    ["rearRight", "Rear right", "charge"],
+    ["frontLeft", "Front left", "chart1", "solid"],
+    ["frontRight", "Front right", "chart3", "dashed"],
+    ["rearLeft", "Rear left", "chart4", "dotted"],
+    ["rearRight", "Rear right", "charge", "dashDot"],
   ] as const;
 
   return {
@@ -404,11 +404,12 @@ export function statsPage(
                 xKey: "at",
                 xFormat: "day",
                 style,
-                series: tires.map(([key, label, color]) => ({
+                series: tires.map(([key, label, color, dash]) => ({
                   key,
                   label,
                   unit: f.units.pressure,
                   color,
+                  dash,
                   digits: pressureDigits,
                 })),
               }),

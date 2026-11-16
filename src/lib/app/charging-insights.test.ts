@@ -84,4 +84,42 @@ describe("chargingInsightsPage", () => {
     ]);
     expect(page.sections).toEqual([]);
   });
+
+  test("names two curves of one day by their start time and dashes the later curves", () => {
+    const curve = (id: number, startAt: string) => ({
+      id,
+      startAt: new Date(startAt),
+      points: [
+        { level: 20, power: 150 },
+        { level: 60, power: 90 },
+      ],
+    });
+    const page = chargingInsightsPage(
+      {
+        ...input,
+        curves: [
+          curve(1, "2026-11-08T06:12:00Z"),
+          curve(2, "2026-11-08T14:40:00Z"),
+          curve(3, "2026-11-05T10:00:00Z"),
+        ],
+      },
+      "30d",
+      false,
+      f,
+    );
+    const block = page.sections[0]?.panels.find(
+      (item) => item.title === "DC charging curves (kW)",
+    )?.blocks[0];
+    const series = block?.kind === "chart" ? block.chart.series : [];
+    expect(series.map((entry) => entry.label)).toEqual([
+      "8 Nov 09:12",
+      "8 Nov 17:40",
+      "5 Nov",
+    ]);
+    expect(series.map((entry) => entry.dash)).toEqual([
+      undefined,
+      "dashed",
+      "dotted",
+    ]);
+  });
 });

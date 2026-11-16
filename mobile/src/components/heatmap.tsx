@@ -6,6 +6,12 @@ import { Text } from "./text";
 
 type HeatmapBlock = Extract<AppBlock, { kind: "heatmap" }>;
 
+const keyShares = [0, 0.25, 0.5, 0.75, 1];
+
+function shade(share: number): number {
+  return 0.2 + share * 0.8;
+}
+
 export function Heatmap({ block }: { block: HeatmapBlock }) {
   const palette = usePalette();
   return (
@@ -34,7 +40,7 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
                         styles.fill,
                         {
                           backgroundColor: palette.primary,
-                          opacity: 0.2 + (value / block.max) * 0.8,
+                          opacity: shade(value / block.max),
                         },
                       ]}
                     />
@@ -51,6 +57,33 @@ export function Heatmap({ block }: { block: HeatmapBlock }) {
             {hour}
           </Text>
         ))}
+      </View>
+      <View
+        accessible
+        accessibilityLabel={`Darker cells mean more ${block.unit}. The most in one hour: ${block.max}.`}
+        style={styles.key}
+      >
+        <Text variant="caption" style={styles.hour}>
+          0
+        </Text>
+        {keyShares.map((share) => (
+          <View
+            key={share}
+            style={[styles.keyCell, { backgroundColor: palette.muted }]}
+          >
+            {share > 0 ? (
+              <View
+                style={[
+                  styles.fill,
+                  { backgroundColor: palette.primary, opacity: shade(share) },
+                ]}
+              />
+            ) : null}
+          </View>
+        ))}
+        <Text variant="caption" style={styles.hour}>
+          {block.max}
+        </Text>
       </View>
     </View>
   );
@@ -69,4 +102,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   hour: { fontSize: 11, fontVariant: ["tabular-nums"] },
+  key: {
+    marginTop: space.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 3,
+  },
+  keyCell: { width: 10, height: 10, borderRadius: 2, overflow: "hidden" },
 });

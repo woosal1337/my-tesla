@@ -147,7 +147,9 @@ describe("batteryPage", () => {
       ],
     });
     expect(
-      titled("Projected range (km)")?.blocks.map((block) => block.kind),
-    ).toEqual(["chart", "chart"]);
+      titled("Projected range (km)")?.blocks.map((block) =>
+        block.kind === "chart" ? block.chart.caption : block.kind,
+      ),
+    ).toEqual(["By outside temperature (°C)", "By battery level (%)"]);
   });
 });

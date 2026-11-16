@@ -7,18 +7,26 @@ import {
 import {
   evenStep,
   evenTicks,
+  fitAxis,
   niceDomain,
   niceStep,
   niceZeroDomain,
 } from "@/components/charts/nice-domain";
 import { localParts } from "../date-format";
-import type { AppAxis, AppChart, AppTick, ChartColor } from "./contract";
+import type {
+  AppAxis,
+  AppChart,
+  AppTick,
+  ChartColor,
+  ChartDash,
+} from "./contract";
 
 type ChartSeriesInput = {
   key: string;
   label: string;
   unit: string;
   color: ChartColor;
+  dash?: ChartDash;
   kind?: "area" | "line" | "bar" | "dot";
   axis?: "left" | "right";
   digits?: number;
@@ -30,6 +38,7 @@ type AxisMode = "zero" | "auto" | "percent" | "count";
 
 export type ChartInput = {
   title: string;
+  caption?: string;
   rows: Row[];
   xKey: string;
   xFormat: AxisFormat;
@@ -46,6 +55,10 @@ const clockSteps = [1, 2, 5, 10, 15, 30, 60, 120, 180, 240, 360, 720, 1440];
 const maxClockIntervals = 4;
 const maxIndexTicks = 5;
 const maxCountIntervals = 5;
+const phonePlotWidth = 262;
+const secondAxisWidth = 32;
+const labelCharWidth = 6.5;
+const labelGap = 8;
 
 function finiteValues(rows: Row[], keys: string[]): number[] {
   return rows.flatMap((row) =>
@@ -83,17 +96,16 @@ function axis(
   style: ChartStyle,
 ): AppAxis {
   if (mode === "count") return countAxis(values, style);
-  const ticksOf = (domain: [number, number]) =>
-    evenTicks(domain).map((value) => ({
-      value,
-      label: formatAxis(value, format, style),
-    }));
-  const domain = domainOf(values, mode);
-  const ticks = ticksOf(domain);
+  const labelOf = (value: number) => formatAxis(value, format, style);
+  const ticksOf = (tickValues: number[]) =>
+    tickValues.map((value) => ({ value, label: labelOf(value) }));
+  const fitted = mode === "auto" ? fitAxis(values, labelOf) : undefined;
+  const domain = fitted?.domain ?? domainOf(values, mode);
+  const ticks = ticksOf(fitted?.ticks ?? evenTicks(domain));
   const labels = new Set(ticks.map((tick) => tick.label));
   if (labels.size === ticks.length) return { domain, ticks };
   const whole: [number, number] = [Math.floor(domain[0]), Math.ceil(domain[1])];
-  return { domain: whole, ticks: ticksOf(whole) };
+  return { domain: whole, ticks: ticksOf(evenTicks(whole)) };
 }
 
 function localOffsetMs(at: number, timeZone: string): number {
@@ -115,69 +127,102 @@ function clockTicks([start, end]: [number, number], style: ChartStyle) {
     clockSteps.at(-1)!;
   const stepMs = stepMin * minuteMs;
   const offset = localOffsetMs(start, style.timeZone);
-  const ticks: AppTick[] = [];
+  const values: number[] = [];
   for (
     let value = Math.ceil((start + offset) / stepMs) * stepMs - offset;
     value <= end;
     value += stepMs
   ) {
-    ticks.push({ value, label: formatAxis(value, "clock", style) });
+    values.push(value);
   }
-  return ticks;
+  return values;
 }
 
-function stepTicks(
-  [start, end]: [number, number],
-  format: AxisFormat,
-  style: ChartStyle,
-): AppTick[] {
+function stepTicks([start, end]: [number, number]): number[] {
   const step = evenStep((end - start) / maxClockIntervals || 1);
-  const ticks: AppTick[] = [];
+  const values: number[] = [];
   for (
     let value = Math.ceil(start / step) * step;
     value <= end;
     value += step
   ) {
-    const rounded = Math.round(value * 1e6) / 1e6;
-    ticks.push({ value: rounded, label: formatAxis(rounded, format, style) });
+    values.push(Math.round(value * 1e6) / 1e6);
   }
-  return ticks;
+  return values;
+}
+
+function indexTicks(xs: number[]): number[] {
+  const count = Math.min(maxIndexTicks, xs.length);
+  if (count < 2) return xs;
+  return Array.from(
+    { length: count },
+    (_, index) => xs[Math.round((index * (xs.length - 1)) / (count - 1))]!,
+  );
+}
+
+function labelWidth(tick: AppTick): number {
+  return tick.label.length * labelCharWidth;
+}
+
+function barTicks(ticks: AppTick[], plotWidth: number): AppTick[] {
+  const widest = Math.max(...ticks.map(labelWidth));
+  const stride = Math.max(
+    Math.ceil(ticks.length / maxIndexTicks),
+    Math.ceil((widest + labelGap) / (plotWidth / ticks.length)),
+  );
+  return ticks.filter((_, index) => index % stride === 0);
+}
+
+function spacedTicks(
+  ticks: AppTick[],
+  [start, end]: [number, number],
+  plotWidth: number,
+): AppTick[] {
+  const kept: AppTick[] = [];
+  let edge = -Infinity;
+  for (const tick of ticks) {
+    const center =
+      end > start ? ((tick.value - start) / (end - start)) * plotWidth : 0;
+    const half = labelWidth(tick) / 2;
+    if (center - half < edge + labelGap) continue;
+    kept.push(tick);
+    edge = center + half;
+  }
+  return kept;
+}
+
+function strideTicks(
+  ticks: AppTick[],
+  domain: [number, number],
+  plotWidth: number,
+): AppTick[] {
+  for (let stride = 1; ; stride += 1) {
+    const kept = ticks.filter((_, index) => index % stride === 0);
+    if (spacedTicks(kept, domain, plotWidth).length === kept.length) {
+      return kept;
+    }
+  }
 }
 
 function xTicks(
   xs: number[],
   domain: [number, number],
+  label: (value: number) => string,
   format: AxisFormat,
   style: ChartStyle,
   bars: boolean,
+  plotWidth: number,
 ): AppTick[] {
-  if (bars) return barTicks(xs, format, style);
-  if (format === "clock") return clockTicks(domain, style);
+  const ticksOf = (values: number[]) =>
+    values.map((value) => ({ value, label: label(value) }));
+  if (bars) return barTicks(ticksOf(xs), plotWidth);
+  if (format === "clock") {
+    return strideTicks(ticksOf(clockTicks(domain, style)), domain, plotWidth);
+  }
   if (format === "percent" || format === "number") {
-    return stepTicks(domain, format, style);
+    return strideTicks(ticksOf(stepTicks(domain)), domain, plotWidth);
   }
-  return indexTicks(xs, format, style);
-}
-
-function barTicks(xs: number[], format: AxisFormat, style: ChartStyle) {
-  const stride = Math.ceil(xs.length / maxIndexTicks);
-  return xs
-    .filter((_, index) => index % stride === 0)
-    .map((value) => ({ value, label: formatAxis(value, format, style) }));
-}
-
-function indexTicks(xs: number[], format: AxisFormat, style: ChartStyle) {
-  const count = Math.min(maxIndexTicks, xs.length);
-  if (count < 2) {
-    return xs.map((value) => ({
-      value,
-      label: formatAxis(value, format, style),
-    }));
-  }
-  return Array.from({ length: count }, (_, index) => {
-    const value = xs[Math.round((index * (xs.length - 1)) / (count - 1))]!;
-    return { value, label: formatAxis(value, format, style) };
-  });
+  return spacedTicks(ticksOf(indexTicks(xs)), domain, plotWidth);
 }
 
 export function buildChart(input: ChartInput): AppChart | null {
@@ -209,6 +254,7 @@ export function buildChart(input: ChartInput): AppChart | null {
   const xDomain: [number, number] = [xs[0]!, xs.at(-1)!];
   return {
     title: input.title,
+    ...(input.caption ? { caption: input.caption } : {}),
     locale: style.locale,
     series,
     points,
@@ -217,10 +263,12 @@ export function buildChart(input: ChartInput): AppChart | null {
       ticks: xTicks(
         xs,
         xDomain,
+        (value) => withUnit(formatAxis(value, input.xFormat, style)),
         input.xFormat,
         style,
         series.some((entry) => entry.kind === "bar"),
-      ).map((tick) => ({ ...tick, label: withUnit(tick.label) })),
+        rightKeys.length ? phonePlotWidth - secondAxisWidth : phonePlotWidth,
+      ),
     },
     left: axis(
       finiteValues(rows, keysOn("left")),

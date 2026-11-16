@@ -373,6 +373,7 @@ export function batteryPage(
                 chartBlock(
                   buildChart({
                     title: "By outside temperature",
+                    caption: `By outside temperature (${f.units.temperature})`,
                     rows: rangeByOutside,
                     xKey: "temperature",
                     xFormat: "number",
@@ -392,6 +393,7 @@ export function batteryPage(
                 chartBlock(
                   buildChart({
                     title: "By battery level",
+                    caption: "By battery level (%)",
                     rows: rangeByBattery,
                     xKey: "level",
                     xFormat: "percent",

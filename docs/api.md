@@ -110,7 +110,7 @@ The lists of `drives`, `charges`, and `report` give their days in `sections`. Ea
 
 A drive gives `gpxPath`, and a report gives `exports`, each the path of an export of the section above. The app downloads them with its phone token and opens the share sheet of the phone.
 
-`src/lib/app/contract.ts` defines every answer. A chart comes with its points in the user's units, the axis ticks, and the tooltip labels, so the app only draws it. The shape follows the app and can change in any release, so scripts should use `summary.json` and the exports.
+`src/lib/app/contract.ts` defines every answer. A chart comes with its points in the user's units, the axis ticks, and the tooltip labels, so the app only draws it. The horizontal ticks keep a gap that fits a 390 pt phone. A chart can give a `caption`, which names its horizontal axis and the unit. A series can give a `dash` (`solid`, `dashed`, `dotted`, or `dashDot`) for its line. An older server omits both fields, and the app then draws solid lines and no caption. The shape follows the app and can change in any release, so scripts should use `summary.json` and the exports.
 
 ## Call the API with a token
 

@@ -315,4 +315,178 @@ describe("buildChart", () => {
     ]);
     expect(chart?.points[0]?.label).toBe("18 °C");
   });
+
+  test("drops a day label that would touch the label before it", () => {
+    const days = [
+      "2026-10-02",
+      "2026-10-06",
+      "2026-10-17",
+      "2026-10-19",
+      "2026-10-22",
+      "2026-10-28",
+      "2026-11-03",
+      "2026-11-09",
+      "2026-11-14",
+    ].map((day, index) => ({
+      at: Date.parse(`${day}T09:00:00Z`),
+      kwh: 70 + index / 10,
+    }));
+    const chart = buildChart({
+      title: "Capacity",
+      rows: days,
+      xKey: "at",
+      xFormat: "day",
+      style,
+      series: [{ key: "kwh", label: "Capacity", unit: "kWh", color: "chart1" }],
+    });
+    expect(chart?.x.ticks.map((tick) => tick.label)).toEqual([
+      "2 Oct",
+      "17 Oct",
+      "3 Nov",
+      "14 Nov",
+    ]);
+  });
+
+  test("labels every second of five month bars, so the labels keep a gap", () => {
+    const chart = buildChart({
+      title: "Distance",
+      rows: months.slice(0, 5),
+      xKey: "at",
+      xFormat: "month",
+      style,
+      left: "zero",
+      series: [
+        {
+          key: "km",
+          label: "Distance",
+          unit: "km",
+          color: "chart1",
+          kind: "bar",
+        },
+      ],
+    });
+    expect(chart?.x.ticks.map((tick) => tick.label)).toEqual([
+      "Jan 2026",
+      "Mar 2026",
+      "May 2026",
+    ]);
+  });
+
+  test("keeps fewer clock labels, at even gaps, next to a second axis", () => {
+    const drive = Array.from({ length: 25 }, (_, index) => ({
+      at: Date.parse("2026-10-17T07:10:00Z") + index * 10 * 60_000,
+      speed: 80,
+      power: 20,
+    }));
+    const chart = buildChart({
+      title: "Speed and power",
+      rows: drive,
+      xKey: "at",
+      xFormat: "clock",
+      style: { ...style, clock: "12h" },
+      series: [
+        { key: "speed", label: "Speed", unit: "km/h", color: "chart1" },
+        {
+          key: "power",
+          label: "Power",
+          unit: "kW",
+          color: "chart4",
+          axis: "right",
+        },
+      ],
+      left: "zero",
+    });
+    expect(chart?.x.ticks.map((tick) => tick.label)).toEqual([
+      "11:00 AM",
+      "1:00 PM",
+    ]);
+  });
+
+  const lineChart = (values: number[]) =>
+    buildChart({
+      title: "Elevation",
+      rows: values.map((value, index) => ({
+        at: start + index * 60_000,
+        value,
+      })),
+      xKey: "at",
+      xFormat: "clock",
+      style,
+      series: [{ key: "value", label: "Value", unit: "m", color: "chart3" }],
+    });
+
+  const filled = (values: number[]) => {
+    const [low, high] = lineChart(values)?.left.domain ?? [0, 1];
+    return (Math.max(...values) - Math.min(...values)) / (high - low);
+  };
+
+  test("fits the value axis close to the values", () => {
+    expect(lineChart([265, 300, 340])?.left.domain).toEqual([260, 360]);
+    const odometer = lineChart([2400, 3300, 4100])?.left;
+    expect(odometer?.domain).toEqual([2000, 4500]);
+    expect(odometer?.ticks.map((tick) => tick.label)).toEqual([
+      "2.0k",
+      "2.5k",
+      "3.0k",
+      "3.5k",
+      "4.0k",
+      "4.5k",
+    ]);
+    expect(filled([265, 300, 340])).toBeGreaterThanOrEqual(0.5);
+    expect(filled([2400, 3300, 4100])).toBeGreaterThanOrEqual(0.5);
+  });
+
+  test("takes a coarser value axis when two ticks would share a label", () => {
+    const labels = (values: number[]) =>
+      lineChart(values)?.left.ticks.map((tick) => tick.label) ?? [];
+    expect(labels([2606, 2680, 2744])).toEqual([
+      "2.5k",
+      "2.6k",
+      "2.7k",
+      "2.8k",
+    ]);
+    expect(labels([41210, 41290, 41380])).toEqual([
+      "41.2k",
+      "41.3k",
+      "41.4k",
+      "41.5k",
+    ]);
+    for (const values of [
+      [2606, 2680, 2744],
+      [41210, 41290, 41380],
+      [1171, 1250, 1368],
+      [12040, 12100, 12190],
+    ]) {
+      const { domain, ticks } = lineChart(values)!.left;
+      expect(new Set(ticks.map((tick) => tick.label)).size).toBe(ticks.length);
+      expect(domain[0]).toBeLessThanOrEqual(Math.min(...values));
+      expect(domain[1]).toBeGreaterThanOrEqual(Math.max(...values));
+    }
+  });
+
+  test("starts the value axis at zero or above for values from zero", () => {
+    expect(lineChart([0.2, 3, 5])?.left.domain[0]).toBe(0);
+    expect(lineChart([12, 40, 61])?.left.domain[0]).toBeGreaterThanOrEqual(0);
+  });
+
+  test("passes the caption and the line style through", () => {
+    const chart = buildChart({
+      title: "By battery level",
+      caption: "By battery level (%)",
+      rows: [20, 50, 80].map((level) => ({ level, a: level, b: level })),
+      xKey: "level",
+      xFormat: "percent",
+      style,
+      series: [
+        { key: "a", label: "A", unit: "km", color: "chart1" },
+        { key: "b", label: "B", unit: "km", color: "chart4", dash: "dashed" },
+      ],
+    });
+    expect(chart?.caption).toBe("By battery level (%)");
+    expect(chart?.series.map((series) => series.dash)).toEqual([
+      undefined,
+      "dashed",
+    ]);
+    expect(lineChart([1, 2])).not.toHaveProperty("caption");
+  });
 });

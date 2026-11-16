@@ -47,7 +47,7 @@ const defaultTones: Record<Variant, keyof Palette> = {
 };
 
 const largeVariants = new Set<Variant>(["hero", "display", "title"]);
-const largeTextCap = 1.2;
+export const largeTextCap = 1.2;
 
 type TextProps = NativeTextProps & {
   variant?: Variant;

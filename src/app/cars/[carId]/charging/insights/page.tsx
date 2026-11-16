@@ -19,6 +19,7 @@ import {
 import {
   chargeInsightTotals,
   costPerKwh,
+  curveLabels,
   curveRows,
 } from "@/lib/charge-insights";
 import {
@@ -169,6 +170,7 @@ export default async function ChargingInsightsPage({
   } = chargeInsightTotals(types, drives.distanceKm);
   const hundred = f.units.distance === "mi" ? 160.9344 : 100;
   const curveData = curveRows(curves);
+  const curveNames = curveLabels(curveData.keys, f.date, f.clock);
   const grid = weekGrid(starts);
   const legs = chargeLegs(snapshot.batteryLevel);
 
@@ -232,7 +234,7 @@ export default async function ChargingInsightsPage({
                   chartStyle={f.chartStyle}
                   series={curveData.keys.map((key, index) => ({
                     key: key.key,
-                    label: f.date(key.startAt),
+                    label: curveNames[index]!,
                     color: curveColors[index % curveColors.length],
                     unit: "kW",
                   }))}

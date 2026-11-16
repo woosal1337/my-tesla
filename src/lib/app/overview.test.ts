@@ -609,6 +609,45 @@ describe("overviewPage", () => {
     expect(shown.menu.map((row) => row.key)).toContain("location");
   });
 
+  test("leaves the live values out of the Status row when Live status is off", () => {
+    const off = { ...defaultPreferences.overview, live: false };
+    const feed = liveInput({
+      locked: "true",
+      doors_open: "false",
+      is_climate_on: "false",
+    });
+    const silent = {
+      ...input,
+      live: {
+        connected: true,
+        hasValues: false,
+        view: liveView({}, {}, now.getTime()),
+      },
+    };
+    const shown = overviewPage(feed, f, now);
+    expect(menuSubtitle(shown, "status")).toBe("All closed · Climate off");
+    const hidden = overviewPage({ ...feed, show: off }, f, now);
+    expect(hidden.live).toBeNull();
+    expect(hidden.menu.map((row) => row.key)).toContain("status");
+    expect(menuSubtitle(hidden, "status")).toBeNull();
+    expect(menuSubtitle(overviewPage(silent, f, now), "status")).toBe(
+      "No live values yet",
+    );
+    expect(
+      menuSubtitle(overviewPage({ ...silent, show: off }, f, now), "status"),
+    ).toBeNull();
+    const empty = overviewPage(
+      {
+        ...feed,
+        snapshot: { ...snapshot, batteryLevel: null, positionAt: null },
+      },
+      f,
+      now,
+    );
+    expect(empty.live).toBeNull();
+    expect(menuSubtitle(empty, "status")).toBeNull();
+  });
+
   test("explains a car without records", () => {
     const page = overviewPage(
       {

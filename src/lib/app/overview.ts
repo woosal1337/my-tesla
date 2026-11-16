@@ -157,6 +157,7 @@ export function overviewPage(
   const charging = snapshot.charging || chargingNow !== null;
   const hasData =
     snapshot.batteryLevel !== null || snapshot.positionAt !== null;
+  const liveCard = hasData && show.live ? live : null;
   const range = f.distanceValue(snapshot.rangeKm);
   const tires = liveNow?.tires ?? snapshot.tires;
   const hasPosition = snapshot.latitude !== null && snapshot.longitude !== null;
@@ -262,6 +263,14 @@ export function overviewPage(
   const estimate = batteryCapacity(input.capacity);
   const health = estimate?.healthPercent ?? null;
   const { whPerKm, distanceTotal } = statsTotals(input.driven, null, f);
+  const statusSummary = statusTiles.length
+    ? statusTiles
+        .slice(0, 3)
+        .map((tile) => tile.title)
+        .join(" · ")
+    : tiles.length
+      ? null
+      : "No live values yet";
   const menu: OverviewMenuRow[] = [
     {
       key: "drives",
@@ -316,14 +325,7 @@ export function overviewPage(
           {
             key: "status" as const,
             title: "Status",
-            subtitle: statusTiles.length
-              ? statusTiles
-                  .slice(0, 3)
-                  .map((tile) => tile.title)
-                  .join(" · ")
-              : tiles.length
-                ? null
-                : "No live values yet",
+            subtitle: liveCard ? statusSummary : null,
           },
         ]
       : []),
@@ -376,20 +378,19 @@ export function overviewPage(
           appStat("Software", snapshot.softwareVersion ?? "—"),
         ])
       : [],
-    live:
-      hasData && show.live && live
-        ? {
-            connected: live.connected,
-            tiles: tiles.map((tile) => ({
-              ...tile,
-              fullAt: tile.fullAt?.toISOString() ?? null,
-            })),
-            notices: liveNotices(live),
-            empty: live.hasValues
-              ? null
-              : `No live values yet. TeslaMate sends them when ${car.name} is online.`,
-          }
-        : null,
+    live: liveCard
+      ? {
+          connected: liveCard.connected,
+          tiles: tiles.map((tile) => ({
+            ...tile,
+            fullAt: tile.fullAt?.toISOString() ?? null,
+          })),
+          notices: liveNotices(liveCard),
+          empty: liveCard.hasValues
+            ? null
+            : `No live values yet. TeslaMate sends them when ${car.name} is online.`,
+        }
+      : null,
     history:
       show.live && input.history
         ? input.history.map((event) => ({

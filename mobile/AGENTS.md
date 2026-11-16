@@ -90,7 +90,7 @@ Put an action of a screen above its long content, never after the last row.
 | `DriveListRow` | A trip row of a drive list, for Drives and the Report. A Report row with `charge` draws as `ChargeListRow`. |
 | `ChargeListRow` | A charge row with the AC or DC badge, the levels, the level bar, the energy, and the cost, for Charging and the Report. It takes the tab stack, so the charge opens in the same tab. |
 | `ExportButton` | Downloads an export of the server with the phone token and opens the share sheet. `src/api/export-file.ts` checks the path and the file name. Pass `disabled` while the screen shows the data of an earlier filter. |
-| `SegmentedControl` | Two to five choices that switch a view or a filter. `size="compact"` for a filter inside a section. Its labels stop growing at 1.2 times the font scale, and a long press shows the iOS Large Content Viewer. |
+| `SegmentedControl` | Two to five choices that switch a view or a filter. `size="compact"` for a filter inside a section. A regular segment is 40 pt high in a 48 pt track, and its `hitSlop` of 4 pt fills the padding of the track, so the target is 48 pt high. A compact segment is 32 pt high in a 40 pt track, and its `hitSlop` of 8 pt makes the target 48 pt high. Keep 8 pt between a compact control and the next control, and put it in no view that clips. Its labels stop growing at 1.2 times the font scale, and a long press shows the iOS Large Content Viewer. |
 | `Button` | The primary button is the only blue control on a screen. Use `kind="secondary"` for every other action. A button that is off and not busy has 38% opacity, a pressed button 60%, and a busy button full opacity with its spinner. |
 | `SwitchRow`, `Field` | An on and off setting with an optional detail, and a labelled text field |
 | `Icon`, `icons` | A symbol with a name for each platform: an SF Symbol and a Material Symbol. The types reject a wrong name. Add new icons to `icons.ts`. An icon grows with the text to 1.5 times its size at most (`useIconScale()`). |
@@ -127,7 +127,7 @@ The app follows the Tesla style of the web. `research/ui-stack.md` has the token
 
 ## Accessibility
 
-1. Touch targets: 48 pt for buttons, rows, and text links, 44 pt for icon buttons. Give the control the size in its layout with `minHeight` and `minWidth`. `hitSlop` never reaches past the bounds of the parent view, so use it only where the parent has the room.
+1. Touch targets: 48 pt for buttons, rows, text links, and the segments of a `SegmentedControl`, 44 pt for icon buttons. Give the control the size in its layout with `minHeight` and `minWidth`. `hitSlop` adds touch area that the view hierarchy does not show. On React Native 0.88, it reaches past the parent view unless an ancestor clips, although the React Native docs say that it does not. Only `SegmentedControl` gets its target from `hitSlop`: a regular segment inside its track, and a compact segment 4 pt past its track. Give no other control its size with it.
 2. Every pressable has `accessibilityRole` and `accessibilityLabel`. Selected, disabled, and busy states go in `accessibilityState`.
 3. Section and panel titles have `accessibilityRole="header"`.
 4. Group the parts of one value or one row into one element with `accessible`, so a screen reader reads it as one.

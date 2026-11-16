@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { targetHref, type TabStack } from "@/navigation/targets";
 import { toneColor } from "@/theme/tones";
 import { usePalette } from "@/theme/use-palette";
+import { ChargeListRow } from "./charge-row";
 import { ListRow, RowTime } from "./list-row";
 import { TripStrip } from "./strips";
 import { Text } from "./text";
@@ -16,6 +17,7 @@ export function DriveListRow({
 }) {
   const router = useRouter();
   const palette = usePalette();
+  if (row.charge) return <ChargeListRow row={row.charge} stack={stack} />;
   const consumption = row.consumption;
   return (
     <ListRow

@@ -12,7 +12,7 @@ Charging insights showed the DC curves of past charges, but it gave no answer to
 
 1. For each charge, the query adds the seconds at each battery percent while power flows. A sample stands for the time until the next sample. A gap of more than 5 minutes is a hole in the record. The level where a charge stopped does not count, because the car did not charge through it.
 2. The typical time of one percent is the median over the charges. The slow time is the 90th percentile. The time of a leg is the sum of its percents. The taper near the top and the AC losses are in these times, because the car measured them.
-3. A leg shows a time only when each percent on the way has a record. If not, it shows "No record".
+3. A leg shows a time only when each percent on the way has a record. If not, it shows "No record". Since 2026-11-16, the table of the mobile app shows "No record" too, in one cell after the levels.
 4. The panel reads the charges of the last 2 years, not the period of the page. A short period has too few charges for each percent.
 5. The panel shows DC and AC. A charge is DC when one of its samples has `fast_charger_present`, as on the other charging pages. The AC time mixes all AC chargers that the car used.
 6. The legs are 10 % to 80 %, 20 % to 80 %, 80 % to 100 %, and one leg from the battery level now.

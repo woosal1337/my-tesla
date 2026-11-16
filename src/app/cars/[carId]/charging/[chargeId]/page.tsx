@@ -301,10 +301,7 @@ export default async function ChargePage({
 
       <div className="mt-12 grid grid-cols-1 gap-4">
         {breakdown && (
-          <Panel
-            title="Cost"
-            action={<span className="text-xs text-subtle">{costSource}</span>}
-          >
+          <Panel title="Cost breakdown">
             <dl className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3">
               <Metric
                 label="Energy billed"

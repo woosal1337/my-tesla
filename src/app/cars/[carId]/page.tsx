@@ -173,8 +173,9 @@ export default async function OverviewPage({
                 animated={preferences.motion !== "reduced"}
               />
             </Stat>
+            <Stat label="Outside">{f.temperature(snapshot.outsideTemp)}</Stat>
             <Stat
-              label="Outside"
+              label="Cabin"
               detail={
                 snapshot.climateOn === null
                   ? undefined
@@ -183,9 +184,8 @@ export default async function OverviewPage({
                     : "Climate off"
               }
             >
-              {f.temperature(snapshot.outsideTemp)}
+              {f.temperature(snapshot.insideTemp)}
             </Stat>
-            <Stat label="Cabin">{f.temperature(snapshot.insideTemp)}</Stat>
             <Stat label="Software">{snapshot.softwareVersion ?? "—"}</Stat>
           </dl>
 

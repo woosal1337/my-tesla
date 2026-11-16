@@ -3,7 +3,7 @@ import type { ChargeSession, CurvePoint } from "../charge-data";
 import { createFormatter } from "../format";
 import { defaultPreferences } from "../preferences";
 import type { Charge } from "../queries";
-import { chargeDetail, chargeList, unclosedNotice } from "./charges";
+import { chargeDetail, chargeList, chargeRow, unclosedNotice } from "./charges";
 
 const f = createFormatter(defaultPreferences, "Europe/Istanbul");
 const now = new Date("2026-10-17T15:00:00Z");
@@ -94,6 +94,7 @@ describe("chargeList", () => {
       energy: "+16.5 kWh",
       cost: "80.10",
     });
+    expect(done).toEqual(chargeRow(charge, f));
   });
 });
 
@@ -107,7 +108,11 @@ describe("chargeDetail", () => {
       "172 kW",
       "30 min",
     ]);
-    expect(detail.cost?.source).toBe("Recorded in TeslaMate");
+    expect(detail.cost).not.toHaveProperty("source");
+    expect(detail.stats.find((stat) => stat.label === "Cost")).toMatchObject({
+      value: { text: "440.00" },
+      detail: "Recorded in TeslaMate",
+    });
     expect(detail.charts.map((chart) => chart.title)).toEqual([
       "Power by battery level (kW)",
       "Battery and power",
@@ -123,7 +128,7 @@ describe("chargeDetail", () => {
 
   test("notes a charge that TeslaMate left open, and hides the map", () => {
     const detail = chargeDetail(
-      { ...session, unclosed: true, cost: null },
+      { ...session, unclosed: true, cost: null, maxPowerKw: null },
       [],
       null,
       f,
@@ -131,6 +136,7 @@ describe("chargeDetail", () => {
       false,
     );
     expect(detail.notice).toBe(unclosedNotice);
+    expect(detail.hero.map((stat) => stat.label)).not.toContain("Peak power");
     expect(detail.cost).toBeNull();
     expect(detail.charts).toEqual([]);
     expect(detail.location).toBeNull();

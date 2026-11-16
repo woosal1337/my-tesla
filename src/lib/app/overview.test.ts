@@ -179,6 +179,14 @@ describe("overviewPage", () => {
       "21 °C",
       "2026.20.300",
     ]);
+    expect(page.stats.find((stat) => stat.label === "Cabin")?.detail).toBe(
+      "Climate off",
+    );
+    expect(page.stats.find((stat) => stat.label === "Outside")?.detail).toBe(
+      null,
+    );
+    expect(page).not.toHaveProperty("lastDrive");
+    expect(page).not.toHaveProperty("lastCharge");
     expect(page.tires?.rearLeft.tone).toBe("bad");
     expect(page.tires?.rearLeft.note).toContain("slow leak");
     expect(page.tires?.warnings[0]).toContain("Rear left tire");
@@ -398,6 +406,42 @@ describe("overviewPage", () => {
     expect(menuSubtitle(page, "charging")).toBe("No charge yet");
     expect(page.battery?.caption).toBe("Charging");
     expect(page.battery?.fullAt).toBe("2026-10-17T17:00:00.000Z");
+  });
+
+  test("leaves out a car figure without a value", () => {
+    const page = overviewPage(
+      {
+        ...input,
+        snapshot: {
+          ...snapshot,
+          outsideTemp: null,
+          softwareVersion: null,
+        },
+      },
+      f,
+      now,
+    );
+    expect(page.stats.map((stat) => stat.label)).toEqual(["Odometer", "Cabin"]);
+  });
+
+  test("shows the last drive and charge in the menu only with the switch on", () => {
+    const records = { ...input, lastDrive, lastCharge };
+    const shown = overviewPage(records, f, now);
+    expect(menuSubtitle(shown, "drives")).toStartWith("Home → Office · ");
+    expect(menuSubtitle(shown, "charging")).toStartWith(
+      "Home · +24.6 kWh · 30% → 66% · ",
+    );
+    const hidden = overviewPage(
+      {
+        ...records,
+        show: { ...defaultPreferences.overview, recent: false },
+      },
+      f,
+      now,
+    );
+    expect(menuSubtitle(hidden, "drives")).toBeNull();
+    expect(menuSubtitle(hidden, "charging")).toBeNull();
+    expect(menuSubtitle(hidden, "battery")).toBe("No long charge yet");
   });
 
   test("hides the cards that Settings turns off, and maps when hidden", () => {

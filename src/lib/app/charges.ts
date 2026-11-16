@@ -10,15 +10,43 @@ import type {
   AppChart,
   ChargeDetail,
   ChargeList,
+  ChargeRow,
   LevelRange,
 } from "./contract";
-import { appStat, levelsText } from "./values";
+import { appStat, levelsText, statsWithValue } from "./values";
 
 export const unclosedNotice =
   "TeslaMate did not close this charge. This happens when TeslaMate restarts during a charge. The values come from the charge records.";
 
 function levelsOf(start: number | null, end: number | null): LevelRange | null {
   return start === null || end === null ? null : { start, end };
+}
+
+export function chargeRow(charge: Charge, f: Formatter): ChargeRow {
+  return {
+    key: `charge-${charge.id}`,
+    id: charge.id,
+    clock: f.clock(charge.startAt),
+    duration: charge.endAt ? f.duration(charge.durationMin) : "Now",
+    place: charge.place,
+    fast: charge.fastCharger,
+    detail: [
+      charge.startLevel !== null && charge.endLevel !== null
+        ? levelsText(charge.startLevel, charge.endLevel)
+        : charge.endAt
+          ? "—"
+          : null,
+      charge.maxPowerKw ? `up to ${Math.round(charge.maxPowerKw)} kW` : null,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    levels: levelsOf(charge.startLevel, charge.endLevel),
+    energy:
+      charge.energyAddedKwh === null && !charge.endAt
+        ? null
+        : `+${f.energy(charge.energyAddedKwh)}`,
+    cost: charge.cost === null ? null : f.cost(charge.cost),
+  };
 }
 
 export function chargeList(
@@ -48,32 +76,7 @@ export function chargeList(
       .map((group) => ({
         title: group.label,
         total: chargesDayTotal(group.items, f),
-        rows: group.items.map((charge) => ({
-          key: `charge-${charge.id}`,
-          id: charge.id,
-          clock: f.clock(charge.startAt),
-          duration: charge.endAt ? f.duration(charge.durationMin) : "Now",
-          place: charge.place,
-          fast: charge.fastCharger,
-          detail: [
-            charge.startLevel !== null && charge.endLevel !== null
-              ? levelsText(charge.startLevel, charge.endLevel)
-              : charge.endAt
-                ? "—"
-                : null,
-            charge.maxPowerKw
-              ? `up to ${Math.round(charge.maxPowerKw)} kW`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-          levels: levelsOf(charge.startLevel, charge.endLevel),
-          energy:
-            charge.energyAddedKwh === null && !charge.endAt
-              ? null
-              : `+${f.energy(charge.energyAddedKwh)}`,
-          cost: charge.cost === null ? null : f.cost(charge.cost),
-        })),
+        rows: group.items.map((charge) => chargeRow(charge, f)),
       })),
   };
 }
@@ -177,7 +180,7 @@ export function chargeDetail(
     }`,
     fullAt: fullAt ? fullAt.toISOString() : null,
     notice: session.unclosed ? unclosedNotice : null,
-    hero: [
+    hero: statsWithValue([
       appStat(
         "Energy added",
         added === null ? missing : `+${f.number(added, 1)} kWh`,
@@ -200,9 +203,9 @@ export function chargeDetail(
           ? missing
           : f.duration(session.durationMin),
       ),
-    ],
+    ]),
     levels: levelsOf(session.startLevel, session.endLevel),
-    stats: [
+    stats: statsWithValue([
       appStat(
         "Average power",
         figures.averagePower === null
@@ -249,10 +252,9 @@ export function chargeDetail(
       ...(figures.batteryHeater
         ? [appStat("Battery heater", figures.batteryHeater)]
         : []),
-    ],
+    ]),
     cost: breakdown
       ? {
-          source: figures.costSource,
           note:
             [
               figures.tariff && `The price at this place: ${figures.tariff}.`,
@@ -263,7 +265,7 @@ export function chargeDetail(
             ]
               .filter(Boolean)
               .join(" ") || null,
-          stats: [
+          stats: statsWithValue([
             appStat(
               "Energy billed",
               session.billedKwh === null
@@ -297,7 +299,7 @@ export function chargeDetail(
             appStat("Per 1% of battery", f.cost(breakdown.perLevel), {
               detail: levelsAdded === null ? null : `${levelsAdded}% added`,
             }),
-          ],
+          ]),
         }
       : null,
     charts: chargeCharts(curve, f),

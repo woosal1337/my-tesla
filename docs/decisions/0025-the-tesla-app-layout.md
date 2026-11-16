@@ -2,7 +2,7 @@
 
 Date: 2026-10-22
 
-Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7).
+Status: Accepted. Since [decision 0028](0028-the-car-fills-the-stage.md), the callouts have no lines. The server also sends the place of the car in the image. Since 2026-11-16, each value has one place on the Overview (point 7), and the switch "Last drive and charge" hides the summaries of the Drives and Charging rows ([decision 0032](0032-no-empty-or-repeated-values-on-the-detail-screens.md)).
 
 ## Context
 
@@ -50,6 +50,6 @@ The Overview of the mobile app was the web Overview in cards: the car image, the
 
 - `research/mobile-ui.md` records the rows, the callouts, the glow, the quick actions, and the car switcher with their sources.
 - The Overview answer of the app API carries two more fields, and an older server without them fails the shape check with the "server is too old" message.
-- The Settings for the Overview cards still hide the parts they name: the car image, the Live card, Today, the tires, the location, and the recent records.
+- The Settings for the Overview cards still hide the parts they name: the car image, the Live card, Today, the tires, and the location. The switch "Last drive and charge" changed no app screen until 2026-11-16. Since then, it hides the summaries of the Drives and Charging rows.
 - The Overview route runs two more queries on each request: the capacity history and the drive totals of the default period. Measure the 30 s poll on a large database if it becomes slow.
 - The open car switcher reads the Overview answer of each other car. This works with every released server, adds no query to the poll of the shown car, and fills the cache, so the chosen car shows at once.

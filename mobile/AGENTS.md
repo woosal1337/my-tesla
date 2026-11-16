@@ -85,7 +85,8 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | `MenuRow`, `LinkRow` | A row with an icon, a title, and a summary that wraps when it is long, the row of the Overview menu and of the sidebar. `LinkRow` is the same row with a chevron, for another screen of the same tab, such as Timeline from Drives |
 | `CarTitle`, `CarStage`, `QuickActions` | The head of the Overview: the car name with the chevron that switches the car, the state, and the switcher rows with the battery and the state of each other car; the car on its glow with the callouts from the server; and the row of icon buttons under it. `carSlot()` in `car-frame.ts` places the image from `car.imageFrame`, so the car spans the stage. Read [decision 0025](../docs/decisions/0025-the-tesla-app-layout.md) and [decision 0028](../docs/decisions/0028-the-car-fills-the-stage.md). |
 | `InsightBody`, `PeriodControl` | The hero, the hero blocks, and the sections of an insight page, for Insights, Charging insights, and the year in review |
-| `DriveListRow` | A trip or a charge row of a drive list, for Drives and the Report |
+| `DriveListRow` | A trip row of a drive list, for Drives and the Report. A Report row with `charge` draws as `ChargeListRow`. |
+| `ChargeListRow` | A charge row with the AC or DC badge, the levels, the level bar, the energy, and the cost, for Charging and the Report. It takes the tab stack, so the charge opens in the same tab. |
 | `ExportButton` | Downloads an export of the server with the phone token and opens the share sheet. `src/api/export-file.ts` checks the path and the file name. |
 | `SegmentedControl` | Two to five choices that switch a view or a filter. `size="compact"` for a filter inside a section. |
 | `Button` | The primary button is the only blue control on a screen. Use `kind="secondary"` for every other action. |

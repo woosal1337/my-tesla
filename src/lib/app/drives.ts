@@ -26,7 +26,7 @@ import type {
   TripDetail,
   TripStepRow,
 } from "./contract";
-import { appStat, appValue, levelsText } from "./values";
+import { appStat, appValue, levelsText, statsWithValue } from "./values";
 
 export const leftOpenNotice =
   "TeslaMate did not close this drive. This happens when TeslaMate restarts during a drive. The values come from the position records.";
@@ -183,7 +183,7 @@ export function driveDetail(
         `${f.temperature(drive.outsideTempAvg)} outside`,
     ]),
     notice: drive.leftOpen ? leftOpenNotice : null,
-    stats: [
+    stats: statsWithValue([
       appStat("Distance", f.distance(drive.distanceKm)),
       appStat("Duration", f.duration(drive.durationMin)),
       appStat("Consumption", f.efficiency(drive.efficiencyWhPerKm), {
@@ -219,7 +219,7 @@ export function driveDetail(
             ? `${f.elevation(drive.descentM)} descent`
             : null,
       }),
-    ],
+    ]),
     charts: hasSeries ? driveCharts(series, f) : [],
     route: showMaps && route.length > 1 ? route : null,
     gpxPath: `/api/cars/${car.id}/drives/${drive.id}.gpx`,
@@ -241,7 +241,7 @@ export function tripDetail(
       tripOrigin(trip),
       `${f.day(trip.startAt, now)} ${f.clock(trip.startAt)} to ${f.clock(trip.endAt)}`,
     ]),
-    stats: [
+    stats: statsWithValue([
       appStat("Distance", f.distance(summary.distanceKm), {
         detail: `${summary.legs} ${summary.legs === 1 ? "drive" : "drives"}`,
       }),
@@ -273,7 +273,7 @@ export function tripDetail(
             ? null
             : `Top ${f.speed(summary.speedMaxKmh)}`,
       }),
-    ],
+    ]),
     steps: tripSteps(trip).map((step): TripStepRow => {
       if (step.kind === "leg") {
         const { leg } = step;

@@ -93,6 +93,7 @@ export type DriveRow = {
   segments: { kind: "drive" | "stop" | "charge"; share: number }[];
   distance: string;
   consumption: AppValue;
+  charge?: ChargeRow;
 };
 
 export type DaySection<Row> = { title: string; total?: string[]; rows: Row[] };
@@ -160,7 +161,7 @@ export type ChargeDetail = {
   hero: AppStat[];
   levels: LevelRange | null;
   stats: AppStat[];
-  cost: { source: string; stats: AppStat[]; note: string | null } | null;
+  cost: { stats: AppStat[]; note: string | null } | null;
   charts: AppChart[];
   location: { latitude: number; longitude: number } | null;
   previousId: number | null;
@@ -308,12 +309,6 @@ export type ActivityTone = "active" | "charge" | "quiet";
 
 export type DayKind = "drive" | "charge" | "online" | "asleep" | "offline";
 
-export type RecentRecord = {
-  title: string;
-  detail: string;
-  target: AppTarget;
-};
-
 export type OverviewMenuKey =
   | "drives"
   | "charging"
@@ -402,8 +397,6 @@ export type OverviewPage = {
         tone: LiveTone;
       }[]
     | null;
-  lastDrive: RecentRecord | null;
-  lastCharge: RecentRecord | null;
 };
 
 export type SettingOption = { id: string; label: string };

@@ -182,6 +182,20 @@ describe("driveDetail", () => {
     expect(driveDetail(found, car, f, now, false).route).toBeNull();
   });
 
+  test("leaves out the peak power without a power record", () => {
+    const detail = driveDetail(
+      {
+        ...found,
+        drive: { ...found.drive, powerMaxKw: null, powerMinKw: null },
+      },
+      car,
+      f,
+      now,
+      true,
+    );
+    expect(detail.stats.map((stat) => stat.label)).not.toContain("Peak power");
+  });
+
   test("shows a small recovered energy in watt-hours", () => {
     const recovered = (energy: { usedKwh: number; recoveredKwh: number }) =>
       driveDetail({ ...found, energy }, car, f, now, true).stats.find(
@@ -233,5 +247,15 @@ describe("tripDetail", () => {
     const hidden = tripDetail(trips[1]!, routes, car, f, now, false);
     expect(hidden.routes).toBeNull();
     expect(hidden.markers).toBeNull();
+  });
+
+  test("shows the charging cost only for a trip with a charge", () => {
+    const labels = (trip: (typeof trips)[number]) =>
+      tripDetail(trip, new Map(), car, f, now, true).stats.map(
+        (stat) => stat.label,
+      );
+    expect(labels(trips[1]!)).toContain("Charging cost");
+    expect(labels(trips[0]!)).not.toContain("Charging cost");
+    expect(labels(trips[0]!)).toHaveLength(7);
   });
 });

@@ -24,7 +24,7 @@ import type {
 } from "./contract";
 import { chartBlock, panel, periodChoices, periodLabel } from "./panels";
 import { heatmap } from "./stats";
-import { appStat, appValue } from "./values";
+import { appStat, appValue, statsWithValue } from "./values";
 
 export type ChargingInsightsInput = {
   types: ChargeTypeTotals[];
@@ -97,8 +97,12 @@ function chargeTimeBlocks(
           key: `${fast ? "dc" : "ac"}-${leg.from}-${leg.to}`,
           cells: [
             appValue(`${leg.from}% → ${leg.to}%${leg.current ? " (now)" : ""}`),
-            appValue(time ? f.duration(time.typicalMin) : "—"),
-            appValue(time ? f.duration(time.slowMin) : "—"),
+            ...(time
+              ? [
+                  appValue(f.duration(time.typicalMin)),
+                  appValue(f.duration(time.slowMin)),
+                ]
+              : [appValue("No record")]),
           ],
         };
       }),
@@ -154,7 +158,7 @@ export function chargingInsightsPage(
   }
   return {
     ...base,
-    hero: [
+    hero: statsWithValue([
       appStat("Sessions", String(totals.sessions)),
       appStat("Energy added", `${f.number(totals.addedKwh)} kWh`),
       appStat(
@@ -170,7 +174,7 @@ export function chargingInsightsPage(
         totals.perKm === null ? "—" : f.cost((totals.perKm * hundred) / 100),
         { detail: `${f.distance(input.drivenKm)} driven` },
       ),
-    ],
+    ]),
     heroBlocks: [
       {
         kind: "stats",

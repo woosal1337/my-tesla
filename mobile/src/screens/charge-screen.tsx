@@ -72,7 +72,7 @@ export function ChargeScreen({ chargeId }: { chargeId: string }) {
                 <StatGrid stats={detail.stats} />
               </View>
               {detail.cost ? (
-                <Panel title="Cost" note={detail.cost.source}>
+                <Panel title="Cost breakdown">
                   <StatGrid stats={detail.cost.stats} />
                   {detail.cost.note ? (
                     <Text variant="caption">{detail.cost.note}</Text>

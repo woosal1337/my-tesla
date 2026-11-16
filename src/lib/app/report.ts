@@ -12,8 +12,9 @@ import {
 } from "../trip";
 import { csvFileName } from "../trip-log";
 import type { DriveRow, MapMarker, ReportPage } from "./contract";
+import { chargeRow } from "./charges";
 import { tripRow } from "./drives";
-import { appStat, appValue } from "./values";
+import { appStat, appValue, statsWithValue } from "./values";
 
 export type ReportInput = {
   range: TripRange | "invalid";
@@ -28,7 +29,7 @@ function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
 }
 
-function chargeRow(charge: Charge, f: Formatter): DriveRow {
+function reportChargeRow(charge: Charge, f: Formatter): DriveRow {
   return {
     key: `charge-${charge.id}`,
     target: { kind: "charge", id: charge.id },
@@ -39,6 +40,7 @@ function chargeRow(charge: Charge, f: Formatter): DriveRow {
     segments: [{ kind: "charge", share: 1 }],
     distance: `+${f.energy(charge.energyAddedKwh)}`,
     consumption: appValue(charge.cost === null ? "—" : f.cost(charge.cost)),
+    charge: chargeRow(charge, f),
   };
 }
 
@@ -94,7 +96,7 @@ export function reportPage(
     to: range.to,
     presets,
     stats: items.length
-      ? [
+      ? statsWithValue([
           appStat(
             "Distance",
             `${f.number(f.distanceValue(totals.distanceKm) ?? 0)} ${f.units.distance}`,
@@ -115,7 +117,7 @@ export function reportPage(
           appStat("Records", plural(input.trips.length, "trip", "trips"), {
             detail: `${totals.drives} drives · ${plural(totals.charges, "charge", "charges")}`,
           }),
-        ]
+        ])
       : [],
     routes: input.routes
       ? ascending.flatMap((drive) => {
@@ -132,7 +134,7 @@ export function reportPage(
         rows: group.items.map((item) =>
           item.kind === "trip"
             ? tripRow(item.trip, rated, f)
-            : chargeRow(item.charge, f),
+            : reportChargeRow(item.charge, f),
         ),
       })),
     notice: items.length ? null : "No drive and no charge in this range.",

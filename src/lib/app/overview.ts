@@ -33,10 +33,9 @@ import type {
   OverviewMenuRow,
   OverviewPage,
   PeriodId,
-  RecentRecord,
 } from "./contract";
 import { periodLabel } from "./panels";
-import { appStat, appValue } from "./values";
+import { appStat, appValue, statsWithValue } from "./values";
 
 export type OverviewInput = {
   car: Car;
@@ -67,10 +66,6 @@ function joined(parts: (string | null | false | undefined)[]): string | null {
   return kept.length ? kept.join(" · ") : null;
 }
 
-function recordLine(record: RecentRecord): string {
-  return `${record.title} · ${record.detail}`;
-}
-
 function historyIcon(event: HistoryEvent): LiveIcon {
   if (event.kind === "locked") return event.value ? "lock" : "lock-open";
   return event.value ? "shield" : "shield-off";
@@ -95,27 +90,21 @@ export function dayStrip(
   };
 }
 
-function lastDriveRecord(drive: Drive, f: Formatter, now: Date): RecentRecord {
-  return {
-    title: `${drive.from} → ${drive.to}`,
-    detail: `${f.distance(drive.distanceKm)} · ${f.duration(drive.durationMin)} · ${f.day(drive.startAt, now)} ${f.clock(drive.startAt)}`,
-    target: { kind: "drive", id: drive.id },
-  };
+function lastDriveLine(drive: Drive | null, f: Formatter, now: Date): string {
+  if (!drive) return "No drive yet";
+  return `${drive.from} → ${drive.to} · ${f.distance(drive.distanceKm)} · ${f.duration(drive.durationMin)} · ${f.day(drive.startAt, now)} ${f.clock(drive.startAt)}`;
 }
 
-function lastChargeRecord(
-  charge: Charge,
+function lastChargeLine(
+  charge: Charge | null,
   f: Formatter,
   now: Date,
-): RecentRecord {
+): string {
+  if (!charge) return "No charge yet";
   const done = charge.endAt
     ? `+${f.energy(charge.energyAddedKwh)} · ${charge.startLevel ?? "—"}% → ${charge.endLevel ?? "—"}%`
     : `${ongoingText} since ${f.clock(charge.startAt)}`;
-  return {
-    title: charge.place,
-    detail: `${done} · ${f.day(charge.startAt, now)}`,
-    target: { kind: "charge", id: charge.id },
-  };
+  return `${charge.place} · ${done} · ${f.day(charge.startAt, now)}`;
 }
 
 function tireValue(
@@ -247,16 +236,12 @@ export function overviewPage(
     {
       key: "drives",
       title: "Drives",
-      subtitle: input.lastDrive
-        ? recordLine(lastDriveRecord(input.lastDrive, f, now))
-        : "No drive yet",
+      subtitle: show.recent ? lastDriveLine(input.lastDrive, f, now) : null,
     },
     {
       key: "charging",
       title: "Charging",
-      subtitle: input.lastCharge
-        ? recordLine(lastChargeRecord(input.lastCharge, f, now))
-        : "No charge yet",
+      subtitle: show.recent ? lastChargeLine(input.lastCharge, f, now) : null,
     },
     {
       key: "battery",
@@ -343,9 +328,10 @@ export function overviewPage(
         }
       : null,
     stats: hasData
-      ? [
+      ? statsWithValue([
           appStat("Odometer", odometerText),
-          appStat("Outside", f.temperature(snapshot.outsideTemp), {
+          appStat("Outside", f.temperature(snapshot.outsideTemp)),
+          appStat("Cabin", f.temperature(snapshot.insideTemp), {
             detail:
               snapshot.climateOn === null
                 ? null
@@ -353,9 +339,8 @@ export function overviewPage(
                   ? "Climate on"
                   : "Climate off",
           }),
-          appStat("Cabin", f.temperature(snapshot.insideTemp)),
           appStat("Software", snapshot.softwareVersion ?? "—"),
-        ]
+        ])
       : [],
     live:
       hasData && show.live && live
@@ -410,14 +395,6 @@ export function overviewPage(
             longitude: snapshot.longitude ?? 0,
             lastSeen: seenText,
           }
-        : null,
-    lastDrive:
-      hasData && show.recent && input.lastDrive
-        ? lastDriveRecord(input.lastDrive, f, now)
-        : null,
-    lastCharge:
-      hasData && show.recent && input.lastCharge
-        ? lastChargeRecord(input.lastCharge, f, now)
         : null,
   };
 }

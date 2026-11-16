@@ -3,6 +3,7 @@ import { createFormatter } from "../format";
 import { defaultPreferences } from "../preferences";
 import type { Car, Charge, Drive } from "../queries";
 import { buildTrips, tripPresets, tripRange } from "../trip";
+import { chargeList } from "./charges";
 import { reportPage } from "./report";
 
 const f = createFormatter(defaultPreferences, "UTC");
@@ -108,6 +109,17 @@ describe("reportPage", () => {
       { kind: "charge", id: 77 },
       { kind: "drive", id: 11 },
     ]);
+    const [chargeItem, tripItem] = rows;
+    expect(chargeItem?.charge).toEqual(
+      chargeList([charge], f, now).sections[0]!.rows[0]!,
+    );
+    expect(chargeItem?.charge).toMatchObject({
+      id: 77,
+      fast: false,
+      levels: { start: 60, end: 80 },
+    });
+    expect(chargeItem?.segments).toEqual([{ kind: "charge", share: 1 }]);
+    expect(tripItem?.charge).toBeUndefined();
     expect(page.exports.map((item) => item.path)).toEqual([
       "/api/cars/2/drives.csv?from=2026-10-12&to=2026-10-18",
       "/api/cars/2/charges.csv?from=2026-10-12&to=2026-10-18",

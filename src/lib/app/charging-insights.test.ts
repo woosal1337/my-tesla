@@ -126,6 +126,20 @@ describe("chargingInsightsPage", () => {
         (item) => item.title === "DC charging curves (kW)",
       )?.blocks,
     ).toEqual([{ kind: "note", text: "No DC fast charge in this period." }]);
+    const cells = new Map(
+      blocks.flatMap((block) =>
+        block.kind === "table"
+          ? block.rows.map((row) => [
+              row.key,
+              row.cells.map((cell) => cell.text),
+            ])
+          : [],
+      ),
+    );
+    expect(cells.get("ac-10-80")).toEqual(["10% → 80%", "No record"]);
+    expect(cells.get("dc-80-100")).toEqual(["80% → 100%", "No record"]);
+    expect(cells.get("dc-10-80")).toHaveLength(3);
+    expect([...cells.values()].flat()).not.toContain("—");
   });
 
   test("names two curves of one day by their start time and dashes the later curves", () => {

@@ -2,7 +2,7 @@
 
 Date: 2026-11-16
 
-Status: Accepted.
+Status: Accepted. Since [decision 0044](0044-light-tones-with-text-contrast.md), the offline amber is darker in light and has 5.22:1 on the light page.
 
 ## Context
 

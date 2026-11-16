@@ -44,6 +44,11 @@ describe("palettes", () => {
         "foreground",
         "secondaryForeground",
         "mutedForeground",
+        "good",
+        "bad",
+        "warning",
+        "charge",
+        "destructive",
       ] as const) {
         for (const surface of ["background", "card"] as const) {
           expect(
@@ -51,6 +56,15 @@ describe("palettes", () => {
           ).toBeGreaterThanOrEqual(4.5);
         }
       }
+    }
+  });
+
+  test("each theme has one green, one amber, and one red", () => {
+    for (const palette of [palettes.light, palettes.dark]) {
+      expect(palette.charge).toBe(palette.good);
+      expect(palette.chart2).toBe(palette.good);
+      expect(palette.destructive).toBe(palette.bad);
+      expect(palette.chart4).toBe(palette.warning);
     }
   });
 

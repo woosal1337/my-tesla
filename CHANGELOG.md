@@ -29,6 +29,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ### Fixed
 
+- In the light theme of the web and the mobile app, the green, amber, and red text has a contrast of at least 4.5:1 on the page and on the card. Before, a green value had 2.62:1 and an amber value 1.96:1 on a light card. The bars, the strips, the map markers, and the chart lines in these colors are darker in light too. The dark theme does not change. The app needs a new build for the colors, and works with any server. [Decision 0044](docs/decisions/0044-light-tones-with-text-contrast.md) gives the new colors and the ratios.
 - The Status row of the Overview in the mobile app names no live value when "Live status" is off. Before, the row still showed, for example, "All closed · Climate off". The fix is on the server, so the app needs no update.
 - The Overview of the mobile app shows no Location row when the Overview card "Location" is off or the maps are hidden. Before, the row stayed and opened the empty screen "No map". The fix is on the server, so the app needs no update.
 - Charging insights on the web and the Charging tab of the mobile app answer fast again. The charging time query looked up the charger type once for each charge sample. On a database with 31 charges it took 4.8 s, and it grew with each charge. It now takes 0.05 s and returns the same values. The app needs this server version, and needs no update.

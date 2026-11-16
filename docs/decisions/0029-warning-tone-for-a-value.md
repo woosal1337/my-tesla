@@ -2,7 +2,7 @@
 
 Date: 2026-11-16
 
-Status: Accepted. It changes point 1 of [decision 0013](0013-value-colors.md).
+Status: Accepted. It changes point 1 of [decision 0013](0013-value-colors.md). Since [decision 0044](0044-light-tones-with-text-contrast.md), the light tones have 4.5:1 on the page and on the card.
 
 ## Context
 

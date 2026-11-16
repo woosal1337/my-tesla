@@ -282,7 +282,7 @@ export function batteryPage(
                       xKey: "level",
                       xFormat: "percent",
                       style,
-                      left: "zero",
+                      left: "count",
                       series: [
                         {
                           key: "start",
@@ -337,7 +337,7 @@ export function batteryPage(
                             key: "usable",
                             label: "Usable",
                             unit: "%",
-                            color: "chart3" as const,
+                            color: "chart4" as const,
                           },
                         ]
                       : []),

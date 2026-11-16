@@ -113,6 +113,10 @@ describe("chargeDetail", () => {
       "Battery and power",
       "Voltage and current",
     ]);
+    expect(detail.charts[2]?.series.map((series) => series.color)).toEqual([
+      "chart4",
+      "chart1",
+    ]);
     expect([detail.previousId, detail.nextId]).toEqual([8, null]);
     expect(detail.location).toEqual({ latitude: 40.7, longitude: 31.6 });
   });

@@ -198,5 +198,121 @@ describe("buildChart", () => {
     expect(chart?.x.ticks.every((tick) => levels.includes(tick.value))).toBe(
       true,
     );
+    expect(chart?.x.ticks.map((tick) => tick.label)).toEqual([
+      "0%",
+      "20%",
+      "40%",
+      "60%",
+      "80%",
+    ]);
+  });
+
+  test("gives a count axis whole steps from zero", () => {
+    const countTicks = (largest: number) =>
+      buildChart({
+        title: "Charge levels",
+        rows: [0, 10].map((level, index) => ({
+          level,
+          start: index ? largest : 0,
+        })),
+        xKey: "level",
+        xFormat: "percent",
+        style,
+        left: "count",
+        series: [
+          {
+            key: "start",
+            label: "Start",
+            unit: "",
+            color: "chart3",
+            kind: "bar",
+          },
+        ],
+      })?.left.ticks ?? [];
+    expect(countTicks(9).map((tick) => tick.label)).toEqual([
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10",
+    ]);
+    expect(countTicks(1).map((tick) => tick.label)).toEqual(["0", "1"]);
+    expect(countTicks(11).map((tick) => tick.label)).toEqual([
+      "0",
+      "5",
+      "10",
+      "15",
+    ]);
+    for (const largest of [1, 3, 9, 11, 26, 140]) {
+      expect(
+        countTicks(largest).every((tick) => Number.isInteger(tick.value)),
+      ).toBe(true);
+    }
+  });
+
+  const months = Array.from({ length: 12 }, (_, index) => ({
+    at: Date.UTC(2026, index, 15),
+    km: 900 + index,
+  }));
+
+  const monthChart = (dateOrder: "day-month" | "iso") =>
+    buildChart({
+      title: "Distance",
+      rows: months,
+      xKey: "at",
+      xFormat: "month",
+      style: { ...style, dateOrder },
+      left: "zero",
+      series: [
+        {
+          key: "km",
+          label: "Distance",
+          unit: "km",
+          color: "chart1",
+          kind: "bar",
+        },
+      ],
+    });
+
+  test("labels every third of twelve months with the full year", () => {
+    const chart = monthChart("day-month");
+    expect(chart?.x.ticks.map((tick) => tick.label)).toEqual([
+      "Jan 2026",
+      "Apr 2026",
+      "Jul 2026",
+      "Oct 2026",
+    ]);
+    expect(chart?.points[7]?.label).toBe("Aug 2026");
+    expect(monthChart("iso")?.x.ticks[1]?.label).toBe("2026-04");
+  });
+
+  test("puts the unit of the horizontal axis on its ticks", () => {
+    const chart = buildChart({
+      title: "Efficiency and temperature",
+      rows: [18, 24, 31].map((temperature, index) => ({
+        temperature,
+        efficiency: [160, 150, 155][index]!,
+      })),
+      xKey: "temperature",
+      xFormat: "number",
+      xUnit: "°C",
+      style,
+      series: [
+        {
+          key: "efficiency",
+          label: "Efficiency",
+          unit: "Wh/km",
+          color: "chart1",
+          kind: "dot",
+        },
+      ],
+    });
+    expect(chart?.x.ticks.map((tick) => tick.label)).toEqual([
+      "20 °C",
+      "25 °C",
+      "30 °C",
+    ]);
+    expect(chart?.points[0]?.label).toBe("18 °C");
   });
 });

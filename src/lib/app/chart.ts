@@ -8,6 +8,7 @@ import {
   evenStep,
   evenTicks,
   niceDomain,
+  niceStep,
   niceZeroDomain,
 } from "@/components/charts/nice-domain";
 import { localParts } from "../date-format";
@@ -25,7 +26,7 @@ type ChartSeriesInput = {
 
 type Row = Record<string, number | null>;
 
-type AxisMode = "zero" | "auto" | "percent";
+type AxisMode = "zero" | "auto" | "percent" | "count";
 
 export type ChartInput = {
   title: string;
@@ -44,6 +45,7 @@ const minuteMs = 60_000;
 const clockSteps = [1, 2, 5, 10, 15, 30, 60, 120, 180, 240, 360, 720, 1440];
 const maxClockIntervals = 4;
 const maxIndexTicks = 5;
+const maxCountIntervals = 5;
 
 function finiteValues(rows: Row[], keys: string[]): number[] {
   return rows.flatMap((row) =>
@@ -61,12 +63,26 @@ function domainOf(values: number[], mode: AxisMode): [number, number] {
   return (mode === "zero" ? niceZeroDomain : niceDomain)(values) ?? [0, 1];
 }
 
+function countAxis(values: number[], style: ChartStyle): AppAxis {
+  const top = Math.max(1, ...values);
+  const step = niceStep(Math.max(1, top / maxCountIntervals));
+  const intervals = Math.ceil(top / step);
+  return {
+    domain: [0, intervals * step],
+    ticks: Array.from({ length: intervals + 1 }, (_, index) => ({
+      value: index * step,
+      label: formatAxis(index * step, "number", style),
+    })),
+  };
+}
+
 function axis(
   values: number[],
   mode: AxisMode,
   format: AxisFormat,
   style: ChartStyle,
 ): AppAxis {
+  if (mode === "count") return countAxis(values, style);
   const ticksOf = (domain: [number, number]) =>
     evenTicks(domain).map((value) => ({
       value,
@@ -135,12 +151,19 @@ function xTicks(
   style: ChartStyle,
   bars: boolean,
 ): AppTick[] {
-  if (bars) return indexTicks(xs, format, style);
+  if (bars) return barTicks(xs, format, style);
   if (format === "clock") return clockTicks(domain, style);
   if (format === "percent" || format === "number") {
     return stepTicks(domain, format, style);
   }
   return indexTicks(xs, format, style);
+}
+
+function barTicks(xs: number[], format: AxisFormat, style: ChartStyle) {
+  const stride = Math.ceil(xs.length / maxIndexTicks);
+  return xs
+    .filter((_, index) => index % stride === 0)
+    .map((value) => ({ value, label: formatAxis(value, format, style) }));
 }
 
 function indexTicks(xs: number[], format: AxisFormat, style: ChartStyle) {
@@ -159,15 +182,15 @@ function indexTicks(xs: number[], format: AxisFormat, style: ChartStyle) {
 
 export function buildChart(input: ChartInput): AppChart | null {
   const { rows, xKey, style } = input;
+  const withUnit = (label: string) =>
+    input.xUnit ? `${label} ${input.xUnit}` : label;
   const points = rows.flatMap((row) => {
     const x = row[xKey];
     if (typeof x !== "number" || !Number.isFinite(x)) return [];
     return [
       {
         x,
-        label: input.xUnit
-          ? `${formatTooltipLabel(x, input.xFormat, style)} ${input.xUnit}`
-          : formatTooltipLabel(x, input.xFormat, style),
+        label: withUnit(formatTooltipLabel(x, input.xFormat, style)),
         values: input.series.map((series) => row[series.key] ?? null),
       },
     ];
@@ -197,7 +220,7 @@ export function buildChart(input: ChartInput): AppChart | null {
         input.xFormat,
         style,
         series.some((entry) => entry.kind === "bar"),
-      ),
+      ).map((tick) => ({ ...tick, label: withUnit(tick.label) })),
     },
     left: axis(
       finiteValues(rows, keysOn("left")),

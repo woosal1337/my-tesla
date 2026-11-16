@@ -580,6 +580,7 @@ export default async function BatteryPage({
                   },
                 ]}
                 yDomain={[0, "auto"]}
+                wholeY
               />
             ) : (
               <PanelNote>No record yet.</PanelNote>

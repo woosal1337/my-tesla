@@ -146,7 +146,7 @@ function chargeCharts(curve: CurvePoint[], f: Formatter): AppChart[] {
           key: "current",
           label: "Current",
           unit: "A",
-          color: "chart3",
+          color: "chart1",
           axis: "right",
           digits: 1,
         },

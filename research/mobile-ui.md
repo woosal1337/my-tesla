@@ -88,6 +88,19 @@ The server sends each chart as points in the user's units, the axis domains, the
 
 A `shares` block draws each bar as a part of the whole, and the first number of the row text gives the same quantity. The note of the panel names it, for example "Share of distance" or "Share of driving time". The web follows the same rule ([share bars](ui-stack.md#insight-pages)).
 
+Since 2026-11-16, `buildChart` on the server follows these tick and color rules:
+
+| Topic | Rule | Reason |
+|---|---|---|
+| Count axis | The axis mode `count` steps by 1, 2, or 5 times a power of ten, never below 1, with at most five intervals from zero. Battery "Charge start and end levels" uses it. | A count has no half. Before, the axis showed 2.5 and 7.5. Apple asks to "Prefer familiar sequences of values in the tick and grid-line labels for an axis". |
+| Bar labels | A bar chart labels every n-th bar from the first bar, with n = ceil(bars / 5). Ten level buckets show 0%, 20%, 40%, 60%, and 80%. | Equal gaps. Before, the labels showed 0%, 20%, 50%, 70%, and 90%. |
+| Month label | A month has the full year, for example `Aug 2026`. The ISO date order keeps `2026-08`. | `Aug 26` reads as 26 August. A period of one year or more crosses a year edge, so the month alone is not enough. |
+| Unit on the horizontal axis | A chart with `xUnit` shows the unit on each tick, for example `25 °C`. | Each other axis has its unit in the panel title, in a percent tick, or in the legend. Apple lets a title carry the unit. |
+| Current of a charge | The blue `chart1`, against the amber voltage. Before, it had the gray `chart3`. | The current of an AC charge is a flat line, and a gray flat line looks like a grid line. On the card, the blue has 4.39:1 in light and 4.72:1 in dark, above the 3:1 of WCAG 2.2 rule 1.4.11 for a chart line. The gray had 2.98:1 in light. Blue and amber is the pair of the palette that is safest for color vision deficiency. The legend names each line, so the color is not the only signal (rule 1.4.1). |
+| "Usable" line of Battery | The amber `chart4`, as on the web | Apple asks to avoid the same color for different meanings, so the app and the web agree. |
+
+The gray `chart3` stays on bars and areas, such as the "Start" bars and the elevation, because they do not read as grid lines. Every series color differs from the grid color `border`. Material Design 3 has no chart guidance.
+
 ## Maps
 
 | Topic | Decision | Reason |
@@ -141,3 +154,4 @@ A `shares` block draws each bar as a part of the whole, and the first number of 
 - [MapLibre React Native releases](https://github.com/maplibre/maplibre-react-native/releases), [v11 migration](https://maplibre.org/maplibre-react-native/docs/setup/migrations/v11), [its Expo setup](https://maplibre.org/maplibre-react-native/docs/setup/expo), [CARTO basemap keys](https://www.carto.com/basemaps/apikey/)
 - [Apple HIG: color](https://developer.apple.com/design/human-interface-guidelines/color), [WCAG 2.2 Understanding 1.4.1 Use of Color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html), [1.4.3 Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), read on 2026-11-16 for the warning tone of a value
 - [Apple HIG: charts](https://developer.apple.com/design/human-interface-guidelines/charts), [charting data](https://developer.apple.com/design/human-interface-guidelines/charting-data), [WCAG 2.2 Understanding 1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html), read on 2026-11-16 for the share bars
+- [Apple HIG: charts](https://developer.apple.com/design/human-interface-guidelines/charts), [charting data](https://developer.apple.com/design/human-interface-guidelines/charting-data), [color](https://developer.apple.com/design/human-interface-guidelines/color), [WCAG 2.2 Understanding 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html), [1.4.1 Use of Color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html), read on 2026-11-16 for the chart ticks, labels, and series colors

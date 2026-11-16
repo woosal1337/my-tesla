@@ -1,6 +1,6 @@
 const factors = [1, 2, 5, 10];
 
-function niceStep(raw: number, after = 0): number {
+export function niceStep(raw: number, after = 0): number {
   const magnitude = 10 ** Math.floor(Math.log10(raw));
   const candidates = factors.map((factor) => factor * magnitude);
   return (

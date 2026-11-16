@@ -133,6 +133,11 @@ describe("batteryPage", () => {
       text: "The last full charge was 2 days ago.",
     });
     expect(titled("Charge level (%)")?.blocks[0]?.kind).toBe("chart");
+    const levels = titled("Charge start and end levels")?.blocks[0];
+    expect(
+      levels?.kind === "chart" &&
+        levels.chart.left.ticks.map((tick) => tick.value),
+    ).toEqual([0, 1]);
     expect(titled("Time in each state")?.blocks[0]).toMatchObject({
       kind: "shares",
       rows: [

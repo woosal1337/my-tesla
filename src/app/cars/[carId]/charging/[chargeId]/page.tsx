@@ -31,7 +31,7 @@ const colors = {
   battery: "var(--chart-1)",
   power: "var(--charge)",
   voltage: "var(--chart-4)",
-  current: "var(--chart-3)",
+  current: "var(--chart-1)",
 };
 
 function parseId(value: string): number | null {

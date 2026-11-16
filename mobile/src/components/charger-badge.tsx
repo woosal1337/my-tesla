@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
     paddingHorizontal: 6,
     paddingVertical: 1,
+    marginVertical: 2,
   },
   text: { fontSize: 11, fontFamily: fonts.medium },
 });

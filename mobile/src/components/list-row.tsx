@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
+import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
 export function ListRow({
@@ -45,7 +46,7 @@ export function ListRow({
         ) : (
           title
         )}
-        {subtitle ? <Text variant="label">{subtitle}</Text> : null}
+        {subtitle ? <Text variant="label">{dottedLine(subtitle)}</Text> : null}
         {accessory}
       </View>
       {end ? <View style={styles.end}>{end}</View> : null}

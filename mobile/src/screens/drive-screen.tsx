@@ -10,6 +10,7 @@ import { Panel } from "@/components/panel";
 import { QueryView } from "@/components/query-view";
 import { Screen } from "@/components/screen";
 import { StatGrid } from "@/components/stat";
+import { dottedLine } from "@/components/summary-line";
 import { Text } from "@/components/text";
 import { useRefresh } from "@/hooks/use-refresh";
 import { space } from "@/theme/tokens";
@@ -32,7 +33,7 @@ export function DriveScreen({ driveId }: { driveId: string }) {
                 />
               </View>
             ) : null}
-            <Text variant="label">{detail.subtitle}</Text>
+            <Text variant="label">{dottedLine(detail.subtitle)}</Text>
             {detail.notice ? <Notice text={detail.notice} /> : null}
             <ExportButton
               item={{

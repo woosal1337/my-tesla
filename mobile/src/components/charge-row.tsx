@@ -64,6 +64,6 @@ export function ChargeListRow({
 }
 
 const styles = StyleSheet.create({
-  title: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  title: { flexDirection: "row", alignItems: "flex-start", gap: space.sm },
   place: { flexShrink: 1 },
 });

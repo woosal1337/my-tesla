@@ -10,6 +10,7 @@ import { RouteMap } from "@/components/map";
 import { QueryView } from "@/components/query-view";
 import { Screen } from "@/components/screen";
 import { StatGrid } from "@/components/stat";
+import { dottedLine } from "@/components/summary-line";
 import { Text } from "@/components/text";
 import { useRefresh } from "@/hooks/use-refresh";
 import { targetHref } from "@/navigation/targets";
@@ -63,7 +64,7 @@ export function TripScreen({ tripId }: { tripId: string }) {
                 />
               </View>
             ) : null}
-            <Text variant="label">{detail.subtitle}</Text>
+            <Text variant="label">{dottedLine(detail.subtitle)}</Text>
             <View style={styles.stats}>
               <StatGrid stats={detail.stats} />
             </View>

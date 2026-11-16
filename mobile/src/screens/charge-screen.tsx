@@ -14,6 +14,7 @@ import { Screen } from "@/components/screen";
 import { StatGrid } from "@/components/stat";
 import { StepButton } from "@/components/step-button";
 import { LevelBar } from "@/components/strips";
+import { dottedLine } from "@/components/summary-line";
 import { Text } from "@/components/text";
 import { chargeLeftText } from "@/format";
 import { useNow } from "@/hooks/use-now";
@@ -60,7 +61,7 @@ export function ChargeScreen({ chargeId }: { chargeId: string }) {
                   />
                 </View>
               </View>
-              <Text variant="label">{detail.subtitle}</Text>
+              <Text variant="label">{dottedLine(detail.subtitle)}</Text>
               {left ? (
                 <Text variant="heading" tone="charge">
                   {left}

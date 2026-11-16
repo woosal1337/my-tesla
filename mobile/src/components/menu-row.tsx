@@ -3,6 +3,7 @@ import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { Icon } from "./icon";
 import { icons, type IconName } from "./icons";
+import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
 export function MenuRow({
@@ -40,7 +41,7 @@ export function MenuRow({
       </View>
       <View style={styles.text}>
         <Text variant="menu">{title}</Text>
-        {subtitle ? <Text variant="label">{subtitle}</Text> : null}
+        {subtitle ? <Text variant="label">{dottedLine(subtitle)}</Text> : null}
       </View>
       {chevron ? (
         <Icon name={icons.chevron} color={palette.subtle} size={14} />

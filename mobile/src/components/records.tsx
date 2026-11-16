@@ -5,6 +5,7 @@ import { targetHref, type TabStack } from "@/navigation/targets";
 import { radius, space } from "@/theme/tokens";
 import { usePalette } from "@/theme/use-palette";
 import { ChargerBadge } from "./charger-badge";
+import { dottedLine } from "./summary-line";
 import { Text } from "./text";
 
 function recordLabel(row: AppRecord): string {
@@ -61,7 +62,9 @@ function Record({ row, stack }: { row: AppRecord; stack: TabStack }) {
             />
           </View>
         ) : null}
-        {row.detail ? <Text variant="caption">{row.detail}</Text> : null}
+        {row.detail ? (
+          <Text variant="caption">{dottedLine(row.detail)}</Text>
+        ) : null}
         {row.note ? <Text variant="caption">{row.note}</Text> : null}
       </View>
     </>
@@ -140,7 +143,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: space.sm,
   },
   titleText: { flexShrink: 1 },

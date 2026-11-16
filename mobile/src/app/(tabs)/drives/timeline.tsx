@@ -47,13 +47,15 @@ function TimelineRow({ row }: { row: TimelinePage["rows"][number] }) {
       }
       start={<Icon name={rowIcons[row.kind]} color={color} />}
       startWidth={28}
-      title={row.title}
-      subtitle={row.detail}
-      end={
-        <Text variant="caption" style={styles.time}>
-          {row.time}
-        </Text>
+      title={
+        <>
+          <Text variant="caption" style={styles.time}>
+            {row.time}
+          </Text>
+          <Text variant="strong">{row.title}</Text>
+        </>
       }
+      subtitle={row.detail}
     />
   );
 }

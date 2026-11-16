@@ -40,14 +40,14 @@ mobile/src/
   alerts/         Push tokens, Android channels, the alert choices, and the routes for a tapped alert
   navigation/     The header options and the link from a server target to a route
   theme/          The palette, the tokens, the tones, the stored theme choice, and reduced motion
-  hooks/          Small shared hooks: refresh, the current time, the scroll to the top
+  hooks/          Small shared hooks: refresh, the current time, the scroll to the top, the day swipe
 ```
 
 ## Navigation
 
 1. The tab bar is `NativeTabs` from `expo-router/native-tabs` with five tabs: Overview, Drives, Charging, Insights, Settings. The Overview is the group folder `(overview)/` with its own stack: `index` at `/`, `status`, and `location`. `index` has no header on a phone. On an iPad it keeps a navigation bar (`overviewHeaderShown`), because UIKit loses the inset of the top tab bar when the bar of the stack hides again. On iPadOS 27 with the tab bar at the top, this bar shows no title. No other iPadOS version or tab bar position was checked. Its menu rows open another tab with `router.navigate` to the tab root and then `router.dismissAll()`, because `navigate` pushes a second copy of the index when a detail screen is open; `requestInsight(kind)` in `src/navigation/insight-request.ts` tells Insights which kind to show, so the index never takes params. Insights switches Battery, Stats, and Places with a segmented control. The period control shows in the section that has `period: true`, or at the top when no section has it. Five is the limit: Android allows five tabs at most, and Apple asks for three to five. Add no tab without a decision record.
 2. Every tab with more than one screen is a folder with a `_layout.tsx` that renders a `Stack` and exports `unstable_settings = { anchor: "index" }`.
-3. The list screen of a tab uses a large title (`headerLargeTitleEnabled: true`). A detail screen sets its title from its data with `<Stack.Screen options={{ title }} />` inside the screen.
+3. The list screen of a tab uses a large title (`headerLargeTitleEnabled: true`). A detail screen sets its title from its data with `<Stack.Screen options={{ title }} />` inside the screen. The Timeline keeps the title "Timeline", because its `DayStepper` shows the date. Its `_layout.tsx` sets `fullScreenGestureEnabled: false` for the Timeline, so a swipe in the content changes the day and the back swipe works from the left edge only. On iOS 26 and later, the native stack turns the full-screen back swipe on by default.
 4. Every `Stack` uses `screenOptions={useStackOptions()}` from `src/navigation/header.ts`, so the headers use Inter and the palette.
 5. Connect lives in the root stack. Its scan button reads the QR code from Settings on the web with `CameraView.launchScanner`, and a `mytesla://connect?…` link from the camera app opens Connect with the code, which waits for a press on **Connect**. `pairingOf()` and `pairingOfLink()` in `src/connection/server.ts` check the code, `/api/app/pair` trades it for a phone token, and the screen polls `/api/app/pair/status` until the person allows the phone on the web. The token stays in `expo-secure-store` with `WHEN_UNLOCKED_THIS_DEVICE_ONLY`. A 401 for a phone token throws `SignedOutError`, and the root layout then forgets the connection. Settings is a tab: its list screen shows the groups from `/api/app/settings`, and `settings/[key]` lists the options of one choice with a check mark. A choice list with more than 12 options gets `Stack.SearchBar`.
 6. Build a link to a drive, a trip, or a charge with `targetHref(target, stack)`. Push it with `router.push(href)` in the same tab. From another tab, add `{ withAnchor: true }`.
@@ -99,7 +99,8 @@ Use these components. Do not style a screen with raw colors or new text sizes.
 | `Notice` | A warning line with an icon, for a server notice |
 | `EmptyState`, `Problem` | A list without records, and an error with a retry button |
 | `TeslaMark`, `LaunchSplash` | The T-mark of the web, drawn at launch or breathing while a screen loads. `src/theme/mark.ts` copies the path of `src/lib/logo.ts`, and a test fails when they differ. |
-| `TripStrip`, `LevelBar`, `ChargerBadge`, `DayStrip`, `Battery`, `LivePanel` | The small parts of the dashboard, drawn the same way as on the web |
+| `DayStepper` | One row with the date as a heading, "Today" when the day is not today, and a 44 pt chevron for the day before and the day after. The buttons move under the date when the row is too narrow, and the date stops growing at 2 times the font scale. A `null` handler disables the chevron or hides "Today". `useSwipe()` in `src/hooks/use-swipe.ts` gives the same steps to a horizontal swipe, and `swipeStep()` holds its rule. |
+| `TripStrip`, `LevelBar`, `ChargerBadge`, `DayStrip`, `Battery`, `LivePanel` | The small parts of the dashboard, drawn the same way as on the web. `DayStrip` draws the key of the server (`legend`) under the hours, and draws no key when an older server sends none. |
 
 A new shared component:
 

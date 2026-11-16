@@ -80,6 +80,33 @@ export function pushCatalog(value: unknown): PushCatalog | null {
   return valid ? (value as PushCatalog) : null;
 }
 
+const dayPattern = /^\d{4}-\d{2}-\d{2}$/;
+
+function isOptionalLegend(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (Array.isArray(value) &&
+      value.every(
+        (entry) =>
+          isRecord(entry) &&
+          typeof entry.kind === "string" &&
+          typeof entry.label === "string",
+      ))
+  );
+}
+
+function isOptionalLastActive(value: unknown): boolean {
+  return (
+    value === undefined ||
+    value === null ||
+    (isRecord(value) &&
+      typeof value.day === "string" &&
+      dayPattern.test(value.day) &&
+      typeof value.title === "string" &&
+      typeof value.detail === "string")
+  );
+}
+
 const listShape = (shape: Shape) =>
   Array.isArray(shape.summary) && Array.isArray(shape.sections);
 
@@ -91,7 +118,8 @@ export const overviewPage = (value: unknown) =>
       isRecord(shape.activity) &&
       Array.isArray(shape.callouts) &&
       Array.isArray(shape.menu) &&
-      Array.isArray(shape.stats),
+      Array.isArray(shape.stats) &&
+      (!isRecord(shape.today) || isOptionalLegend(shape.today.legend)),
   );
 
 export const driveList = (value: unknown) =>
@@ -218,6 +246,8 @@ export const timelinePage = (value: unknown) =>
       Array.isArray(shape.stats) &&
       isRecord(shape.strip) &&
       Array.isArray(shape.strip.segments) &&
+      isOptionalLegend(shape.strip.legend) &&
+      isOptionalLastActive(shape.lastActive) &&
       Array.isArray(shape.rows),
   );
 

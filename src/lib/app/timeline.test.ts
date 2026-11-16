@@ -42,6 +42,7 @@ describe("timelinePage", () => {
       window,
       f,
       now,
+      null,
     );
     expect(page.title).toBe("Yesterday");
     expect(page.previous).toBe("2026-10-16");
@@ -62,6 +63,30 @@ describe("timelinePage", () => {
       target: { kind: "charge", id: 9 },
     });
     expect(page.strip.segments.length).toBeGreaterThan(0);
+    expect(page.strip.legend).toHaveLength(5);
+    expect(page.lastActive).toBeNull();
+  });
+
+  test("links a quiet day to the last day with a drive or a charge", () => {
+    const page = timelinePage(
+      {
+        states: [{ state: "asleep", start: at("00:00"), end: at("23:59") }],
+        drives: [],
+        charges: [],
+      },
+      "2026-10-17",
+      "2026-10-18",
+      dayWindow("2026-10-17", "UTC"),
+      f,
+      now,
+      new Date("2026-10-14T09:00:00Z"),
+    );
+    expect(page.lastActive).toEqual({
+      day: "2026-10-14",
+      title: "No drive and no charge on this day",
+      detail: `Open the last day with one: ${f.day(new Date("2026-10-14T09:00:00Z"), now)}`,
+    });
+    expect(page.stats.map((stat) => stat.label)).toEqual(["Asleep"]);
   });
 
   test("has no next day on today", () => {
@@ -72,8 +97,13 @@ describe("timelinePage", () => {
       dayWindow("2026-10-18", "UTC"),
       f,
       now,
+      null,
     );
     expect(page.next).toBeNull();
     expect(page.rows).toEqual([]);
+    expect(page.stats).toEqual([]);
+    expect(page.lastActive).toBeNull();
+    expect(page.strip.legend?.at(-1)).toEqual({ kind: "now", label: "Now" });
+    expect(page.strip.legend).toHaveLength(6);
   });
 });

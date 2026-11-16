@@ -1,15 +1,62 @@
 import type { Formatter } from "./format";
 import {
   buildTimeline,
+  localDayKey,
   timelineItems,
   type TimelineCharge,
   type TimelineDrive,
   type TimelineItem,
+  type TimelineSegment,
   type TimelineState,
 } from "./insights";
 import { ongoingText } from "./vehicle";
 
 const minuteMs = 60_000;
+
+type DayKind = TimelineSegment["kind"];
+
+export const dayKindLabels: Record<DayKind, string> = {
+  drive: "Driving",
+  charge: "Charging",
+  online: "Awake",
+  asleep: "Asleep",
+  offline: "Offline",
+};
+
+export type DayLegendEntry = { kind: DayKind | "now"; label: string };
+
+export function dayLegend(
+  window: { start: Date; end: Date },
+  now: Date,
+): DayLegendEntry[] {
+  const kinds = (Object.keys(dayKindLabels) as DayKind[]).map((kind) => ({
+    kind,
+    label: dayKindLabels[kind],
+  }));
+  return window.start < now && now < window.end
+    ? [...kinds, { kind: "now", label: "Now" }]
+    : kinds;
+}
+
+export function isQuietDay(records: {
+  drives: unknown[];
+  charges: unknown[];
+}): boolean {
+  return records.drives.length === 0 && records.charges.length === 0;
+}
+
+export function lastActiveDay(
+  lastActivity: Date | null,
+  f: Formatter,
+  now: Date,
+) {
+  if (!lastActivity) return null;
+  return {
+    day: localDayKey(lastActivity, f.timeZone),
+    title: "No drive and no charge on this day",
+    detail: `Open the last day with one: ${f.day(lastActivity, now)}`,
+  };
+}
 
 type TimelineTarget =
   { kind: "drive"; id: number } | { kind: "charge"; id: number } | null;

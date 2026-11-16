@@ -1,4 +1,5 @@
 import type { TimelineSegment } from "@/lib/insights";
+import { type DayLegendEntry, dayKindLabels } from "@/lib/timeline-view";
 import { cn } from "@/lib/utils";
 
 const tones: Record<TimelineSegment["kind"], string> = {
@@ -7,14 +8,6 @@ const tones: Record<TimelineSegment["kind"], string> = {
   online: "bg-subtle",
   asleep: "bg-subtle/35",
   offline: "bg-subtle/15",
-};
-
-const labels: Record<TimelineSegment["kind"], string> = {
-  drive: "Driving",
-  charge: "Charging",
-  online: "Awake",
-  asleep: "Asleep",
-  offline: "Offline",
 };
 
 export function DayStrip({
@@ -49,7 +42,7 @@ export function DayStrip({
           return (
             <span
               key={`${segment.kind}-${segment.start.getTime()}`}
-              title={labels[segment.kind]}
+              title={dayKindLabels[segment.kind]}
               className={cn(
                 "absolute inset-y-0 origin-left transition-tesla",
                 tones[segment.kind],
@@ -75,13 +68,19 @@ export function DayStrip({
   );
 }
 
-export function DayStripLegend() {
+export function DayStripLegend({ entries }: { entries: DayLegendEntry[] }) {
   return (
     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-      {(Object.keys(labels) as TimelineSegment["kind"][]).map((kind) => (
+      {entries.map(({ kind, label }) => (
         <span key={kind} className="flex items-center gap-1.5">
-          <span className={cn("size-2 rounded-full", tones[kind])} />
-          {labels[kind]}
+          <span
+            className={
+              kind === "now"
+                ? "h-3 w-px bg-foreground"
+                : cn("size-2 rounded-full", tones[kind])
+            }
+          />
+          {label}
         </span>
       ))}
     </div>

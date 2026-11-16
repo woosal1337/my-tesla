@@ -1,4 +1,4 @@
-import type { DayKind, OverviewPage } from "@contract";
+import type { AppDayStrip, DayKind } from "@contract";
 import { StyleSheet, View } from "react-native";
 import type { Palette } from "@/theme/palette";
 import { radius, space } from "@/theme/tokens";
@@ -15,15 +15,36 @@ function dayColors(palette: Palette): Record<DayKind, string> {
   };
 }
 
+function LegendSwatch({ color }: { color: string | null }) {
+  const palette = usePalette();
+  if (color === null) {
+    return (
+      <View style={styles.swatch}>
+        <View
+          style={[styles.nowMark, { backgroundColor: palette.foreground }]}
+        />
+      </View>
+    );
+  }
+  return (
+    <View style={[styles.swatch, { backgroundColor: palette.background }]}>
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: color }]} />
+    </View>
+  );
+}
+
 export function DayStrip({
   today,
   label,
 }: {
-  today: NonNullable<OverviewPage["today"]>;
+  today: AppDayStrip;
   label: string;
 }) {
   const palette = usePalette();
-  const colors = dayColors(palette);
+  const colors: Record<string, string | undefined> = dayColors(palette);
+  const legend = (today.legend ?? []).filter(
+    (entry) => entry.kind === "now" || colors[entry.kind] !== undefined,
+  );
   return (
     <View accessible accessibilityLabel={label}>
       <View style={[styles.strip, { backgroundColor: palette.background }]}>
@@ -57,6 +78,22 @@ export function DayStrip({
           </Text>
         ))}
       </View>
+      {legend.length ? (
+        <View style={styles.legend}>
+          {legend.map((entry) => (
+            <View key={entry.kind} style={styles.legendItem}>
+              <LegendSwatch
+                color={
+                  entry.kind === "now" ? null : (colors[entry.kind] ?? null)
+                }
+              />
+              <Text variant="caption" tone="mutedForeground">
+                {entry.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -71,4 +108,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   hour: { fontSize: 11, fontVariant: ["tabular-nums"] },
+  legend: {
+    marginTop: space.md,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: space.lg,
+    rowGap: space.xs,
+  },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  swatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+    overflow: "hidden",
+    alignItems: "center",
+  },
+  nowMark: { width: 2, height: 10 },
 });

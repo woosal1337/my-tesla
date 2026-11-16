@@ -247,11 +247,8 @@ export type TimelinePage = {
   previous: string;
   next: string | null;
   stats: AppStat[];
-  strip: {
-    segments: { kind: DayKind; start: number; end: number }[];
-    now: number;
-    hours: string[];
-  };
+  strip: AppDayStrip;
+  lastActive?: { day: string; title: string; detail: string } | null;
   rows: {
     key: string;
     kind: "drive" | "charge" | "parked";
@@ -308,6 +305,13 @@ export type LiveTone = "normal" | "active" | "charge" | "warning";
 export type ActivityTone = "active" | "charge" | "quiet";
 
 export type DayKind = "drive" | "charge" | "online" | "asleep" | "offline";
+
+export type AppDayStrip = {
+  segments: { kind: DayKind; start: number; end: number }[];
+  now: number;
+  hours: string[];
+  legend?: { kind: DayKind | "now"; label: string }[];
+};
 
 export type OverviewMenuKey =
   | "drives"
@@ -375,11 +379,7 @@ export type OverviewPage = {
     notices: string[];
     empty: string | null;
   } | null;
-  today: {
-    segments: { kind: DayKind; start: number; end: number }[];
-    now: number;
-    hours: string[];
-  } | null;
+  today: AppDayStrip | null;
   tires: {
     frontLeft: AppValue;
     frontRight: AppValue;

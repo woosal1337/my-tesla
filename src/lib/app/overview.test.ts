@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { createFormatter } from "../format";
+import { dayWindow } from "../insights";
 import { liveView } from "../live/view";
 import { defaultPreferences } from "../preferences";
 import type { Car, CarSnapshot, Charge, Drive } from "../queries";
 import type { OverviewPage } from "./contract";
-import { overviewPage, type OverviewInput } from "./overview";
+import { dayStrip, overviewPage, type OverviewInput } from "./overview";
 
 const f = createFormatter(defaultPreferences, "Europe/Istanbul");
 const now = new Date("2026-10-17T15:00:00Z");
@@ -475,5 +476,28 @@ describe("overviewPage", () => {
     expect(page.callouts).toEqual([]);
     expect(menuSubtitle(page, "battery")).toBe("No long charge yet");
     expect(menuSubtitle(page, "stats")).toBe("Last 30 days · No drive");
+  });
+});
+
+describe("dayStrip", () => {
+  test("gives the key of the strip with Now inside today", () => {
+    const strip = dayStrip(
+      {
+        ...dayWindow("2026-10-17", f.timeZone),
+        states: [],
+        drives: [],
+        charges: [],
+      },
+      f,
+      now,
+    );
+    expect(strip.legend?.map((entry) => entry.label)).toEqual([
+      "Driving",
+      "Charging",
+      "Awake",
+      "Asleep",
+      "Offline",
+      "Now",
+    ]);
   });
 });

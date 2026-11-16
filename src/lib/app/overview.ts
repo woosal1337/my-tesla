@@ -14,6 +14,7 @@ import type { Car, CarSnapshot, Charge, Drive } from "../queries";
 import type { DriveTotals } from "../stats-data";
 import { statsTotals } from "../stats-figures";
 import type { DayRecords } from "../timeline-data";
+import { dayLegend } from "../timeline-view";
 import { leakWarning, type SlowLeak } from "../tire-leak";
 import {
   activityLabel,
@@ -26,6 +27,7 @@ import {
   variantLine,
 } from "../vehicle";
 import type {
+  AppDayStrip,
   AppValue,
   CarImageFrame,
   LiveIcon,
@@ -75,7 +77,7 @@ export function dayStrip(
   today: NonNullable<OverviewInput["today"]>,
   f: Formatter,
   now: Date,
-): OverviewPage["today"] {
+): AppDayStrip {
   const start = today.start.getTime();
   const total = today.end.getTime() - start;
   const share = (date: Date) => (date.getTime() - start) / total;
@@ -87,6 +89,7 @@ export function dayStrip(
     })),
     now: Math.min(1, Math.max(0, share(now))),
     hours: [0, 6, 12, 18, 24].map((hour) => f.hour(hour)),
+    legend: dayLegend(today, now),
   };
 }
 

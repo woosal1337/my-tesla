@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AnimatedNumber } from "@/components/animated-number";
-import { DayStrip } from "@/components/day-strip";
+import { DayStrip, DayStripLegend } from "@/components/day-strip";
 import { EmptyState } from "@/components/empty-state";
 import { LocationMap, MapsOff } from "@/components/maps";
 import { BatteryPanel } from "@/components/overview/battery-panel";
@@ -24,6 +24,7 @@ import { mapThemeOf } from "@/lib/preferences";
 import { carSnapshot, recentCharges, recentDrives } from "@/lib/queries";
 import { recentTireLeaks } from "@/lib/stats-data";
 import { dayRecords } from "@/lib/timeline-data";
+import { dayLegend } from "@/lib/timeline-view";
 import { leakWarning } from "@/lib/tire-leak";
 import { cn } from "@/lib/utils";
 import {
@@ -236,6 +237,9 @@ export default async function OverviewPage({
                   size="sm"
                   hourLabels={[0, 6, 12, 18, 24].map((hour) => f.hour(hour))}
                 />
+              </div>
+              <div className="mt-4">
+                <DayStripLegend entries={dayLegend(today, now)} />
               </div>
             </section>
           )}

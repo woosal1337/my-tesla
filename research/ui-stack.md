@@ -131,6 +131,14 @@ Checked on 2026-10-18 on the demo at 1280 and 390 px, in dark and light, with me
 
 Sources: [Apple segmented controls](https://developer.apple.com/design/human-interface-guidelines/segmented-controls), [WCAG 2.2 reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow), [WCAG 2.2 target size (minimum)](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html), [WAI-ARIA `aria-current`](https://www.w3.org/TR/wai-aria-1.2/#aria-current), and the Next.js 16.3.8 `page.md` guide on `searchParams` in `node_modules/next/dist/docs/`.
 
+## Timeline
+
+Since 2026-11-16, the web Timeline and the Today card of the car page share three facts with the mobile app.
+
+1. **Key.** `DayStripLegend` takes its entries from `dayLegend()` in `src/lib/timeline-view.ts`, the same function as the app answer. It names the five colors (Driving, Charging, Awake, Asleep, Offline) and adds "Now", a thin bar in the foreground color, when the current time is inside the day. The Today card of the car page shows the same key under its strip. Before, the "now" line had no label, and the Today card had no key ([WCAG 2.2 Understanding 1.4.1 Use of Color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html), [Apple HIG: charting data](https://developer.apple.com/design/human-interface-guidelines/charting-data)).
+2. **Quiet day.** A day without a drive and a charge shows a card link under the header: "No drive and no charge on this day" and "Open the last day with one: …". It opens `?day=` of the last earlier day with a drive or a charge, from `lastActivityBefore()` in `src/lib/timeline-data.ts`. The metrics show only "Asleep", or nothing when the day has no record, so the page shows no row of zeros. The page still opens on today, so the "now" line shows and "Day after" stays off.
+3. **Stepper.** The header keeps the date, "Today" on an earlier day, and the two chevron links. The app copies this row. [Decision 0034](../docs/decisions/0034-the-timeline-opens-on-today-and-links-a-quiet-day.md) gives the reasons.
+
 ## Every road driven
 
 Checked on 2026-10-18 on the demo at 1280 and 390 px, in dark and light, with maps on and off.

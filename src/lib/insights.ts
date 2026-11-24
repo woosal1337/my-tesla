@@ -43,18 +43,22 @@ export function parseDayKey(value: string | undefined): string | null {
     : null;
 }
 
+function dayStart(dayKey: string, timeZone: string): Date {
+  const [year, month, day] = dayKey.split("-").map(Number);
+  const guess = Date.UTC(year, month - 1, day);
+  const first = new Date(guess - offsetMs(guess, timeZone));
+  const second = new Date(guess - offsetMs(first.getTime(), timeZone));
+  return localDayKey(second, timeZone) === dayKey ? second : first;
+}
+
 export function dayWindow(
   dayKey: string,
   timeZone: string,
 ): { start: Date; end: Date } {
-  const [year, month, day] = dayKey.split("-").map(Number);
-  const guess = Date.UTC(year, month - 1, day);
-  let start = guess - offsetMs(guess, timeZone);
-  start = guess - offsetMs(start, timeZone);
-  const nextGuess = guess + dayMs;
-  let end = nextGuess - offsetMs(nextGuess, timeZone);
-  end = nextGuess - offsetMs(end, timeZone);
-  return { start: new Date(start), end: new Date(end) };
+  return {
+    start: dayStart(dayKey, timeZone),
+    end: dayStart(shiftDayKey(dayKey, 1), timeZone),
+  };
 }
 
 export function shiftDayKey(dayKey: string, days: number): string {

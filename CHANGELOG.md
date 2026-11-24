@@ -10,6 +10,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - The cost bars of Stats and of the year in review leave out sessions that added no energy, as the cost total above them does. A plug-in with a fee and no energy counted in the bars and not in the total, so the two disagreed.
 - Energy and consumption follow the preferred range of TeslaMate, also when the range setting of the app differs. TeslaMate derives the car efficiency from its preferred range, so energy from the other range was off by the gap between rated and ideal range on drives, trips, Stats, frequent routes, and the parked drain. The range values on the screen still follow the setting.
 - Two writes at the same moment to the Settings file or the push device file no longer undo each other, for example when a phone registers its alerts while the server removes a dead phone. The server had three copies of the file code, each with its own write queue but the same temporary file, and two copies of the database pool. They now share one queue and one pool, and each write uses its own temporary file.
+- Timeline keeps a late drive on its own day where the clock skips midnight for daylight saving time, as in Chile and Cuba. A drive at 23:30 on the evening before the change showed on the timeline of the next day. Lists also name the day before "Yesterday" in the first hour after a 23-hour day, where they showed its date.
 
 ## [2.3.0] - 2026-11-17
 

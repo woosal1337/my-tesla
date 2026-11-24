@@ -75,6 +75,13 @@ describe("exportRange", () => {
     expect(range.end.toISOString()).toBe("2026-10-01T07:00:00.000Z");
   });
 
+  test("runs to the last instant that PostgreSQL reads without an end", () => {
+    const range = exportRange("2026-09-01", null, zone);
+    if (!range || range === "invalid") throw new Error("range");
+    expect(range.start.toISOString()).toBe("2026-09-01T07:00:00.000Z");
+    expect(range.end.toISOString()).toBe("9999-12-31T23:59:59.999Z");
+  });
+
   test.each([
     ["2026-9-1", null],
     ["2026-09-30", "2026-09-01"],

@@ -14,7 +14,7 @@ import {
   rangeByTemperatureQuery,
   stateTimesQuery,
 } from "./trends-sql";
-import { getRangeKind } from "./viewer";
+import { getEfficiencyRangeKind, getRangeKind } from "./viewer";
 
 export type BatteryCapacityPoint = CapacityPoint & {
   rangeKm: number;
@@ -212,8 +212,9 @@ export const idlePeriods = cache(
   ): Promise<IdlePeriod[]> => {
     await connection();
     const since = (from ?? new Date(0)).toISOString();
-    const [kind, { relation: sessions }] = await Promise.all([
+    const [kind, energyKind, { relation: sessions }] = await Promise.all([
       getRangeKind(),
+      getEfficiencyRangeKind(),
       chargeSessions(carId),
     ]);
     return database()<IdlePeriod[]>`
@@ -223,6 +224,8 @@ export const idlePeriods = cache(
           c.end_date,
           ${rangeColumn(kind, "c", "start")} as start_range,
           ${rangeColumn(kind, "c", "end")} as end_range,
+          ${rangeColumn(energyKind, "c", "start")} as start_energy_range,
+          ${rangeColumn(energyKind, "c", "end")} as end_energy_range,
           c.start_battery_level as start_level,
           c.end_battery_level as end_level,
           p.usable_battery_level as start_usable,
@@ -238,6 +241,8 @@ export const idlePeriods = cache(
           d.end_date,
           ${rangeColumn(kind, "d", "start")},
           ${rangeColumn(kind, "d", "end")},
+          ${rangeColumn(energyKind, "d", "start")},
+          ${rangeColumn(energyKind, "d", "end")},
           sp.battery_level,
           ep.battery_level,
           sp.usable_battery_level,
@@ -255,6 +260,8 @@ export const idlePeriods = cache(
           t.start_date as end_date,
           lag(t.end_range) over w as start_range,
           t.start_range as end_range,
+          lag(t.end_energy_range) over w as start_energy_range,
+          t.start_energy_range as end_energy_range,
           lag(t.end_km) over w as start_km,
           t.start_km as end_km,
           extract(epoch from (t.start_date - lag(t.end_date) over w))
@@ -274,7 +281,7 @@ export const idlePeriods = cache(
         case when v.reduced then null
           else (v.start_range - v.end_range)::float8 end as "rangeLostKm",
         case when v.reduced then null
-          else ((v.start_range - v.end_range) * car.efficiency)::float8
+          else ((v.start_energy_range - v.end_energy_range) * car.efficiency)::float8
         end as "energyKwh"
       from v
       cross join lateral (

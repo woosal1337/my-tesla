@@ -8,6 +8,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 - A drives or charges CSV with only `from` exports everything since that day. The missing end became a date that PostgreSQL refuses, so the export failed with an error.
 - The cost bars of Stats and of the year in review leave out sessions that added no energy, as the cost total above them does. A plug-in with a fee and no energy counted in the bars and not in the total, so the two disagreed.
+- Energy and consumption follow the preferred range of TeslaMate, also when the range setting of the app differs. TeslaMate derives the car efficiency from its preferred range, so energy from the other range was off by the gap between rated and ideal range on drives, trips, Stats, frequent routes, and the parked drain. The range values on the screen still follow the setting.
 
 ## [2.3.0] - 2026-11-17
 

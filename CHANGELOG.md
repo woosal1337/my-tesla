@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Added
+
+- Each car page of the web shows the current live activity in a black pill at the top center, under the tab navigation: a drive with its speed, a charge with the time left, or a software update. A download or an install shows its progress as a ring around the icon. A tap opens the Overview. The pill needs the MQTT feed and follows the Live status setting. [Decision 0045](docs/decisions/0045-an-activity-island-for-live-activities.md) gives the reasons.
+
 ### Fixed
 
 - A drives or charges CSV with only `from` exports everything since that day. The missing end became a date that PostgreSQL refuses, so the export failed with an error.

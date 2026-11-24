@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActivityIsland } from "@/components/activity-island";
 import { BasemapKeyProvider } from "@/components/basemap-key";
 import { CanonicalCarPath } from "@/components/canonical-car-path";
 import { CarSwitcher } from "@/components/car-switcher";
@@ -15,21 +16,27 @@ import { basemapKey } from "@/lib/basemap";
 import { requireCar } from "@/lib/car-route";
 import { carPath } from "@/lib/car-slug";
 import { isDemoMode } from "@/lib/demo/mode";
+import { islandActivity } from "@/lib/live/island";
+import { getLive } from "@/lib/live/live";
 import { tabKeys } from "@/lib/preferences";
 import { listCars } from "@/lib/queries";
 import { variantLine, type TabId } from "@/lib/vehicle";
-import { getPreferences } from "@/lib/viewer";
+import { getFormatter, getPreferences } from "@/lib/viewer";
 
 export default async function CarLayout({
   children,
   params,
 }: LayoutProps<"/cars/[carId]">) {
-  const [car, cars, preferences, signedIn] = await Promise.all([
+  const [car, cars, preferences, signedIn, f] = await Promise.all([
     requireCar(params),
     listCars(),
     getPreferences(),
     currentSession(),
+    getFormatter(),
   ]);
+  const live = preferences.overview.live ? await getLive(car.id) : null;
+  const renderedAt = new Date().getTime();
+  const activity = live?.connected ? islandActivity(live.view, f) : null;
   const visible: TabId[] = [
     "overview",
     ...tabKeys.filter((tab) => preferences.tabs[tab.id]).map((tab) => tab.id),
@@ -75,6 +82,11 @@ export default async function CarLayout({
                 )}
               </div>
             </div>
+            <ActivityIsland
+              activity={activity}
+              href={carPath(car)}
+              renderedAt={renderedAt}
+            />
           </header>
           <main className="mx-auto w-full max-w-5xl px-5 pb-32 md:pb-20">
             {children}

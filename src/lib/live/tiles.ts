@@ -143,7 +143,7 @@ function climateTile(view: LiveView, f: Formatter): LiveTile | null {
   });
 }
 
-const updateTitles = {
+export const updateTitles = {
   ready: "Update ready",
   downloading: "Downloading update",
   installing: "Installing update",
@@ -173,7 +173,7 @@ function softwareTile(view: LiveView): LiveTile | null {
   });
 }
 
-const gearTitles: Record<string, string> = {
+export const gearTitles: Record<string, string> = {
   D: "Driving",
   R: "Reversing",
   N: "In neutral",

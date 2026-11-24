@@ -35,7 +35,7 @@ Universal Sans is Tesla's own typeface and has no public licence. Inter is the n
 | Components | shadcn/ui on Base UI, the shadcn 4 default | S | shadcn 4.21.0, `@base-ui/react` 1.8.0 |
 | Class merging | `cn` by shadcn, added by the shadcn CLI | Not listed | 0.4.0 |
 | Screen transitions | React `ViewTransition`, built into the Next.js App Router | Not a package | Next.js 16.3.8 |
-| Small motion | Motion, for the sliding tab highlight | S | 13.4.6 |
+| Small motion | Motion, for the sliding tab highlight and the activity island | S | 13.4.6 |
 | Animated numbers | NumberFlow, for battery, range, and odometer | S | 0.6.2 |
 | Icons | Lucide, the shadcn default | Not needed | 1.49.0 |
 | Charts | shadcn charts on Recharts | shadcn/ui, S | Recharts 3.8.0 |
@@ -156,6 +156,19 @@ Checked on 2026-10-18 on the demo at 1280 and 390 px, in dark and light, with ma
 7. **Labels.** Since 2026-11-16, the route line of a drive, a trip, and the Report lies under the label layers of the CARTO style. `MapRoute` gets `beforeId={labelLayer}`, the layer `watername_ocean`. In Dark Matter and Positron it starts the last block of 27 `symbol` layers, so the line lies above the roads and under the names. Apple names "Above roads" as the default level of an overlay, and "Above labels" hides everything beneath it. The markers stay on top. When a style has no such layer, `resolveBeforeId` in mapcn draws the line on top. `DrivenMap` keeps its layer on top, because its mapcn part `MapGeoJSON` passes `beforeId` to MapLibre without that check, and the repository does not edit `src/components/ui/map.tsx`. The app draws "Every road driven" with `RouteMap`, so there the lines lie under the names. [Decision 0038](../docs/decisions/0038-value-notes-route-under-labels-and-back-from-a-quick-action.md) has the reasons.
 
 Sources: [MapLibre style spec, sources](https://maplibre.org/maplibre-style-spec/sources/), [Mapbox, working with large GeoJSON sources](https://docs.mapbox.com/help/troubleshooting/working-with-large-geojson-data/), [WCAG 2.2 Understanding 1.1.1 Non-text Content](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html), [WCAG 2.2 Understanding 2.5.7 Dragging Movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements), [TeslaMate Grafana dashboards Visited and Locations](https://github.com/teslamate-org/teslamate/tree/main/grafana/dashboards), [Apple HIG: maps](https://developer.apple.com/design/human-interface-guidelines/maps) and [MapLibre style specification: layers](https://maplibre.org/maplibre-style-spec/layers/), read on 2026-11-16 for the labels.
+
+## Activity island
+
+Checked on 2026-11-25 on the demo at 390 and 1280 px.
+
+1. **Source.** The island copies the look and the motion of `ActivityIsland` in Atlas web: a black pill, 36 px high, a spring of 0.5 s with a bounce of 0.28, and a cross-fade of the content. My Tesla keeps only the pill. It leaves out the drag to an edge of the screen and the open view of Atlas.
+2. **Content.** The pill shows one activity of the live feed: a drive, a charge, or a software update, in this order. `islandActivity()` in `src/lib/live/island.ts` picks it on the server and formats it with the Settings. An update shows its progress as a ring around the icon. The leading icon and the trailing value read as one fact, as Apple asks for the compact presentation of a Live Activity.
+3. **Place.** The pill sits at the top center of each car page, in a second row of the sticky header, under the tab navigation. So it stays in view on scroll and covers no title. The row shows only while there is an activity. A tap opens the Overview with the Live card.
+4. **Color.** The pill is black in both themes and sets `color-scheme: dark`, so the tone tokens take their dark values. The value text is white at 70% or the dark green. The icon is Electric Blue, about 4:1 on black, over the 3:1 of WCAG 1.4.11.
+5. **Motion.** Motion animates the size, the entry, and the exit. `MotionConfig` of the Reduced setting and of the system setting stops these animations. The ring uses a CSS transition, which `data-motion="reduced"` stops.
+6. **Access.** The pill is one link with a label such as "Update ready, 2026.32.6. Open the live status". It is 36 px high, over the 24 px of WCAG 2.5.8. It is not a live region, because a value change every few seconds is noise for a screen reader.
+
+Sources: [Apple HIG: Live Activities](https://developer.apple.com/design/human-interface-guidelines/live-activities), [Motion: layout animations](https://motion.dev/docs/react-layout-animations), [WCAG 2.2 Understanding 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html), [WCAG 2.2 Understanding 2.5.8 Target Size (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html), read on 2026-11-25. [Decision 0045](../docs/decisions/0045-an-activity-island-for-live-activities.md) has the reasons.
 
 ## Rejected
 

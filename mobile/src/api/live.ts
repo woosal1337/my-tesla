@@ -38,6 +38,11 @@ export function useLiveChanges(carId: number, key: readonly unknown[]): void {
       });
       if (finalStatuses.has(response.status)) return false;
       if (!response.ok || !response.body) return true;
+      if (
+        !response.headers.get("content-type")?.includes("text/event-stream")
+      ) {
+        return false;
+      }
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";

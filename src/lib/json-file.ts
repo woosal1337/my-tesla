@@ -1,8 +1,12 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { processWide } from "./sqlite";
 
-let queue: Promise<unknown> = Promise.resolve();
+const writes = processWide("json-file-writes", () => ({
+  queue: Promise.resolve() as Promise<unknown>,
+}));
 
 export async function readJsonFile(path: string): Promise<unknown> {
   try {
@@ -17,15 +21,15 @@ export function updateJsonFile(
   path: string,
   update: (current: unknown) => unknown,
 ): Promise<void> {
-  const write = queue.then(async () => {
+  const write = writes.queue.then(async () => {
     const next = update(await readJsonFile(path));
     await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-    const temporary = `${path}.${process.pid}.tmp`;
+    const temporary = `${path}.${randomUUID()}.tmp`;
     await writeFile(temporary, `${JSON.stringify(next, null, 2)}\n`, {
       mode: 0o600,
     });
     await rename(temporary, path);
   });
-  queue = write.catch(() => undefined);
+  writes.queue = write.catch(() => undefined);
   return write;
 }

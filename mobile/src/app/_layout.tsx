@@ -20,6 +20,7 @@ import {
   useConnectionState,
 } from "@/connection/connection-provider";
 import { SignedOutError } from "@/api/client";
+import { useForgetPhone } from "@/connection/use-forget-phone";
 import { LaunchSplash } from "@/components/launch-splash";
 import { useStackOptions } from "@/navigation/header";
 import { applyThemeChoice, readThemeChoice } from "@/theme/appearance";
@@ -71,7 +72,8 @@ function useNavigationTheme() {
 
 function useSignedOut(): void {
   const queryClient = useQueryClient();
-  const { connection, forget } = useConnectionState();
+  const { connection } = useConnectionState();
+  const forgetPhone = useForgetPhone();
   useEffect(() => {
     if (!connection?.token) return;
     return queryClient.getQueryCache().subscribe((event) => {
@@ -80,10 +82,10 @@ function useSignedOut(): void {
         event.action.type === "error" &&
         event.action.error instanceof SignedOutError
       ) {
-        forget().then(() => queryClient.clear());
+        forgetPhone(connection);
       }
     });
-  }, [connection, forget, queryClient]);
+  }, [connection, forgetPhone, queryClient]);
 }
 
 function Navigator({ fontsReady }: { fontsReady: boolean }) {

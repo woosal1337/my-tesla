@@ -12,6 +12,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - Two writes at the same moment to the Settings file or the push device file no longer undo each other, for example when a phone registers its alerts while the server removes a dead phone. The server had three copies of the file code, each with its own write queue but the same temporary file, and two copies of the database pool. They now share one queue and one pool, and each write uses its own temporary file.
 - Timeline keeps a late drive on its own day where the clock skips midnight for daylight saving time, as in Chile and Cuba. A drive at 23:30 on the evening before the change showed on the timeline of the next day. Lists also name the day before "Yesterday" in the first hour after a 23-hour day, where they showed its date.
 - Pairing the mobile app keeps waiting for Allow on the web when one check fails, for example while the phone locks or a proxy restarts. Only a denied or expired pairing ends it, and the checks wait for each other on a slow network.
+- A phone signed out from the web forgets its data like a phone signed out in the app: the stored car list and Settings, and the alert choices, which before turned the alerts on again at the next pairing, even with another server.
+- A shared drive route or export no longer stays on the phone. Each share deleted none of the files before it, so every route ever shared stayed in the cache. The app now keeps only the last export, and signing out deletes it.
 
 ## [2.3.0] - 2026-11-17
 

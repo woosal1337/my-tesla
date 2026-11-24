@@ -1,11 +1,9 @@
 import type { PushEvent, SettingItem, SettingsPage } from "@contract";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { forgetAlerts, useAlertChoices } from "@/alerts/use-alerts";
+import { unregisterAlerts, useAlertChoices } from "@/alerts/use-alerts";
 import {
-  forgetStored,
   signOutPhone,
   useMe,
   usePushCatalog,
@@ -26,10 +24,8 @@ import { SegmentedControl } from "@/components/segmented-control";
 import { StatGrid } from "@/components/stat";
 import { SwitchRow } from "@/components/switch-row";
 import { Text } from "@/components/text";
-import {
-  useConnection,
-  useConnectionState,
-} from "@/connection/connection-provider";
+import { useConnection } from "@/connection/connection-provider";
+import { useForgetPhone } from "@/connection/use-forget-phone";
 import { useRefresh } from "@/hooks/use-refresh";
 import {
   readThemeChoice,
@@ -225,8 +221,7 @@ function Alerts() {
 
 function ServerPanel() {
   const connection = useConnection();
-  const { forget } = useConnectionState();
-  const queryClient = useQueryClient();
+  const forgetPhone = useForgetPhone();
   const me = useMe();
   const signedIn = connection.token !== null;
   return (
@@ -247,11 +242,9 @@ function ServerPanel() {
         label={signedIn ? "Sign out" : "Disconnect"}
         kind="secondary"
         onPress={async () => {
-          await forgetAlerts(connection);
+          await unregisterAlerts(connection);
           await signOutPhone(connection);
-          forgetStored(connection);
-          await forget();
-          queryClient.clear();
+          await forgetPhone(connection);
         }}
       />
     </Panel>

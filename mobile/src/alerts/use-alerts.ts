@@ -82,7 +82,7 @@ export function useAlertChoices(events: readonly PushEvent[]) {
   return { chosen: choices.data ?? [], update, test };
 }
 
-export async function forgetAlerts(connection: Connection): Promise<void> {
+export async function unregisterAlerts(connection: Connection): Promise<void> {
   const token = await pushToken(false).catch(() => null);
   if (token) {
     await request(connection, "/api/push", {
@@ -90,6 +90,9 @@ export async function forgetAlerts(connection: Connection): Promise<void> {
       body: { token },
     }).catch(() => null);
   }
+}
+
+export async function forgetAlertChoices(): Promise<void> {
   await SecureStore.deleteItemAsync(keychainKeys.alerts);
 }
 

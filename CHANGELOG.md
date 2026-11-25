@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-25
+
 ### Added
 
 - Each car page of the web shows the current live activity in a black pill at the top center, under the tab navigation: a drive with its speed, a charge with the time left, or a software update. A download or an install shows its progress as a ring around the icon. A tap opens the Overview. The pill needs the MQTT feed and follows the Live status setting. [Decision 0045](docs/decisions/0045-an-activity-island-for-live-activities.md) gives the reasons.
@@ -316,7 +318,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 - README screenshots of every page.
 - Documentation for installation, the database role, authentication, configuration, privacy, upgrades, and troubleshooting.
 
-[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/woosal1337/my-tesla/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/woosal1337/my-tesla/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/woosal1337/my-tesla/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/woosal1337/my-tesla/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/woosal1337/my-tesla/compare/v2.2.0...v2.2.1

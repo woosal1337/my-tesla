@@ -18,6 +18,17 @@ The card also shows a notice for a tire pressure warning, for Service Mode, and 
 
 TeslaMate keeps most of these values only in MQTT. They are not in the database.
 
+### Activity island
+
+Each car page shows a black pill at the top center, under the tab navigation, while the car drives, charges, or has a software update. It shows one activity at a time, in this order. A download or an install shows its progress as a ring. A tap on the pill opens the Overview. The pill follows the Live status setting. [Decision 0045](decisions/0045-an-activity-island-for-live-activities.md) explains the design.
+
+![The activity island under the tab navigation, with "Update ready" and the version 2026.32.6](images/screenshots/activity-island-dark.png)
+
+<p>
+  <img src="images/screenshots/phone-activity-island.png" alt="The activity island under the car name on a phone" width="390">
+  <img src="images/screenshots/activity-island-update.png" alt="The activity island with &quot;Downloading update&quot;, 42%, and a progress ring around the icon" width="280">
+</p>
+
 ### End of a charge
 
 While the car charges, the app shows the time left until the charge limit, such as "2 h 10 min left", in three places:

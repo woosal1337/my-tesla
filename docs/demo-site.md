@@ -10,7 +10,7 @@ The public site at https://mytesla.chele.bi runs the app with `DEMO_MODE=1`. It 
 | `/` | Opens the start car | Shows the landing page |
 | Settings | Saved in `PREFERENCES_FILE` for each user | Saved in a cookie for each visitor |
 | Dashboard | No banner | A banner that says the data is synthetic |
-| Live card | From the MQTT feed, if `MQTT_URL` is set | Fixed demo values, with no live stream |
+| Live card and activity island | From the MQTT feed, if `MQTT_URL` is set | Fixed demo values, with no live stream. The demo car always charges at 11 kW to 90%, with a full charge in 2.5 hours, so the Overview, the Live card, and the activity island show a charge. |
 | Theme | The TeslaMate default, often System | Dark, with a light and dark switch in the landing page header |
 
 The demo data ends when the server process starts. A process builds new data after 6 hours.

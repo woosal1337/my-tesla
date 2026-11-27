@@ -4,6 +4,11 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Changed
+
+- The demo car always charges at 11 kW to 90%. The Overview, the Live card, and the activity island on each car page show the charge with the time to full. Before, the demo car was parked and the island showed only the update that was ready.
+- The tire pressure on the Overview follows the outside temperature, on the web and in the mobile app. Tesla gives a change of about 1 psi for each 6 °C, so a tire set to 42 psi at 20 °C reads about 37 psi at −10 °C and about 45 psi at 35 °C. A tire is correct when it is in the range from that value to 42 psi, for example 37 to 42 psi at −10 °C. Before, the Overview compared every tire with 42 psi, and 37 psi showed as 5 psi under on a cold day. The note gives the range and the temperature, and in the cold it says that Tesla still asks for 42 psi cold. The app needs this server version, and needs no update.
+
 ### Fixed
 
 - The Docker image serves the files of `public/` again: the screenshots of the demo landing page and the app icons of the web manifest. Before, the image copied only the server and `.next/static`, so these files answered 404.

@@ -270,22 +270,50 @@ export function assessAsleep(share: number | null): Assessment | null {
 }
 
 const recommendedBar = 2.9;
+const setAtCelsius = 20;
+const barPerCelsius = 0.0689476 / 6;
+
+function expectedTireBar(outsideCelsius: number | null): number {
+  if (outsideCelsius === null) return recommendedBar;
+  return recommendedBar + (outsideCelsius - setAtCelsius) * barPerCelsius;
+}
 
 export function assessTirePressure(
   bar: number | null,
   f: Formatter,
+  outsideCelsius: number | null = null,
 ): Assessment | null {
   if (bar === null) return null;
-  const gap = bar - recommendedBar;
+  const target = expectedTireBar(outsideCelsius);
+  const low = Math.min(target, recommendedBar);
+  const high = Math.max(target, recommendedBar);
+  const gap = bar < low ? bar - low : bar > high ? bar - high : 0;
   const off = Math.abs(gap);
-  const expected = `Tesla gives ${f.pressure(recommendedBar)} cold for most Model 3 and Model Y wheels. The label in the door frame gives the value for your wheels. Warm tires read up to ${f.pressure(0.3)} more.`;
-  const side = `${f.pressure(off)} ${gap < 0 ? "under" : "over"} the recommended value`;
+  const temperature = f.temperature(outsideCelsius);
+  const edge = (value: number) =>
+    value === recommendedBar
+      ? "the recommended value"
+      : `the ${f.pressure(value)} expected at ${temperature}`;
+  const atTemperature =
+    outsideCelsius === null || f.pressure(target) === f.pressure(recommendedBar)
+      ? ""
+      : ` At ${temperature} outside, a tire set to ${f.pressure(recommendedBar)} at ${f.temperature(setAtCelsius)} reads about ${f.pressure(target)}.`;
+  const coldAdvice =
+    target < recommendedBar - 0.15
+      ? ` Tesla still asks for ${f.pressure(recommendedBar)} cold in any weather.`
+      : "";
+  const expected = `Tesla gives ${f.pressure(recommendedBar)} cold for most Model 3 and Model Y wheels. The label in the door frame gives the value for your wheels. The pressure changes about ${f.pressure(barPerCelsius * 6)} for each 6 °C (10 °F) of outside temperature, and warm tires read up to ${f.pressure(0.3)} more.${atTemperature}${coldAdvice}`;
+  const side = `${f.pressure(off)} ${gap < 0 ? "under" : "over"} ${edge(gap < 0 ? low : high)}`;
   if (off <= 0.15) {
+    const range = `${f.pressure(low)} to ${f.pressure(high)}`;
     return {
       tone: "good",
       verdict: "Correct pressure",
       expected,
-      meaning: `${f.pressure(bar)} is close to the recommended value.`,
+      meaning:
+        f.pressure(low) === f.pressure(high)
+          ? `${f.pressure(bar)} is close to the recommended value.`
+          : `${f.pressure(bar)} is in the range for ${temperature}: ${range}.`,
     };
   }
   if (off <= 0.35) {
@@ -309,8 +337,9 @@ export function assessTire(
   bar: number | null,
   leaks: SlowLeak[],
   f: Formatter,
+  outsideCelsius: number | null = null,
 ): Assessment | null {
-  const pressure = assessTirePressure(bar, f);
+  const pressure = assessTirePressure(bar, f, outsideCelsius);
   const leak = leaks.find((item) => item.tire === tire);
   if (!pressure || !leak) return pressure;
   const meaning = `${pressure.meaning} The tire is ${leakTrend(leak, (value) => f.pressure(value))}`;

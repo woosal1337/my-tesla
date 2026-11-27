@@ -256,7 +256,9 @@ export default async function OverviewPage({
                 <TireCard
                   tires={liveNow?.tires ?? snapshot.tires}
                   format={(bar) => f.pressure(bar)}
-                  assess={(tire, bar) => assessTire(tire, bar, leaks, f)}
+                  assess={(tire, bar) =>
+                    assessTire(tire, bar, leaks, f, snapshot.outsideTemp)
+                  }
                   warnings={leaks.map((leak) =>
                     leakWarning(leak, (bar) => f.pressure(bar)),
                   )}

@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Fixed
+
+- The Docker image serves the files of `public/` again: the screenshots of the demo landing page and the app icons of the web manifest. Before, the image copied only the server and `.next/static`, so these files answered 404.
+
 ## [2.4.0] - 2026-11-25
 
 ### Added

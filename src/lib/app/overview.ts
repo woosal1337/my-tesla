@@ -137,8 +137,12 @@ function tireValue(
   bar: number,
   leaks: SlowLeak[],
   f: Formatter,
+  outsideCelsius: number | null,
 ): AppValue {
-  return appValue(f.pressure(bar), assessTire(tire, bar, leaks, f));
+  return appValue(
+    f.pressure(bar),
+    assessTire(tire, bar, leaks, f, outsideCelsius),
+  );
 }
 
 export function overviewPage(
@@ -409,15 +413,34 @@ export function overviewPage(
     tires:
       hasData && show.tires && tires
         ? {
-            frontLeft: tireValue("frontLeft", tires.frontLeft, input.leaks, f),
+            frontLeft: tireValue(
+              "frontLeft",
+              tires.frontLeft,
+              input.leaks,
+              f,
+              snapshot.outsideTemp,
+            ),
             frontRight: tireValue(
               "frontRight",
               tires.frontRight,
               input.leaks,
               f,
+              snapshot.outsideTemp,
             ),
-            rearLeft: tireValue("rearLeft", tires.rearLeft, input.leaks, f),
-            rearRight: tireValue("rearRight", tires.rearRight, input.leaks, f),
+            rearLeft: tireValue(
+              "rearLeft",
+              tires.rearLeft,
+              input.leaks,
+              f,
+              snapshot.outsideTemp,
+            ),
+            rearRight: tireValue(
+              "rearRight",
+              tires.rearRight,
+              input.leaks,
+              f,
+              snapshot.outsideTemp,
+            ),
             warnings: input.leaks.map((leak) =>
               leakWarning(leak, (bar) => f.pressure(bar)),
             ),

@@ -22,7 +22,7 @@ Move the pointer over a value with a dotted underline, or tap it on a phone. The
 | Battery lost while parked | Battery | 1% a day or less | Up to 3% a day | More than 3% a day |
 | Average power while parked | Battery, the idle drain list | 30 W or less | Up to 150 W | More than 150 W |
 | Time asleep while parked | Battery | 80% or more | 40 to 80% | Under 40% |
-| Tire pressure | Overview | At most 0.15 bar from 2.9 bar | At most 0.35 bar from 2.9 bar | More than 0.35 bar from 2.9 bar |
+| Tire pressure | Overview | At most 0.15 bar outside the range for the outside temperature | At most 0.35 bar outside the range | More than 0.35 bar outside the range |
 | Battery level | Overview | No green | 20% or more, or charging | Under 20% and not charging |
 
 Notes:
@@ -33,6 +33,7 @@ Notes:
 4. The charge levels and the charge limit have no color. An LFP battery and an NMC battery need different charge limits, and TeslaMate does not record which one the car has.
 5. Distances, durations, speeds, temperatures, costs, and places have no color.
 6. A tire with a slow-leak warning shows amber, unless its pressure is already red. The leak test compares each tire with the median of the other three in the last 14 days, and it warns from a drop of 0.1 bar. [Decision 0029](decisions/0029-warning-tone-for-a-value.md) explains the amber tone.
+7. The tire pressure changes about 1 psi (0.07 bar) for each 6 °C of outside temperature. A tire set to 2.9 bar at 20 °C reads about 2.55 bar (37 psi) at −10 °C and about 3.07 bar (45 psi) at 35 °C. The range for a tire goes from this value to 2.9 bar, for example 37 to 42 psi at −10 °C and 42 to 45 psi at 35 °C. The Overview takes its own outside temperature. Without a temperature, the range is 2.9 bar. In the cold, the note says that Tesla still asks for 2.9 bar cold in any weather. The slow-leak test compares the tires with each other, so the weather does not change it.
 
 ## Sources
 
@@ -44,5 +45,6 @@ Notes:
 | Battery health | The Tesla Impact Report 2023 shows about 85% after 200,000 miles for Model 3 and Model Y: [Electrek](https://electrek.co/2023/04/25/tesla-update-battery-degradation/) |
 | Parked drain | A sleeping Tesla loses about 1% a day, and Sentry Mode uses about 250 to 350 W: [owner reports](https://skillsphere.blog/stop-tesla-battery-drain-while-parked) |
 | Tire pressure | 42 psi, or 290 kPa, cold for Model 3: [Tesla Owner's Manual](https://www.tesla.com/ownersmanual/model3/en_cn/GUID-FDDB10EF-FFA9-46EB-B8CC-03614AE92B6B.html) |
+| Tire pressure in the cold | The tires lose one psi for every 10 °F (6 °C) drop in outside temperature. Check them cold, and inflate them when the TPMS light comes on in the cold: [Tesla Model Y Owner's Manual, Cold Weather Best Practices](https://www.tesla.com/ownersmanual/modely/en_us/GUID-F907200E-A619-4A95-A0CF-94E0D03BEBEF.html). AAA gives the same rate of about 1 psi for each 10 °F: [AAA](https://cluballiance.aaa.com/the-extra-mile/advice/car/how-temperature-changes-affect-your-tire-pressure) |
 
 The rules live in `src/lib/assessment.ts`. [Decision 0013](decisions/0013-value-colors.md) explains the design.

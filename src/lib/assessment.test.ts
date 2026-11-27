@@ -152,6 +152,44 @@ describe("assessTirePressure", () => {
     expect(assessTirePressure(3.3, f)?.meaning).toContain("over");
     expect(assessTirePressure(2.9, psi)?.expected).toContain("42 psi");
   });
+
+  test("compares a tire with the range for the outside temperature", () => {
+    const bar = 37 * 0.0689476;
+    expect(assessTirePressure(bar, psi)?.tone).toBe("typical");
+    const cold = assessTirePressure(bar, psi, -10);
+    expect(cold?.tone).toBe("good");
+    expect(cold?.meaning).toBe(
+      "37 psi is in the range for -10 °C: 37 psi to 42 psi.",
+    );
+    expect(cold?.expected).toContain(
+      "At -10 °C outside, a tire set to 42 psi at 20 °C reads about 37 psi. Tesla still asks for 42 psi cold in any weather.",
+    );
+    expect(assessTirePressure(2.9, psi, -10)?.tone).toBe("good");
+    const low = assessTirePressure(2.3, psi, -10);
+    expect(low?.tone).toBe("typical");
+    expect(low?.meaning).toBe(
+      "33 psi is 4 psi under the 37 psi expected at -10 °C.",
+    );
+    expect(assessTirePressure(2.1, psi, -10)?.tone).toBe("bad");
+    expect(assessTirePressure(3.3, psi, -10)?.meaning).toBe(
+      "48 psi is 6 psi over the recommended value. A correct pressure saves energy and tire wear.",
+    );
+  });
+
+  test("allows a higher pressure in the heat", () => {
+    expect(assessTirePressure(2.9, psi, 35)?.meaning).toBe(
+      "42 psi is in the range for 35 °C: 42 psi to 45 psi.",
+    );
+    expect(assessTirePressure(3.3, psi, 35)?.meaning).toBe(
+      "48 psi is 3 psi over the 45 psi expected at 35 °C.",
+    );
+    expect(assessTirePressure(2.9, psi, 35)?.expected).not.toContain(
+      "Tesla still asks",
+    );
+    expect(assessTirePressure(2.9, f, 20)?.meaning).toBe(
+      "2.9 bar is close to the recommended value.",
+    );
+  });
 });
 
 describe("assessTire", () => {

@@ -4,6 +4,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Vers
 
 ## [Unreleased]
 
+### Changed
+
+- The tire pressure on the Overview follows the outside temperature, on the web and in the mobile app. Tesla gives a change of about 1 psi for each 6 °C, so a tire set to 42 psi at 20 °C reads about 37 psi at −10 °C and about 45 psi at 35 °C. A tire is correct when it is in the range from that value to 42 psi, for example 37 to 42 psi at −10 °C. Before, the Overview compared every tire with 42 psi, and 37 psi showed as 5 psi under on a cold day. The note gives the range and the temperature, and in the cold it says that Tesla still asks for 42 psi cold. The app needs this server version, and needs no update.
+
 ## [2.4.0] - 2026-11-25
 
 ### Added

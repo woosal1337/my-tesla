@@ -27,6 +27,7 @@ RUN groupadd --system --gid 1001 dashboard \
     && chown dashboard:dashboard /data
 COPY --from=build --chown=dashboard:dashboard /app/.next/standalone ./
 COPY --from=build --chown=dashboard:dashboard /app/.next/static ./.next/static
+COPY --from=build --chown=dashboard:dashboard /app/public ./public
 USER dashboard
 EXPOSE 3000
 VOLUME ["/data"]
